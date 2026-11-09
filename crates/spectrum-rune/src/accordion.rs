@@ -197,9 +197,10 @@ impl AccordionItem {
         self.press = Some(Box::new(move |e| {
             let enter = f.clone();
             e.on_press(move |s: &mut S| f(s))
-                .on_key(move |s: &mut S, ev, _| {
+                .on_key(move |s: &mut S, ev, tx| {
                     let hit = ev.key == Key::Enter && ev.mods == Mods::default();
-                    if hit {
+                    // Once per press, as Space does: a held Enter must not flip it again and again.
+                    if hit && !tx.key_repeat() {
                         enter(s);
                     }
                     hit
@@ -279,6 +280,9 @@ impl AccordionItem {
                     .color(ink)
                     .a11y_hidden()
                     .font(font::text_style(&self.size.title_type(t)))
+                    .wrap()
+                    .grow(1.0)
+                    .shrink()
                     .ml(d.title_pad)
                     .mr(d.title_pad)
                     .my(d.title_pad_v),

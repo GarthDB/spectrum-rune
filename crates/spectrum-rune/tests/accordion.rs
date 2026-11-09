@@ -35,6 +35,7 @@ pub struct App {
     pub toggles: u32,
     /// A focusable control inside the content.
     pub button: bool,
+    pub long_title: bool,
 }
 
 impl Default for App {
@@ -50,6 +51,7 @@ impl Default for App {
             follow: true,
             toggles: 0,
             button: false,
+            long_title: false,
         }
     }
 }
@@ -68,7 +70,11 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
         },
     );
     let mut b = AccordionItem::new("ac")
-        .title("Label")
+        .title(if a.long_title {
+            "A title much longer than this narrow accordion item can show on one line"
+        } else {
+            "Label"
+        })
         .size(a.size)
         .quiet(a.quiet)
         .disabled(a.disabled)
@@ -86,7 +92,12 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
     if a.button {
         b = b.content(el().key("ac/button").h(20.0).focusable(true));
     }
-    col().child(b.build(t))
+    let item = b.build(t);
+    col().child(if a.long_title {
+        col().w(160.0).child(item)
+    } else {
+        item
+    })
 }
 
 pub fn runtime(a: App) -> Runtime<App> {
@@ -558,4 +569,41 @@ fn defaults_and_part_keys() {
     assert_eq!(content.role, "region");
     assert_eq!(content.label.as_deref(), Some("Label"));
     assert_eq!(part(&rt, "header").unwrap().label.as_deref(), Some("Label"));
+}
+
+#[test]
+fn a_held_enter_toggles_once() {
+    let mut rt = runtime(App::default());
+    rt.key(KeyEvent::from(Key::Tab));
+    rt.key(KeyEvent::from(Key::Enter));
+    rt.frame(0.0);
+    for _ in 0..3 {
+        rt.repeat_key(KeyEvent::from(Key::Enter));
+        rt.frame(0.0);
+    }
+    assert_eq!(rt.state.toggles, 1);
+}
+
+#[test]
+fn a_long_title_wraps_and_keeps_the_chevron() {
+    let mut rt = runtime(App {
+        long_title: true,
+        ..App::default()
+    });
+    settle(&mut rt);
+    let (item, icon, title) = (
+        part(&rt, "item").unwrap(),
+        part(&rt, "disclosure-icon").unwrap(),
+        part(&rt, "title").unwrap(),
+    );
+    assert_eq!(icon.target[2], 10.0, "chevron keeps its size");
+    assert!(
+        title.target[0] + title.target[2] <= item.target[0] + item.target[2],
+        "title stays inside: {title:?}"
+    );
+    assert!(
+        title.target[3] > 20.0,
+        "wrapped to more than one line: {}",
+        title.target[3]
+    );
 }
