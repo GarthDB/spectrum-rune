@@ -15,3 +15,11 @@ pub mod switch;
 pub mod tokens;
 
 pub use size::{ActionButtonSize, Size};
+
+/// Wraps a button-like root so it hugs its content in a column (which stretches its children)
+/// and still centres in a row (`align-self: flex-start` on the root itself would stop that).
+/// The wrapper stretches or centres; the root, which keeps every key and size, sits at its
+/// start.
+pub(crate) fn hug(root: rune::El) -> rune::El {
+    rune::row().child(root)
+}

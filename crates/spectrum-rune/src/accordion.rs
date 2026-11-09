@@ -16,6 +16,10 @@
 //!   both colour schemes, and darkens the title and chevron. A pressed item looks like a rested
 //!   one (`down` is not visual). The oracle also fills a *disabled* item on hover; this one does
 //!   not react to the pointer at all when disabled.
+//! - The content has only vertical padding, no horizontal: it starts at the item's left edge, left
+//!   of the chevron and the title (the oracle's `content` is at the item's x, full width, and
+//!   neither the recipe nor the catalog has a token for an inset). It is kept as rendered; an app
+//!   that wants the content under the title pads it itself (a14.24).
 //!
 //! The header is a `button` that reports its press through `on_toggle` and exposes `expanded`
 //! (ARIA `aria-expanded`); the app owns `open`. Opening and closing spring the content's height
@@ -179,7 +183,8 @@ impl AccordionItem {
         self.open = v;
         self
     }
-    /// Adds content below the header. Its height is the app's; the recipe adds the padding. It is
+    /// Adds content below the header. Its height is the app's; the recipe adds the vertical padding
+    /// only, so the content is flush with the item's left edge (not under the title). It is
     /// only built while open (and while closing), so a closed item has nothing to focus.
     pub fn content(mut self, c: El) -> Self {
         self.content.push(c);

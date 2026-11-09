@@ -220,12 +220,29 @@ mod tests {
     fn render_scenes_to_png() {
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        for (id, setup) in stories::SCENES {
+        let scene = |id: &str, h: f32| {
+            let (_, setup) = stories::SCENES.iter().find(|(i, _)| *i == id).unwrap();
             let mut s = init();
             setup(&mut s);
-            let mut rt = Runtime::new(s, view, (1100.0, 1200.0), Env::new(false, 1.0));
+            let mut rt = Runtime::new(s, view, (1100.0, h), Env::new(false, 1.0));
             rt.frame(0.05);
-            crate::pixels::Pixels::of(&rt, (1100, 1200)).write_png(&dir.join(format!("{id}.png")));
+            rt
+        };
+        for (id, _) in stories::SCENES {
+            // Lay out on a tall page, then render at the content's height (plus the body padding).
+            let bottom = scene(id, 6000.0)
+                .elements()
+                .iter()
+                .filter(|e| !matches!(e.key.as_deref(), Some("gallery" | "gallery/body")))
+                .map(|e| e.rect[1] + e.rect[3])
+                .fold(0.0_f32, f32::max);
+            assert!(
+                bottom < 5000.0,
+                "{id}: measured the whole page, was a key renamed?"
+            );
+            let h = (bottom.ceil() + 16.0).max(300.0) as u32;
+            let rt = scene(id, h as f32);
+            crate::pixels::Pixels::of(&rt, (1100, h)).write_png(&dir.join(format!("{id}.png")));
         }
     }
 

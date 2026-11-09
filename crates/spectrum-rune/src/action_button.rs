@@ -12,6 +12,11 @@
 //!   button (dark on a static-white button), as the oracle draws it.
 //! - Pending always draws the `gray_100` fill (no hover or down colour), quiet or not, and the
 //!   progress is `accent_content_color_default` on a `gray_300` track. Static colour does nothing.
+//! - Disabled ignores the static colour: an opaque `disabled_background_color` pill (transparent
+//!   when quiet) with `disabled_content_color`, the same as a plain disabled button, so it is a
+//!   grey pill on a coloured backdrop. Button's recipe has translucent static + disabled rules
+//!   and this one does not; this is kept as rendered, not borrowed from Button (a14.23, see
+//!   `disabled_ignores_the_static_colour`).
 //! - The focus ring is `focus_indicator_color` for every static colour.
 //!
 //! A selected button is a toggle: `.selected(..)` marks it as one (role `button`, `checked` =
@@ -364,6 +369,10 @@ impl ActionButton {
         o
     }
 
+    /// The root comes back inside a plain `row()` wrapper (see `crate::hug`), so it hugs its
+    /// content in a column and centres in a row. A modifier chained on the result (`.w_full()`,
+    /// `.w(..)`, `.key(..)`, margins) applies to the wrapper, not to the pill: to size or find the
+    /// pill use its `<key>/container` part.
     pub fn build(self, t: &Tokens) -> El {
         constraints::assert_valid("action-button", &self.options());
         // Not a catalog constraint (accessible names belong to the accessibility spec).
@@ -404,7 +413,6 @@ impl ActionButton {
 
         let mut root = row()
             .key(part("container"))
-            .self_start()
             .h(d.height)
             .px(pad)
             .gap(d.gap)
@@ -484,14 +492,14 @@ impl ActionButton {
         };
 
         if self.disabled {
-            return root;
+            return crate::hug(root);
         }
         let root = interaction.attach(root);
         let root = match (self.pending, self.press) {
             (false, Some(p)) => p(root),
             _ => root,
         };
-        root.press_scale(k)
+        crate::hug(root.press_scale(k))
     }
 }
 
@@ -522,6 +530,25 @@ mod tests {
                 assert!((g.a - w[3]).abs() < 0.02, "{what}: alpha {} want {s}", g.a);
             }
             (g, w) => panic!("{what}: got {g:?}, want {w:?} ({s})"),
+        }
+    }
+
+    #[test]
+    fn disabled_ignores_the_static_colour() {
+        let t = tokens(ColorScheme::Light, Scale::Desktop);
+        for static_color in [StaticColor::White, StaticColor::Black] {
+            for quiet in [false, true] {
+                let flags = |sc| Flags {
+                    quiet,
+                    disabled: true,
+                    static_color: sc,
+                    ..Flags::default()
+                };
+                let plain = look(t, flags(None), State::Rest);
+                for state in [State::Rest, State::Hover, State::Down] {
+                    assert_eq!(look(t, flags(Some(static_color)), state), plain);
+                }
+            }
         }
     }
 

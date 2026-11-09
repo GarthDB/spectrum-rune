@@ -72,13 +72,9 @@ fn flow() -> El {
     row().w_full().gap(16.0).center_y().flex_wrap()
 }
 
-/// A row of cells, each centring its component on a common line. The components set
-/// `align-self: flex-start` on their root, so a parent's `center_y` does not centre them; the cell
-/// centres on the main axis (which `align-self` does not touch) instead.
+/// A row of components centred on a common line.
 fn line(items: impl IntoIterator<Item = El>) -> El {
-    row()
-        .gap(16.0)
-        .children(items.into_iter().map(|e| col().h(80.0).center().child(e)))
+    row().gap(16.0).center_y().children(items)
 }
 
 fn section(t: &Tokens, title: &str, body: El) -> El {
@@ -382,8 +378,16 @@ fn action_button(s: &G, t: &'static Tokens) -> El {
     );
     page(vec![
         section(t, "States", states),
-        section(t, "Static white", statics(StaticColor::White, blue())),
-        section(t, "Static black", statics(StaticColor::Black, yellow())),
+        section(
+            t,
+            "Static white (Disabled stays an opaque grey pill: the oracle ignores the static colour when disabled)",
+            statics(StaticColor::White, blue()),
+        ),
+        section(
+            t,
+            "Static black (same: the oracle draws Disabled like a plain disabled button)",
+            statics(StaticColor::Black, yellow()),
+        ),
         section(t, "Sizes", sizes),
         section(t, "Icon-only sizes", icons),
     ])
@@ -451,7 +455,7 @@ fn accordion(s: &G, t: &'static Tokens) -> El {
             .open(s.on(&key, open))
             .on_toggle(flip(key))
             .content(
-                text("Content below the header. Its height is the app's; the recipe adds the padding.")
+                text("Content below the header. Its height is the app's; the recipe adds only the vertical padding, so it is flush with the item edge.")
                     .wrap()
                     .font(font::text_style(&t.component_m_regular))
                     .color(t.neutral_content_color_default),

@@ -240,6 +240,12 @@ dataset changes nothing.
 - **RTL** is not handled.
 - **Groups.** Accordion (several items, `isMultiple`, arrow keys) and radio groups are not built;
   a single `AccordionItem` and `RadioButton` are (beads a14.15, a14.20).
+- **Action-button static + disabled** draws the plain disabled pill (opaque grey on the coloured
+  backdrop), because that is what the oracle renders; Button's recipe has translucent rules for it
+  and Action-button's does not (bead a14.23, proposed upstream in #1693).
+- **Accordion content inset.** `AccordionItem::content` is flush with the item's left edge (the
+  oracle's `content` has only vertical padding); pad it yourself to sit under the title (bead
+  a14.24, proposed upstream in #1693).
 - **Recipe findings** (outline badges for 19 variants render as bold, and others) are collected
   upstream in [adobe/spectrum-design-data#1693](https://github.com/adobe/spectrum-design-data/issues/1693).
 
@@ -247,9 +253,11 @@ dataset changes nothing.
 
 CI (`.github/workflows/ci.yml`) runs `cargo fmt --all --check`,
 `cargo clippy --workspace --all-targets -- -D warnings` and `cargo test --workspace`, on Ubuntu
-(`libxkbcommon-dev` is installed because winit, via Rune, links it). Tasks are tracked with
-[beads](https://github.com/gastownhall/beads) (`bd`); `bd ready` lists the available work and
-`bd show <id>` the details.
+(`libxkbcommon-dev` is installed because winit, via Rune, links it). That `check` job is the
+required one and stays fast. A separate `gallery` job (not required) renders every gallery scene
+with Rune's CPU reference renderer, sized to its content, and uploads them as the `gallery`
+artifact. Tasks are tracked with [beads](https://github.com/gastownhall/beads) (`bd`);
+`bd ready` lists the available work and `bd show <id>` the details.
 
 The repository is private; nothing here links to anything that is not in it or public.
 
