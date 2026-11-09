@@ -63,10 +63,12 @@ fn settle(rt: &mut Runtime<App>) {
     }
 }
 
-fn part(rt: &Runtime<App>, key: &str) -> Option<ElementInfo> {
+/// The element for a recipe part of the one component under test (keyed `cb/<part>`).
+fn part(rt: &Runtime<App>, name: &str) -> Option<ElementInfo> {
+    let key = format!("cb/{name}");
     rt.elements()
         .into_iter()
-        .find(|e| e.key.as_deref() == Some(key))
+        .find(|e| e.key.as_deref() == Some(key.as_str()))
 }
 
 fn rgb(s: &str) -> [i32; 3] {
@@ -120,7 +122,7 @@ fn app_for(c: &Value) -> App {
 }
 
 fn click(rt: &mut Runtime<App>) {
-    let (x, y) = rt.find("container").unwrap();
+    let (x, y) = rt.find("cb/container").unwrap();
     rt.pointer_move(x, y);
     rt.pointer_down(x, y);
     rt.pointer_up(x, y);
@@ -145,7 +147,7 @@ fn matches_oracle_scene() {
             c["state"]
         );
         let mut rt = runtime(app_for(c));
-        let (x, y) = rt.find("container").unwrap();
+        let (x, y) = rt.find("cb/container").unwrap();
         match c["state"].as_str().unwrap() {
             "hover" => rt.pointer_move(x, y),
             "down" => rt.pointer_down(x, y),
@@ -257,7 +259,7 @@ fn indeterminate_shows_dash_not_checkmark() {
 fn check_fades_in_on_toggle() {
     let mut rt = runtime(App::default());
     assert!(part(&rt, "checkmark").unwrap().opacity < 0.01);
-    let (x, y) = rt.find("container").unwrap();
+    let (x, y) = rt.find("cb/container").unwrap();
     rt.pointer_move(x, y);
     rt.pointer_down(x, y);
     rt.pointer_up(x, y);

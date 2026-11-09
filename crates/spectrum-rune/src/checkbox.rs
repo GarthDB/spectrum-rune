@@ -82,8 +82,8 @@ pub struct Checkbox {
 }
 
 impl Checkbox {
-    /// `key` must be unique per checkbox: it keys the pointer state. The part keys
-    /// (`container`, `box`, `checkmark`, `dash`, `label`) follow the recipe and repeat.
+    /// `key` must be unique per instance: it keys the pointer state, and the parts are keyed
+    /// `{key}/{recipe part}` (`container`, `track`, `handle`, `label`...), so `rt.find("{key}/track")` works.
     pub fn new(key: impl Into<String>) -> Self {
         Checkbox {
             key: key.into(),
@@ -135,6 +135,7 @@ impl Checkbox {
 
     pub fn build(self, t: &Tokens) -> El {
         let d = self.size.checkbox_dims(t);
+        let part = |name: &str| format!("{}/{name}", self.key);
         let interaction = Interaction::of(&self.key);
         let state = if self.disabled {
             State::Rest
@@ -201,17 +202,17 @@ impl Checkbox {
         let press = t.component_size_minimum_perspective_down
             / (t.component_size_minimum_perspective_down - t.component_size_difference_down);
         let inset = (d.control - d.mark) / 2.0;
-        let mark = |key: &str, name: &str, visible: bool| {
+        let mark = |name: &str, visible: bool| {
             let i = ui_icon(name, d.mark_set).expect("ui icon");
             icon(i, d.mark)
-                .key(key)
+                .key(part(name))
                 .absolute(inset, inset)
                 .color(t.gray_25)
                 .opacity(if visible { 1.0 } else { 0.0 })
         };
         // Spectrum has no motion tokens; Rune's SNAPPY spring stands in until it does.
         let mut control = el()
-            .key("box")
+            .key(part("box"))
             .size(d.control, d.control)
             .radius(d.radius)
             .fill(fill)
@@ -222,18 +223,14 @@ impl Checkbox {
                 t.focus_ring_gap,
                 t.focus_indicator_color,
             )
-            .child(mark(
-                "checkmark",
-                "checkmark",
-                self.selected && !self.indeterminate,
-            ))
-            .child(mark("dash", "dash", self.indeterminate));
+            .child(mark("checkmark", self.selected && !self.indeterminate))
+            .child(mark("dash", self.indeterminate));
         if !on {
             control = control.border(t.border_width_200, stroke);
         }
 
         let mut root = row()
-            .key("container")
+            .key(part("container"))
             .h(d.height)
             .gap(d.gap)
             .center_y()
@@ -249,7 +246,7 @@ impl Checkbox {
         if let Some(l) = self.label {
             root = root.label(l.clone()).child(
                 text(l)
-                    .key("label")
+                    .key(part("label"))
                     .color(label_color)
                     .a11y_hidden()
                     .font(font::text_style(&d.label)),

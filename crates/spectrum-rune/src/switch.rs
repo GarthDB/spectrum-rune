@@ -76,8 +76,8 @@ pub struct Switch {
 }
 
 impl Switch {
-    /// `key` must be unique per switch: it keys the pointer state. The part keys
-    /// (`container`, `track`, `handle`, `label`) follow the recipe and repeat across switches.
+    /// `key` must be unique per instance: it keys the pointer state, and the parts are keyed
+    /// `{key}/{recipe part}` (`container`, `track`, `handle`, `label`...), so `rt.find("{key}/track")` works.
     pub fn new(key: impl Into<String>) -> Self {
         Switch {
             key: key.into(),
@@ -123,6 +123,7 @@ impl Switch {
 
     pub fn build(self, t: &Tokens) -> El {
         let d = self.size.dims(t);
+        let part = |name: &str| format!("{}/{name}", self.key);
         let interaction = Interaction::of(&self.key);
         let state = if self.disabled {
             State::Rest
@@ -173,14 +174,14 @@ impl Switch {
         };
         // Spectrum has no motion tokens; Rune's SNAPPY spring stands in until it does.
         let handle = el()
-            .key("handle")
+            .key(part("handle"))
             .size(hs, hs)
             .absolute(x, inset)
             .radius(t.corner_radius_full * hs)
             .fill(handle_fill)
             .motion(SNAPPY);
         let track = el()
-            .key("track")
+            .key(part("track"))
             .size(d.track_w, d.track_h)
             .radius(t.corner_radius_full * d.track_h)
             .fill(track_fill)
@@ -193,7 +194,7 @@ impl Switch {
             .child(handle);
 
         let mut root = row()
-            .key("container")
+            .key(part("container"))
             .h(d.height)
             .gap(d.gap)
             .center_y()
@@ -207,7 +208,7 @@ impl Switch {
             if !self.hide_label {
                 root = root.child(
                     text(l)
-                        .key("label")
+                        .key(part("label"))
                         .color(label_color)
                         .a11y_hidden()
                         .font(font::text_style(&d.label)),

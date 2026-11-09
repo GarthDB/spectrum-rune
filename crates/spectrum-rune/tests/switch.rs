@@ -60,10 +60,12 @@ fn settle(rt: &mut Runtime<App>) {
     }
 }
 
-fn part(rt: &Runtime<App>, key: &str) -> Option<ElementInfo> {
+/// The element for a recipe part of the one component under test (keyed `sw/<part>`).
+fn part(rt: &Runtime<App>, name: &str) -> Option<ElementInfo> {
+    let key = format!("sw/{name}");
     rt.elements()
         .into_iter()
-        .find(|e| e.key.as_deref() == Some(key))
+        .find(|e| e.key.as_deref() == Some(key.as_str()))
 }
 
 fn rgb(s: &str) -> [i32; 3] {
@@ -131,7 +133,7 @@ fn matches_oracle_scene() {
             c["state"]
         );
         let mut rt = runtime(app_for(c));
-        let (x, y) = rt.find("container").unwrap();
+        let (x, y) = rt.find("sw/container").unwrap();
         match c["state"].as_str().unwrap() {
             "hover" => rt.pointer_move(x, y),
             "down" => rt.pointer_down(x, y),
@@ -165,7 +167,7 @@ fn matches_oracle_scene() {
 #[test]
 fn press_toggles_and_disabled_does_not() {
     let mut rt = runtime(App::default());
-    let (x, y) = rt.find("container").unwrap();
+    let (x, y) = rt.find("sw/container").unwrap();
     rt.pointer_move(x, y);
     rt.pointer_down(x, y);
     rt.pointer_up(x, y);
@@ -177,7 +179,7 @@ fn press_toggles_and_disabled_does_not() {
         disabled: true,
         ..App::default()
     });
-    let (x, y) = rt.find("container").unwrap();
+    let (x, y) = rt.find("sw/container").unwrap();
     rt.pointer_move(x, y);
     rt.pointer_down(x, y);
     rt.pointer_up(x, y);
@@ -203,7 +205,7 @@ fn hide_label_removes_label() {
 fn handle_travel_animates() {
     let mut rt = runtime(App::default());
     let before = part(&rt, "handle").unwrap().rect[0];
-    let (x, y) = rt.find("container").unwrap();
+    let (x, y) = rt.find("sw/container").unwrap();
     rt.pointer_move(x, y);
     rt.pointer_down(x, y);
     rt.pointer_up(x, y);
