@@ -9,7 +9,7 @@ use crate::tokens::{Tokens, Typography};
 use rune::tok::motion::SNAPPY;
 use rune::{el, icon, row, text, El};
 
-pub use crate::switch::Size;
+pub use crate::size::Size;
 
 /// The per-size tokens the recipe reads.
 struct Dims {
@@ -24,17 +24,6 @@ struct Dims {
     label: Typography,
 }
 
-/// Scale-aware label type: `font_size_*` grow on mobile, `component_*_regular` do not.
-fn label(t: &Tokens, size: f32, line_height: f32) -> Typography {
-    Typography {
-        family: t.default_font_family,
-        size,
-        weight: t.regular_font_weight,
-        line_height,
-        letter_spacing_em: 0.0,
-    }
-}
-
 impl Size {
     fn checkbox_dims(self, t: &Tokens) -> Dims {
         match self {
@@ -45,7 +34,7 @@ impl Size {
                 radius: t.corner_radius_small_size_small,
                 mark: 8.0,
                 mark_set: 75,
-                label: label(t, t.font_size_75, t.line_height_font_size_75),
+                label: self.label_type(t),
             },
             Size::M => Dims {
                 height: t.component_height_100,
@@ -54,7 +43,7 @@ impl Size {
                 radius: t.corner_radius_small_size_medium,
                 mark: 10.0,
                 mark_set: 100,
-                label: label(t, t.font_size_100, t.line_height_font_size_100),
+                label: self.label_type(t),
             },
             Size::L => Dims {
                 height: t.component_height_200,
@@ -63,7 +52,7 @@ impl Size {
                 radius: t.corner_radius_small_size_large,
                 mark: 10.0,
                 mark_set: 200,
-                label: label(t, t.font_size_200, t.line_height_font_size_200),
+                label: self.label_type(t),
             },
             Size::XL => Dims {
                 height: t.component_height_300,
@@ -72,7 +61,7 @@ impl Size {
                 radius: t.corner_radius_small_size_extra_large,
                 mark: 12.0,
                 mark_set: 300,
-                label: label(t, t.font_size_300, t.line_height_font_size_300),
+                label: self.label_type(t),
             },
         }
     }

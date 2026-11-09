@@ -3,18 +3,10 @@
 
 use crate::font;
 use crate::interaction::{Interaction, State};
+pub use crate::size::Size;
 use crate::tokens::{Tokens, Typography};
 use rune::tok::motion::SNAPPY;
 use rune::{el, row, text, El};
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum Size {
-    S,
-    #[default]
-    M,
-    L,
-    XL,
-}
 
 /// The per-size tokens the recipe reads.
 struct Dims {
@@ -27,17 +19,6 @@ struct Dims {
     label: Typography,
 }
 
-/// Scale-aware label type: `font_size_*` grow on mobile, `component_*_regular` do not.
-fn label(t: &Tokens, size: f32, line_height: f32) -> Typography {
-    Typography {
-        family: t.default_font_family,
-        size,
-        weight: t.regular_font_weight,
-        line_height,
-        letter_spacing_em: 0.0,
-    }
-}
-
 impl Size {
     fn dims(self, t: &Tokens) -> Dims {
         match self {
@@ -48,7 +29,7 @@ impl Size {
                 track_h: t.switch_control_height_small,
                 handle: t.switch_handle_size_small,
                 handle_selected: t.switch_handle_selected_size_small,
-                label: label(t, t.font_size_75, t.line_height_font_size_75),
+                label: self.label_type(t),
             },
             Size::M => Dims {
                 height: t.component_height_100,
@@ -57,7 +38,7 @@ impl Size {
                 track_h: t.switch_control_height_medium,
                 handle: t.switch_handle_size_medium,
                 handle_selected: t.switch_handle_selected_size_medium,
-                label: label(t, t.font_size_100, t.line_height_font_size_100),
+                label: self.label_type(t),
             },
             Size::L => Dims {
                 height: t.component_height_200,
@@ -66,7 +47,7 @@ impl Size {
                 track_h: t.switch_control_height_large,
                 handle: t.switch_handle_size_large,
                 handle_selected: t.switch_handle_selected_size_large,
-                label: label(t, t.font_size_200, t.line_height_font_size_200),
+                label: self.label_type(t),
             },
             Size::XL => Dims {
                 height: t.component_height_300,
@@ -75,7 +56,7 @@ impl Size {
                 track_h: t.switch_control_height_extra_large,
                 handle: t.switch_handle_size_extra_large,
                 handle_selected: t.switch_handle_selected_size_extra_large,
-                label: label(t, t.font_size_300, t.line_height_font_size_300),
+                label: self.label_type(t),
             },
         }
     }
