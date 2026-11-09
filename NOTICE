@@ -1,0 +1,15 @@
+spectrum-rune
+Copyright 2026 Garth Braithwaite
+
+This product includes data derived from Spectrum Design Data
+(https://github.com/adobe/spectrum-design-data), Copyright Adobe. All rights reserved.
+Licensed under the Apache License, Version 2.0. The generated files under
+crates/spectrum-rune/src/{tokens,icons,constraints}/generated.rs are produced from that data by
+`cargo xtask gen`, and the test fixtures under crates/spectrum-rune/tests/fixtures/ are produced
+from the output of its `design-data` CLI.
+
+It depends on Rune (https://github.com/anomalyco/rune), Copyright Anomaly, MIT License.
+
+Adobe Clean Spectrum VF, the typeface Spectrum names, is NOT part of this repository and is NOT
+licensed by it. It is licensed separately; do not commit font files. Adobe, Spectrum and Adobe
+Clean are trademarks of Adobe.
