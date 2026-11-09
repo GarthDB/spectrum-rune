@@ -357,7 +357,8 @@ impl Badge {
     }
     /// The visible text. Without one the badge is icon-only (and has no accessible name).
     pub fn label(mut self, l: impl Into<String>) -> Self {
-        self.label = Some(l.into());
+        // An empty label is no label: the oracle draws `--label ""` icon-only.
+        self.label = Some(l.into()).filter(|l| !l.is_empty());
         self
     }
     pub fn variant(mut self, v: Variant) -> Self {
@@ -489,7 +490,7 @@ mod tests {
     #[test]
     fn look_table_and_corners_match_oracle() {
         let cs = cases();
-        let mut table = 0;
+        let mut table = std::collections::HashSet::new();
         for c in &cs {
             let t = tokens(
                 if c["scheme"] == "dark" {
@@ -526,10 +527,17 @@ mod tests {
                 None => vec![r; 4],
             };
             assert_eq!(corner_radii(r, f).to_vec(), want, "{what}");
-            table += (c["size"] == "m" && c["fixed"] == "none" && c["icon"].is_object()) as u32;
+            if c["size"] == "m" && c["fixed"] == "none" && c["icon"].is_object() {
+                table.insert((
+                    c["variant"].to_string(),
+                    c["style"].to_string(),
+                    c["scheme"].to_string(),
+                    c["scale"].to_string(),
+                ));
+            }
         }
         // Block A: 25 variants x 3 styles x 4 corners.
-        assert!(table >= 300);
+        assert_eq!(table.len(), 300);
     }
 
     #[test]

@@ -253,14 +253,14 @@ fn defaults_follow_the_catalog() {
 }
 
 #[test]
-fn label_is_the_accessible_text_and_the_icon_is_hidden() {
+fn label_is_the_accessible_text() {
     let mut a = base();
     a.icon = true;
     let rt = runtime(a);
     let l = part(&rt, "label").unwrap();
     assert_eq!(l.role, "text");
     assert_eq!(l.text.as_deref(), Some("Label"));
-    // Hidden from the accessibility tree: it is decoration next to the label.
+    // `ElementInfo` does not expose a11y_hidden on the icon, so that is not asserted.
     assert!(part(&rt, "icon").is_some());
 }
 
@@ -283,4 +283,21 @@ fn badge_has_no_catalog_constraints_today() {
         ("size", Str("xl")),
     ];
     assert!(check("badge", &o).is_empty());
+}
+
+#[test]
+fn an_empty_label_is_icon_only() {
+    let mut a = base();
+    a.icon = true;
+    a.size = Some(Size::M);
+    a.label = Some(String::new());
+    let rt = runtime(a);
+    assert!(part(&rt, "label").is_none());
+    // Icon-only oracle layout: 7 + 20 + 7 wide.
+    assert_eq!(part(&rt, "container").unwrap().target[2], 34.0);
+    assert!(!Badge::new("b")
+        .label("")
+        .options()
+        .iter()
+        .any(|(k, _)| *k == "label"));
 }
