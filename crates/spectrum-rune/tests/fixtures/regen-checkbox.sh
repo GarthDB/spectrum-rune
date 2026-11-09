@@ -39,3 +39,17 @@ cd "$root"
   done; done
 } | jq -s . > "$out"
 echo "wrote $out"
+
+# Focus ring (--state keyboard-focus) around the box: checkbox_rings.json (ring.jq).
+ring="$(dirname "$out")/checkbox_rings.json"
+for scheme in light dark; do for scale in desktop mobile; do for size in s m l xl; do for value in unselected selected indeterminate; do
+  for err in false true; do
+    args=(--size "$size" --option "isError=$err" --color-scheme "$scheme" --scale "$scale" --state keyboard-focus --format scene)
+    [ "$value" = selected ] && args+=(--option isSelected=true)
+    [ "$value" = indeterminate ] && args+=(--option isIndeterminate=true)
+    design-data render checkbox "${args[@]}" | jq -c --arg target box \
+      --argjson meta "{\"scheme\":\"$scheme\",\"scale\":\"$scale\",\"size\":\"$size\",\"value\":\"$value\",\"error\":$err}" \
+      -f "$(dirname "$out")/ring.jq"
+  done
+done; done; done; done | jq -s . > "$ring"
+echo "wrote $ring"

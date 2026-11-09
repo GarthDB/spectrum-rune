@@ -222,10 +222,17 @@ dataset changes nothing.
   skip combinations a catalog marks `error` (`fixtures/constraints.sh`), and the builders refuse
   them in debug builds.
 - **Pixel helper.** `tests/support/pixels.rs` paints a headless runtime's instances with `rune-ref`
-  (Rune's CPU reference renderer, no GPU) to assert things `ElementInfo` cannot give, such as the
-  chevron's rotation or a divider's colour. It shows what Rune's instance stream says it draws, not
-  the Metal/wgpu output (text is drawn differently, and tests run at scale 1), and colours are
-  read at chosen pixels rather than from a property.
+  (Rune's CPU reference renderer, no GPU) to assert things `ElementInfo` cannot give. It shows what
+  Rune's instance stream says it draws, not the Metal/wgpu output (text is drawn differently, and
+  tests run at scale 1), and colours are read at chosen pixels rather than from a property.
+  Switch, Checkbox, Radio-button and Button (`tests/{switch,checkbox,radio_button,button}_pixels.rs`)
+  assert **border colour and width and focus-ring colour, thickness and gap** this way, against
+  values read from the oracle fixtures (`*_scene.json`, `*_rings.json`, `button_focus_ring.json`),
+  never from our `Tokens`: a wrong token choice cannot pass. Translucent colours are blended over the
+  page in linear light, as Rune does. Border drawing in Rune is inside the box and snapped to whole
+  pixels; all the oracle's widths for these four are the integral 2px, so they are compared exactly,
+  and a pressed (scaled) button is compared at its snapped edge. Action-button, Badge and Accordion
+  use the same helper.
 - **Mutation checked.** The component tests were checked by breaking a component on purpose and
   confirming a test fails.
 
@@ -234,7 +241,14 @@ dataset changes nothing.
 - **Keyboard-focus colours.** Rune draws a focus ring in one colour; Spectrum's per-variant
   keyboard-focus colours need a Rune change (bead a14.14).
 - **Font family.** Tests cannot observe which family Rune resolved; only the ignored font tests and the gallery's
-  measurement can.
+  measurement can. (Border and ring colour and geometry of Switch, Checkbox, Radio-button and
+  Button are now asserted from pixels; the family is not.)
+- **Pixel limits.** The pixel tests render Rune's instance stream with its CPU reference renderer,
+  at scale 1 and in 8-bit sRGB: they prove what Rune emits, not what the GPU path shows (the
+  gallery notes heavier light-on-dark text in `rune-ref`). Not asserted from pixels: Button's pending
+  progress ink (the oracle's `gray_800` is a colour we deliberately do not copy), selected
+  Switch borders (the oracle's stroke equals the fill, so the width cannot be seen), the ring's
+  rounded corners, and the oracle's keyboard-focus colours (bead a14.14).
 - **High contrast.** The tokens exported for high contrast are identical to regular upstream, and
   Windows forced colours are not designed.
 - **RTL** is not handled.

@@ -13,8 +13,9 @@
 #      disabled + static white / black
 #   D. hover and down for pending, and for static white / black (primary, secondary x fill, outline)
 #   E. press scale at the perspective clamps: a one-letter and a long label, M and XL
-#   F. focus ring colour (--state focus; keyboard-focus renders no ring, spectrum-design-data #1693):
-#      variant x style x staticColor x scheme, written to button_focus_ring.json
+#   F. focus ring (--state focus; keyboard-focus renders no ring, spectrum-design-data #1693):
+#      colour, thickness, gap and rect: variant x style x staticColor x scheme at M desktop, and
+#      sizes S/L/XL x scale for three looks, written to button_focus_ring.json (ring.jq)
 # Combinations an error constraint of the catalog excludes (accent/negative outline) are skipped
 # (constraints.sh); advisory ones stay.
 # The oracle always draws the optional icon, so every case has one. A hidden or pending button
@@ -47,16 +48,26 @@ render() {
       def part($p; $keys): [.nodes[] | select(.part == $p)][0]
         | if . == null then null
           else ({x: (.x - $c.x), y: (.y - $c.y)}
-                + (. | {w, h, radius, fill, stroke, color}
+                + (. | {w, h, radius, fill, stroke, stroke_width, color}
                    | with_entries(select(.value != null and (.key | IN($keys[])))))
                ) | map_values(r) end;
     {scheme: $scheme, scale: $scale, variant: $variant, style: $style, size: $size, label: $label,
      disabled: $dis, pending: $pend, hidden: $hid, static: (if $stat == "none" then null else $stat end),
      state: $state, press: (.press.scale // null | if . then . * 10000 | round / 10000 else . end),
-     container: part("container"; ["w","h","radius","fill","stroke"]),
+     container: part("container"; ["w","h","radius","fill","stroke","stroke_width"]),
      icon: part("icon"; ["w","h","color"]),
      label_part: part("label"; ["w","color"]),
      progress: part("progress"; ["w","h"])}'
+}
+
+# ring_case scheme scale size variant style static: one row of button_focus_ring.json
+ring_case() {
+  local args=(--size "$3" --color-scheme "$1" --scale "$2" --state focus --format scene
+    --option "variant=\"$4\"" --option "style=\"$5\"")
+  [ "$6" != none ] && args+=(--option "staticColor=\"$6\"")
+  design-data render button "${args[@]}" | jq -c --arg target container \
+    --argjson meta "{\"scheme\":\"$1\",\"scale\":\"$2\",\"size\":\"$3\",\"variant\":\"$4\",\"style\":\"$5\",\"static\":$([ "$6" = none ] && echo null || echo "\"$6\"")}" \
+    -f "$(dirname "$out")/ring.jq"
 }
 
 {
@@ -117,16 +128,17 @@ echo "wrote $out"
 
 # F
 ring="$(dirname "$out")/button_focus_ring.json"
-for scheme in light dark; do for variant in accent negative primary secondary; do
-  for style in fill outline; do for stat in none white black; do
-    [ "$style" = outline ] && excluded button "{\"variant\":\"$variant\",\"style\":\"outline\"}" && continue
-    args=(--color-scheme "$scheme" --state focus --format scene
-      --option "variant=\"$variant\"" --option "style=\"$style\"")
-    [ "$stat" != none ] && args+=(--option "staticColor=\"$stat\"")
-    design-data render button "${args[@]}" | jq -c \
-      --arg scheme "$scheme" --arg variant "$variant" --arg style "$style" --arg stat "$stat" \
-      '{scheme: $scheme, variant: $variant, style: $style, static: (if $stat == "none" then null else $stat end),
-        ring: ([.nodes[] | select(.part == "focus-indicator") | .stroke][0] | gsub("rgba?\\(|\\)| "; ""))}'
+{
+  for scheme in light dark; do for variant in accent negative primary secondary; do
+    for style in fill outline; do for stat in none white black; do
+      [ "$style" = outline ] && excluded button "{\"variant\":\"$variant\",\"style\":\"outline\"}" && continue
+      ring_case "$scheme" desktop m "$variant" "$style" "$stat"
+    done; done
   done; done
-done; done | jq -s . > "$ring"
+  for scheme in light dark; do for scale in desktop mobile; do for size in s l xl; do
+    ring_case "$scheme" "$scale" "$size" accent fill none
+    ring_case "$scheme" "$scale" "$size" primary outline none
+    ring_case "$scheme" "$scale" "$size" secondary outline white
+  done; done; done
+} | jq -s . > "$ring"
 echo "wrote $ring"

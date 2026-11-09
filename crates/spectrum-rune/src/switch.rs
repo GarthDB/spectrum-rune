@@ -1,5 +1,9 @@
 //! Spectrum Switch, from `design-data` visuals/switch.json (container > track > handle, label,
 //! focus ring). Every size, colour, radius and type value comes from [`Tokens`].
+//!
+//! Verification: geometry and fill against the oracle (`tests/switch.rs`); border and focus-ring colour,
+//! width, thickness and gap from pixels, against the oracle's values (`tests/switch_pixels.rs`). The
+//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
 
 use crate::font;
 use crate::interaction::{Interaction, State};

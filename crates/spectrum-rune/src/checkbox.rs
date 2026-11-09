@@ -1,6 +1,10 @@
 //! Spectrum Checkbox, from `design-data` visuals/checkbox.json (container > box (> checkmark | dash),
 //! label, focus ring). Every size, colour, radius and type value comes from [`Tokens`], except the
 //! icon sizes, which the recipe itself writes as literals.
+//!
+//! Verification: geometry and fill against the oracle (`tests/checkbox.rs`); border and focus-ring colour,
+//! width, thickness and gap from pixels, against the oracle's values (`tests/checkbox_pixels.rs`). The
+//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
 
 use crate::constraints::{self, OptionValue};
 use crate::font;

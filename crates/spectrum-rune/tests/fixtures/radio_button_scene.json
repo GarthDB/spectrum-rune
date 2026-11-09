@@ -14,7 +14,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -38,7 +40,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -62,7 +66,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -86,7 +92,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -110,7 +118,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -141,7 +151,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -172,7 +184,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -203,7 +217,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -234,7 +250,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -258,7 +276,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -282,7 +302,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -306,7 +328,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -330,7 +354,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -354,7 +380,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -378,7 +406,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -402,7 +432,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -426,7 +458,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -457,7 +491,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(19, 19, 19)"
+      "fill": "rgb(19, 19, 19)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -488,7 +524,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -519,7 +557,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -550,7 +590,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -581,7 +623,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(39, 77, 234)"
+      "fill": "rgb(39, 77, 234)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -612,7 +656,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(39, 77, 234)"
+      "fill": "rgb(39, 77, 234)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -643,7 +689,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -674,7 +722,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -698,7 +748,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -722,7 +774,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -746,7 +800,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -770,7 +826,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -801,7 +859,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -832,7 +892,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -863,7 +925,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -894,7 +958,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -918,7 +984,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -942,7 +1010,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -966,7 +1036,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -990,7 +1062,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1021,7 +1095,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1052,7 +1128,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1083,7 +1161,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1114,7 +1194,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1138,7 +1220,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1162,7 +1246,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1186,7 +1272,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1210,7 +1298,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -1241,7 +1331,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -1272,7 +1364,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -1303,7 +1397,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -1334,7 +1430,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1358,7 +1456,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1382,7 +1482,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1406,7 +1508,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1430,7 +1534,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1454,7 +1560,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1478,7 +1586,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1502,7 +1612,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1526,7 +1638,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1557,7 +1671,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(19, 19, 19)"
+      "fill": "rgb(19, 19, 19)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1588,7 +1704,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1619,7 +1737,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1650,7 +1770,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1681,7 +1803,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(39, 77, 234)"
+      "fill": "rgb(39, 77, 234)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1712,7 +1836,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(39, 77, 234)"
+      "fill": "rgb(39, 77, 234)",
+      "stroke": "rgb(19, 19, 19)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1743,7 +1869,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -1774,7 +1902,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1798,7 +1928,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1822,7 +1954,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1846,7 +1980,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -1870,7 +2006,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -1901,7 +2039,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -1932,7 +2072,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -1963,7 +2105,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -1994,7 +2138,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2018,7 +2164,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2042,7 +2190,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2066,7 +2216,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(255, 255, 255)"
+      "fill": "rgb(255, 255, 255)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2090,7 +2242,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(41, 41, 41)"
+      "fill": "rgb(41, 41, 41)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -2121,7 +2275,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -2152,7 +2308,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(59, 99, 251)"
+      "fill": "rgb(59, 99, 251)",
+      "stroke": "rgb(41, 41, 41)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -2183,7 +2341,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(198, 198, 198)"
+      "fill": "rgb(198, 198, 198)",
+      "stroke": "rgb(198, 198, 198)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -2214,7 +2374,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2238,7 +2400,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2262,7 +2426,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2286,7 +2452,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2310,7 +2478,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -2341,7 +2511,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -2372,7 +2544,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -2403,7 +2577,9 @@
       "w": 12.0,
       "h": 12.0,
       "radius": 6.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 4,
@@ -2434,7 +2610,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2458,7 +2636,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2482,7 +2662,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2506,7 +2688,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2530,7 +2714,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2554,7 +2740,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2578,7 +2766,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2602,7 +2792,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2626,7 +2818,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2657,7 +2851,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(242, 242, 242)"
+      "fill": "rgb(242, 242, 242)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2688,7 +2884,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2719,7 +2917,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2750,7 +2950,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2781,7 +2983,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(105, 149, 254)"
+      "fill": "rgb(105, 149, 254)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2812,7 +3016,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(105, 149, 254)"
+      "fill": "rgb(105, 149, 254)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2843,7 +3049,9 @@
       "w": 14.0,
       "h": 14.0,
       "radius": 7.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 5,
@@ -2874,7 +3082,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2898,7 +3108,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2922,7 +3134,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2946,7 +3160,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -2970,7 +3186,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3001,7 +3219,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3032,7 +3252,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3063,7 +3285,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3094,7 +3318,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3118,7 +3344,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3142,7 +3370,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3166,7 +3396,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3190,7 +3422,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3221,7 +3455,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3252,7 +3488,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3283,7 +3521,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3314,7 +3554,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3338,7 +3580,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3362,7 +3606,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3386,7 +3632,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3410,7 +3658,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3441,7 +3691,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3472,7 +3724,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3503,7 +3757,9 @@
       "w": 16.0,
       "h": 16.0,
       "radius": 8.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 6,
@@ -3534,7 +3790,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3558,7 +3816,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3582,7 +3842,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3606,7 +3868,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3630,7 +3894,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3654,7 +3920,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3678,7 +3946,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3702,7 +3972,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3726,7 +3998,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3757,7 +4031,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(242, 242, 242)"
+      "fill": "rgb(242, 242, 242)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3788,7 +4064,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3819,7 +4097,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3850,7 +4130,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3881,7 +4163,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(105, 149, 254)"
+      "fill": "rgb(105, 149, 254)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3912,7 +4196,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(105, 149, 254)"
+      "fill": "rgb(105, 149, 254)",
+      "stroke": "rgb(242, 242, 242)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3943,7 +4229,9 @@
       "w": 18.0,
       "h": 18.0,
       "radius": 9.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 7,
@@ -3974,7 +4262,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -3998,7 +4288,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4022,7 +4314,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4046,7 +4340,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4070,7 +4366,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -4101,7 +4399,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -4132,7 +4432,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -4163,7 +4465,9 @@
       "w": 20.0,
       "h": 20.0,
       "radius": 10.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 8,
@@ -4194,7 +4498,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4218,7 +4524,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4242,7 +4550,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4266,7 +4576,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(17, 17, 17)"
+      "fill": "rgb(17, 17, 17)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 2.0
     },
     "indicator": null,
     "label": {
@@ -4290,7 +4602,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(219, 219, 219)"
+      "fill": "rgb(219, 219, 219)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -4321,7 +4635,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -4352,7 +4668,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(86, 129, 255)"
+      "fill": "rgb(86, 129, 255)",
+      "stroke": "rgb(219, 219, 219)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,
@@ -4383,7 +4701,9 @@
       "w": 22.0,
       "h": 22.0,
       "radius": 11.0,
-      "fill": "rgb(68, 68, 68)"
+      "fill": "rgb(68, 68, 68)",
+      "stroke": "rgb(68, 68, 68)",
+      "stroke_width": 0.0
     },
     "indicator": {
       "x": 9,

@@ -24,10 +24,10 @@ cd "$root"
           --argjson sel "$sel" --argjson emph "$emph" --argjson dis "$dis" '
           (.nodes[] | select(.part == "container")) as $c
           | def part($p; $keys): [.nodes[] | select(.part == $p)][0]
-              | if . == null then null else ({x: (.x - $c.x), y: (.y - $c.y)} + (. | {w, h, radius, fill, color} | with_entries(select(.value != null and (.key | IN($keys[]))))) ) end;
+              | if . == null then null else ({x: (.x - $c.x), y: (.y - $c.y)} + (. | {w, h, radius, fill, color, stroke, stroke_width} | with_entries(select(.value != null and (.key | IN($keys[]))))) ) end;
           {scheme: $scheme, scale: $scale, size: $size, selected: $sel, emphasized: $emph, disabled: $dis,
            state: $state, press: (.press.scale // null),
-           control: part("control"; ["w","h","radius","fill"]),
+           control: part("control"; ["w","h","radius","fill","stroke","stroke_width"]),
            indicator: part("selection-indicator"; ["w","h","radius","fill"]),
            label: part("label"; ["color"])}'
       done
@@ -35,3 +35,13 @@ cd "$root"
   done; done
 done; } | jq -s . > "$out"
 echo "wrote $out"
+
+# Focus ring (--state keyboard-focus) around the control: radio_button_rings.json (ring.jq).
+ring="$(dirname "$out")/radio_button_rings.json"
+for scheme in light dark; do for scale in desktop mobile; do for size in s m l xl; do for sel in false true; do
+  design-data render radio-button --size "$size" --option "isSelected=$sel" --color-scheme "$scheme" --scale "$scale" \
+    --state keyboard-focus --format scene | jq -c --arg target control \
+    --argjson meta "{\"scheme\":\"$scheme\",\"scale\":\"$scale\",\"size\":\"$size\",\"selected\":$sel}" \
+    -f "$(dirname "$out")/ring.jq"
+done; done; done; done | jq -s . > "$ring"
+echo "wrote $ring"
