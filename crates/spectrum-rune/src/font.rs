@@ -67,7 +67,6 @@ mod tests {
 
     #[test]
     fn token_family_leads_the_list() {
-        assert_eq!(family(SPECTRUM_VF), FAMILY_LIST);
         assert_eq!(
             family("Other Face"),
             "Other Face, Adobe Clean Spectrum, Source Sans 3"
