@@ -1,2 +1,486 @@
-fn main() { /* shortcut: stub, generates tokens/metrics from `design-data` (see beads) */
+//! `cargo xtask gen`: writes `crates/spectrum-rune/src/tokens/generated.rs` from the
+//! `design-data` CLI. Needs spectrum-design-data checked out (`SPECTRUM_DESIGN_DATA`,
+//! default `~/repos/spectrum-design-data`).
+
+use serde_json::{Map, Value};
+use std::collections::{BTreeMap, BTreeSet};
+use std::fmt::Write as _;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+type Res<T> = Result<T, String>;
+
+const CLI_VERSION: &str = "design-data 0.20.";
+const SCHEMES: [&str; 2] = ["light", "dark"];
+const SCALES: [&str; 2] = ["desktop", "mobile"];
+const KEYWORDS: [&str; 8] = ["type", "match", "ref", "fn", "in", "as", "mod", "use"];
+
+fn main() {
+    let allow_dirty = std::env::args().any(|a| a == "--allow-dirty");
+    if std::env::args().nth(1).as_deref() != Some("gen") {
+        eprintln!("usage: cargo xtask gen [--allow-dirty]");
+        std::process::exit(2);
+    }
+    if let Err(e) = generate(allow_dirty) {
+        eprintln!("xtask gen failed: {e}");
+        std::process::exit(1);
+    }
+}
+
+fn run(cmd: &mut Command) -> Res<String> {
+    let out = cmd.output().map_err(|e| format!("{cmd:?}: {e}"))?;
+    if !out.status.success() {
+        return Err(format!(
+            "{cmd:?} failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        ));
+    }
+    String::from_utf8(out.stdout).map_err(|e| e.to_string())
+}
+
+fn json(cmd: &mut Command) -> Res<Value> {
+    serde_json::from_str(&run(cmd)?).map_err(|e| format!("{cmd:?}: bad JSON: {e}"))
+}
+
+fn dataset_dir() -> PathBuf {
+    std::env::var_os("SPECTRUM_DESIGN_DATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            PathBuf::from(std::env::var("HOME").unwrap_or_default())
+                .join("repos/spectrum-design-data")
+        })
+}
+
+fn git(dir: &Path, args: &[&str]) -> Res<String> {
+    run(Command::new("git").current_dir(dir).args(args)).map(|s| s.trim().to_string())
+}
+
+fn check_inputs(dir: &Path, allow_dirty: bool) -> Res<(String, String)> {
+    let version = run(Command::new("design-data").arg("--version"))?
+        .trim()
+        .to_string();
+    if !version.starts_with(CLI_VERSION) {
+        return Err(format!("expected `{CLI_VERSION}x`, found `{version}`"));
+    }
+    git(dir, &["fetch", "-q", "origin", "main"])?;
+    let (head, main) = (
+        git(dir, &["rev-parse", "HEAD"])?,
+        git(dir, &["rev-parse", "origin/main"])?,
+    );
+    let dirty = !git(dir, &["status", "--porcelain", "--untracked-files=no"])?.is_empty();
+    if !allow_dirty && (head != main || dirty) {
+        return Err(format!(
+            "{} must be clean and at origin/main (use --allow-dirty to override)",
+            dir.display()
+        ));
+    }
+    Ok((version, git(dir, &["rev-parse", "--short", "HEAD"])?))
+}
+
+fn export(dir: &Path, scheme: &str, scale: &str, contrast: &str) -> Res<Map<String, Value>> {
+    let v = json(
+        Command::new("design-data")
+            .arg("export")
+            .arg(dir.join("packages/design-data/tokens"))
+            .args([
+                "--color-scheme",
+                scheme,
+                "--scale",
+                scale,
+                "--contrast",
+                contrast,
+            ]),
+    )?;
+    match v {
+        Value::Object(m) => Ok(m),
+        _ => Err("export is not an object".into()),
+    }
+}
+
+/// Drops `desktop|mobile|light|dark` segments and a leading `color`, how scene token names
+/// relate to export names.
+fn normalize(name: &str) -> String {
+    let segs: Vec<&str> = name
+        .split('-')
+        .filter(|s| !SCHEMES.contains(s) && !SCALES.contains(s))
+        .collect();
+    let segs = if segs.first() == Some(&"color") {
+        &segs[1..]
+    } else {
+        &segs[..]
+    };
+    segs.join("-")
+}
+
+fn parse_px(v: &str) -> Res<f64> {
+    v.strip_suffix("px")
+        .unwrap_or(v)
+        .parse()
+        .map_err(|_| format!("unsupported scoped value `{v}`"))
+}
+
+/// Values bound by recipes that `export` omits, per scale: normalized name -> scale -> px.
+fn scoped_values(
+    dir: &Path,
+    exported: &BTreeSet<String>,
+) -> Res<BTreeMap<String, BTreeMap<String, f64>>> {
+    let data = dir.join("packages/design-data");
+    let mut states = Vec::new();
+    let mut recipes: Vec<_> = std::fs::read_dir(data.join("visuals"))
+        .map_err(|e| e.to_string())?
+        .flatten()
+        .collect();
+    recipes.sort_by_key(|e| e.file_name());
+    for entry in recipes {
+        let path = entry.path();
+        let name = path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .ok_or("bad recipe name")?
+            .to_string();
+        let read = |p: PathBuf| -> Res<Value> {
+            serde_json::from_str(
+                &std::fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?,
+            )
+            .map_err(|e| e.to_string())
+        };
+        let recipe = read(path)?;
+        let catalog = read(data.join(format!("components/{name}.json")))?;
+        let sizes: Vec<String> = recipe["sizeScale"]
+            .as_object()
+            .map_or_else(|| vec!["m".into()], |m| m.keys().cloned().collect());
+        let mut variants = vec![Map::new()];
+        for (opt, def) in catalog["options"].as_object().into_iter().flatten() {
+            if opt == "size" {
+                continue;
+            }
+            let mut one = |v: Value| variants.push(Map::from_iter([(opt.clone(), v)]));
+            if def["type"] == "boolean" {
+                one(Value::Bool(true));
+            }
+            for v in def["values"].as_array().into_iter().flatten() {
+                one(v["value"].clone());
+            }
+        }
+        for scale in SCALES {
+            for size in &sizes {
+                for (i, options) in variants.iter().enumerate() {
+                    let id = format!("{name}.{scale}.{size}.{i}");
+                    states.push(serde_json::json!({"id": id, "component": name, "size": size, "options": options, "colorScheme": "light", "scale": scale}));
+                }
+            }
+        }
+    }
+    let tmp = std::env::temp_dir().join("spectrum-rune-xtask");
+    let _ = std::fs::remove_dir_all(&tmp);
+    std::fs::create_dir_all(&tmp).map_err(|e| e.to_string())?;
+    let batch = tmp.join("batch.json");
+    std::fs::write(
+        &batch,
+        serde_json::to_string(&serde_json::json!({ "states": states })).unwrap(),
+    )
+    .map_err(|e| e.to_string())?;
+    run(Command::new("design-data")
+        .current_dir(dir)
+        .arg("render")
+        .arg("--batch")
+        .arg(&batch)
+        .arg("--out")
+        .arg(tmp.join("out")))?;
+    let index: Value = serde_json::from_str(
+        &std::fs::read_to_string(tmp.join("out/index.json")).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| e.to_string())?;
+
+    let mut out: BTreeMap<String, BTreeMap<String, f64>> = BTreeMap::new();
+    for state in index["states"]
+        .as_array()
+        .ok_or("index.json has no states")?
+    {
+        if let Some(err) = state.get("error") {
+            return Err(format!("render {} failed: {err}", state["id"]));
+        }
+        let id = state["id"].as_str().ok_or("state without id")?;
+        let scale = id.split('.').nth(1).ok_or("bad state id")?;
+        let scene_file = state["scene"].as_str().ok_or("state without scene")?;
+        let scene_path = if Path::new(scene_file).is_absolute() {
+            PathBuf::from(scene_file)
+        } else {
+            tmp.join("out").join(scene_file)
+        };
+        let scene: Value = serde_json::from_str(
+            &std::fs::read_to_string(&scene_path)
+                .map_err(|e| format!("{}: {e}", scene_path.display()))?,
+        )
+        .map_err(|e| e.to_string())?;
+        for node in scene["nodes"].as_array().into_iter().flatten() {
+            for t in node["tokens"].as_array().into_iter().flatten() {
+                let raw = t["token"].as_str().ok_or("token without name")?;
+                let norm = normalize(raw);
+                if exported.contains(raw) || exported.contains(&norm) {
+                    continue;
+                }
+                let value = parse_px(t["value"].as_str().ok_or("token without value")?)?;
+                let slot = out.entry(norm.clone()).or_default();
+                if let Some(old) = slot.insert(scale.to_string(), value) {
+                    if old != value {
+                        return Err(format!("`{norm}` ({scale}) is {old} and {value}"));
+                    }
+                }
+            }
+        }
+    }
+    for (name, by_scale) in &out {
+        if by_scale.len() != SCALES.len() {
+            return Err(format!(
+                "scoped token `{name}` has values for {:?} only",
+                by_scale.keys()
+            ));
+        }
+    }
+    Ok(out)
+}
+
+fn ident(key: &str) -> Res<String> {
+    let id = key.replace('-', "_");
+    let ok = id.chars().next().is_some_and(|c| c.is_ascii_lowercase())
+        && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_');
+    if !ok || KEYWORDS.contains(&id.as_str()) {
+        return Err(format!("token `{key}` is not a usable field name"));
+    }
+    Ok(id)
+}
+
+fn f(v: f64) -> String {
+    format!("{:?}", v as f32)
+}
+
+fn dim(v: &Value) -> Res<f64> {
+    v["value"]
+        .as_f64()
+        .ok_or_else(|| format!("bad dimension {v}"))
+}
+
+fn srgb_decode(c: f64) -> f64 {
+    if c <= 0.04045 {
+        c / 12.92
+    } else {
+        ((c + 0.055) / 1.055).powf(2.4)
+    }
+}
+
+fn color(hex: &str) -> Res<String> {
+    let h = hex
+        .strip_prefix('#')
+        .ok_or_else(|| format!("bad color {hex}"))?;
+    let byte = |i: usize| {
+        u8::from_str_radix(h.get(i..i + 2).unwrap_or(""), 16)
+            .map(f64::from)
+            .map_err(|_| format!("bad color {hex}"))
+    };
+    let a = match h.len() {
+        6 => 1.0,
+        8 => byte(6)? / 255.0,
+        _ => return Err(format!("bad color {hex}")),
+    };
+    let ch = |i| byte(i).map(|b| f(srgb_decode(b / 255.0)));
+    Ok(format!(
+        "Color {{ r: {}, g: {}, b: {}, a: {} }}",
+        ch(0)?,
+        ch(2)?,
+        ch(4)?,
+        f(a)
+    ))
+}
+
+fn weight(name: &str) -> Res<u16> {
+    Ok(match name {
+        "light" => 300,
+        "regular" => 400,
+        "medium" => 500,
+        "bold" => 700,
+        "extra-bold" => 800,
+        "black" => 900,
+        _ => return Err(format!("unknown font weight `{name}`")),
+    })
+}
+
+fn typography(v: &Value) -> Res<String> {
+    Ok(format!(
+        "Typography {{ family: {:?}, size: {}, weight: {}, line_height: {}, letter_spacing_em: {} }}",
+        v["fontFamily"].as_str().ok_or("typography without family")?,
+        f(dim(&v["fontSize"])?),
+        weight(v["fontWeight"].as_str().ok_or("typography without weight")?)?,
+        f(dim(&v["lineHeight"])?),
+        f(dim(&v["letterSpacing"])?),
+    ))
+}
+
+/// Rust type and expression for one token, or None for untyped values (gradient stops, text-align).
+fn emit(token: &Value) -> Res<Option<(&'static str, String, Option<String>)>> {
+    let v = &token["$value"];
+    Ok(Some(match token["$type"].as_str() {
+        Some("color") => (
+            "Color",
+            color(v.as_str().ok_or("color is not a string")?)?,
+            None,
+        ),
+        Some("dimension") => {
+            let unit = v["unit"].as_str().unwrap_or("px");
+            ("f32", f(dim(v)?), (unit != "px").then(|| unit.to_string()))
+        }
+        Some("number") => ("f32", f(v.as_f64().ok_or("bad number")?), None),
+        Some("fontFamily") => (
+            "&'static str",
+            format!("{:?}", v.as_str().ok_or("bad fontFamily")?),
+            None,
+        ),
+        Some("fontWeight") => (
+            "u16",
+            weight(v.as_str().ok_or("bad fontWeight")?)?.to_string(),
+            None,
+        ),
+        Some("typography") => ("Typography", typography(v)?, None),
+        Some("shadow") => {
+            let layers: Res<Vec<String>> = v
+                .as_array()
+                .ok_or("bad shadow")?
+                .iter()
+                .map(|s| {
+                    Ok(format!(
+                        "Shadow {{ x: {}, y: {}, blur: {}, spread: {}, color: {} }}",
+                        f(dim(&s["offsetX"])?),
+                        f(dim(&s["offsetY"])?),
+                        f(dim(&s["blur"])?),
+                        f(dim(&s["spread"])?),
+                        color(s["color"].as_str().ok_or("shadow without color")?)?
+                    ))
+                })
+                .collect();
+            (
+                "&'static [Shadow]",
+                format!("&[{}]", layers?.join(", ")),
+                None,
+            )
+        }
+        None => return Ok(None),
+        Some(other) => return Err(format!("unsupported token type `{other}`")),
+    }))
+}
+
+fn generate(allow_dirty: bool) -> Res<()> {
+    let dir = dataset_dir();
+    let (version, commit) = check_inputs(&dir, allow_dirty)?;
+
+    let mut modes: Vec<(String, Map<String, Value>)> = Vec::new();
+    for scheme in SCHEMES {
+        for scale in SCALES {
+            let regular = export(&dir, scheme, scale, "regular")?;
+            if regular != export(&dir, scheme, scale, "high")? {
+                return Err(format!("contrast=high now differs from regular for {scheme}/{scale}: add a high-contrast token set"));
+            }
+            modes.push((
+                format!("{}_{}", scheme.to_uppercase(), scale.to_uppercase()),
+                regular,
+            ));
+        }
+    }
+    let keys: BTreeSet<String> = modes[0].1.keys().cloned().collect();
+    for (name, m) in &modes {
+        if m.keys().cloned().collect::<BTreeSet<_>>() != keys {
+            return Err(format!("{name} exports a different token set"));
+        }
+    }
+    let scoped = scoped_values(&dir, &keys)?;
+    if let Some(clash) = scoped.keys().find(|k| keys.contains(*k)) {
+        return Err(format!(
+            "scoped token `{clash}` collides with an exported token"
+        ));
+    }
+
+    let mut types: BTreeMap<&str, (&'static str, Option<String>)> = BTreeMap::new();
+    let mut skipped = Vec::new();
+    for key in &keys {
+        match emit(&modes[0].1[key])? {
+            Some((ty, _, unit)) => {
+                types.insert(key, (ty, unit));
+            }
+            None => skipped.push(key.as_str()),
+        }
+    }
+
+    let mut out = String::new();
+    writeln!(out, "// @generated by `cargo xtask gen`. Do not edit.\n// Source: {version}, spectrum-design-data {commit}.").unwrap();
+    writeln!(
+        out,
+        "// Skipped untyped tokens ({}): {}.\n",
+        skipped.len(),
+        skipped.join(", ")
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "use super::{{ColorScheme, Scale, Shadow, Typography}};\nuse rune::Color;\n"
+    )
+    .unwrap();
+    writeln!(
+        out,
+        "#[derive(Clone, Debug, PartialEq)]\npub struct Tokens {{"
+    )
+    .unwrap();
+    for (key, (ty, unit)) in &types {
+        if let Some(u) = unit {
+            writeln!(out, "    /// Unit: {u}.").unwrap();
+        }
+        writeln!(out, "    pub {}: {ty},", ident(key)?).unwrap();
+    }
+    writeln!(out, "    // Recipe-scoped values `export` omits (px).").unwrap();
+    for key in scoped.keys() {
+        writeln!(out, "    pub {}: f32,", ident(key)?).unwrap();
+    }
+    writeln!(out, "}}\n").unwrap();
+    for (name, map) in &modes {
+        let scale = name.split('_').nth(1).unwrap().to_lowercase();
+        writeln!(out, "pub static {name}: Tokens = Tokens {{").unwrap();
+        for key in types.keys() {
+            let (_, expr, _) = emit(&map[*key])?.ok_or("token lost its type")?;
+            writeln!(out, "    {}: {expr},", ident(key)?).unwrap();
+        }
+        for (key, by_scale) in &scoped {
+            writeln!(out, "    {}: {},", ident(key)?, f(by_scale[&scale])).unwrap();
+        }
+        writeln!(out, "}};\n").unwrap();
+    }
+    writeln!(out, "pub fn tokens(scheme: ColorScheme, scale: Scale) -> &'static Tokens {{\n    match (scheme, scale) {{").unwrap();
+    for (a, b) in [
+        ("Light", "Desktop"),
+        ("Light", "Mobile"),
+        ("Dark", "Desktop"),
+        ("Dark", "Mobile"),
+    ] {
+        writeln!(
+            out,
+            "        (ColorScheme::{a}, Scale::{b}) => &{}_{},",
+            a.to_uppercase(),
+            b.to_uppercase()
+        )
+        .unwrap();
+    }
+    writeln!(out, "    }}\n}}").unwrap();
+
+    let target = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../crates/spectrum-rune/src/tokens/generated.rs");
+    std::fs::write(&target, out).map_err(|e| format!("{}: {e}", target.display()))?;
+    run(Command::new("rustfmt")
+        .arg("--edition")
+        .arg("2021")
+        .arg(&target))?;
+    println!(
+        "wrote {} ({} tokens, {} scoped, {} skipped)",
+        target.display(),
+        types.len(),
+        scoped.len(),
+        skipped.len()
+    );
+    Ok(())
 }
