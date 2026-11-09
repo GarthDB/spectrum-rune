@@ -2,6 +2,7 @@
 //! label, focus ring). Every size, colour, radius and type value comes from [`Tokens`], except the
 //! icon sizes, which the recipe itself writes as literals.
 
+use crate::constraints::{self, OptionValue};
 use crate::font;
 use crate::icons::icon as ui_icon;
 use crate::interaction::{Interaction, State};
@@ -133,7 +134,17 @@ impl Checkbox {
         self
     }
 
+    /// The builder state under the catalog's option names. Unset options are left out and take
+    /// their catalog default.
+    pub fn options(&self) -> Vec<(&'static str, OptionValue<'static>)> {
+        vec![
+            ("isSelected", OptionValue::Bool(self.selected)),
+            ("isIndeterminate", OptionValue::Bool(self.indeterminate)),
+        ]
+    }
+
     pub fn build(self, t: &Tokens) -> El {
+        constraints::assert_valid("checkbox", &self.options());
         let d = self.size.checkbox_dims(t);
         let part = |name: &str| format!("{}/{name}", self.key);
         let interaction = Interaction::of(&self.key);

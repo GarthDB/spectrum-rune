@@ -11,6 +11,7 @@
 //! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
 //!   draw it in the content colour instead (the one deliberate departure).
 
+use crate::constraints::{self, OptionValue};
 use crate::font;
 use crate::interaction::{Interaction, State};
 use crate::size::Size;
@@ -349,10 +350,49 @@ impl Button {
         self
     }
 
+    /// The builder state under the catalog's option names. Unset options are left out and take
+    /// their catalog default.
+    pub fn options(&self) -> Vec<(&'static str, OptionValue<'static>)> {
+        let mut o = vec![
+            (
+                "variant",
+                OptionValue::Str(match self.variant {
+                    Variant::Accent => "accent",
+                    Variant::Negative => "negative",
+                    Variant::Primary => "primary",
+                    Variant::Secondary => "secondary",
+                }),
+            ),
+            (
+                "style",
+                OptionValue::Str(match self.style {
+                    Style::Fill => "fill",
+                    Style::Outline => "outline",
+                }),
+            ),
+            ("isLabelHidden", OptionValue::Bool(self.label_hidden)),
+        ];
+        if self.icon.is_some() {
+            o.push(("icon", OptionValue::Present));
+        }
+        if let Some(c) = self.static_color {
+            o.push((
+                "staticColor",
+                OptionValue::Str(match c {
+                    StaticColor::White => "white",
+                    StaticColor::Black => "black",
+                }),
+            ));
+        }
+        o
+    }
+
     pub fn build(self, t: &Tokens) -> El {
+        constraints::assert_valid("button", &self.options());
+        // Not a catalog constraint (accessible names belong to the accessibility spec).
         debug_assert!(
-            !self.label_hidden || (self.icon.is_some() && self.label.is_some()),
-            "a button with a hidden label needs an icon and a label (its accessible name)"
+            !self.label_hidden || self.label.is_some(),
+            "a button with a hidden label needs a label (its accessible name)"
         );
         let d = self.size.button_dims(t);
         let part = |name: &str| format!("{}/{name}", self.key);
@@ -566,10 +606,36 @@ mod tests {
     }
 
     #[test]
+    fn oracle_cases_have_no_error_constraint_violations() {
+        use crate::constraints::{check, Severity};
+        let cases: Vec<Value> =
+            serde_json::from_str(include_str!("../tests/fixtures/button_scene.json")).unwrap();
+        // 264 before the matrix followed the catalog constraints: 40 accent/negative outline cases dropped.
+        assert_eq!(cases.len(), 224);
+        for c in &cases {
+            let mut o = vec![
+                ("variant", OptionValue::Str(c["variant"].as_str().unwrap())),
+                ("style", OptionValue::Str(c["style"].as_str().unwrap())),
+                ("icon", OptionValue::Present),
+                ("isLabelHidden", OptionValue::Bool(c["hidden"] == true)),
+            ];
+            if let Some(s) = c["static"].as_str() {
+                o.push(("staticColor", OptionValue::Str(s)));
+            }
+            assert!(
+                check("button", &o)
+                    .iter()
+                    .all(|v| v.severity != Severity::Error),
+                "{c}"
+            );
+        }
+    }
+
+    #[test]
     fn focus_ring_color_matches_oracle() {
         let cases: Vec<Value> =
             serde_json::from_str(include_str!("../tests/fixtures/button_focus_ring.json")).unwrap();
-        assert_eq!(cases.len(), 48);
+        assert_eq!(cases.len(), 36);
         for c in &cases {
             let t = tokens(
                 if c["scheme"] == "dark" {

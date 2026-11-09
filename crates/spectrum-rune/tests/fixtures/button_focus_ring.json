@@ -22,27 +22,6 @@
   },
   {
     "scheme": "light",
-    "variant": "accent",
-    "style": "outline",
-    "static": null,
-    "ring": "75,117,255"
-  },
-  {
-    "scheme": "light",
-    "variant": "accent",
-    "style": "outline",
-    "static": "white",
-    "ring": "75,117,255"
-  },
-  {
-    "scheme": "light",
-    "variant": "accent",
-    "style": "outline",
-    "static": "black",
-    "ring": "75,117,255"
-  },
-  {
-    "scheme": "light",
     "variant": "negative",
     "style": "fill",
     "static": null,
@@ -59,27 +38,6 @@
     "scheme": "light",
     "variant": "negative",
     "style": "fill",
-    "static": "black",
-    "ring": "75,117,255"
-  },
-  {
-    "scheme": "light",
-    "variant": "negative",
-    "style": "outline",
-    "static": null,
-    "ring": "75,117,255"
-  },
-  {
-    "scheme": "light",
-    "variant": "negative",
-    "style": "outline",
-    "static": "white",
-    "ring": "75,117,255"
-  },
-  {
-    "scheme": "light",
-    "variant": "negative",
-    "style": "outline",
     "static": "black",
     "ring": "75,117,255"
   },
@@ -190,27 +148,6 @@
   },
   {
     "scheme": "dark",
-    "variant": "accent",
-    "style": "outline",
-    "static": null,
-    "ring": "64,105,253"
-  },
-  {
-    "scheme": "dark",
-    "variant": "accent",
-    "style": "outline",
-    "static": "white",
-    "ring": "64,105,253"
-  },
-  {
-    "scheme": "dark",
-    "variant": "accent",
-    "style": "outline",
-    "static": "black",
-    "ring": "64,105,253"
-  },
-  {
-    "scheme": "dark",
     "variant": "negative",
     "style": "fill",
     "static": null,
@@ -227,27 +164,6 @@
     "scheme": "dark",
     "variant": "negative",
     "style": "fill",
-    "static": "black",
-    "ring": "64,105,253"
-  },
-  {
-    "scheme": "dark",
-    "variant": "negative",
-    "style": "outline",
-    "static": null,
-    "ring": "64,105,253"
-  },
-  {
-    "scheme": "dark",
-    "variant": "negative",
-    "style": "outline",
-    "static": "white",
-    "ring": "64,105,253"
-  },
-  {
-    "scheme": "dark",
-    "variant": "negative",
-    "style": "outline",
     "static": "black",
     "ring": "64,105,253"
   },

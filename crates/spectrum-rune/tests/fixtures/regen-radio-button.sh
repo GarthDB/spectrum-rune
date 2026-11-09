@@ -5,6 +5,7 @@
 # Only the fields the test reads are kept.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
+source "$(dirname "$0")/constraints.sh"
 out="$(cd "$(dirname "$0")" && pwd)/radio_button_scene.json"
 cd "$root"
 {
@@ -14,6 +15,7 @@ cd "$root"
         # Hover and down are checked at size m only, and a disabled radio ignores the pointer.
         [ "$state" != rest ] && [ "$size" != m ] && continue
         [ "$state" != rest ] && [ "$dis" = true ] && continue
+        excluded radio-button "{\"isSelected\":$sel,\"isEmphasized\":$emph,\"isDisabled\":$dis}" && continue
         args=(--size "$size" --option "isSelected=$sel" --option "isEmphasized=$emph" --option "isDisabled=$dis"
               --color-scheme "$scheme" --scale "$scale" --format scene)
         [ "$state" != rest ] && args+=(--state "$state")

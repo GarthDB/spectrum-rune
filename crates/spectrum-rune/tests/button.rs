@@ -8,6 +8,7 @@
 use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
 use spectrum_rune::button::{Button, StaticColor, Style, Variant};
+use spectrum_rune::constraints::{check, Severity};
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
 use spectrum_rune::Size;
@@ -191,7 +192,7 @@ fn click(rt: &mut Runtime<App>) {
 fn matches_oracle_scene() {
     let cases: Vec<Value> =
         serde_json::from_str(include_str!("fixtures/button_scene.json")).unwrap();
-    assert_eq!(cases.len(), 264);
+    assert_eq!(cases.len(), 224);
     for c in &cases {
         let what = c.to_string();
         let what = &what[..what.len().min(200)];
@@ -357,4 +358,57 @@ fn label_only_button_has_no_icon() {
     let l = part(&rt, "label").unwrap();
     assert!(part(&rt, "icon").is_none());
     assert_eq!(l.target[0] - c.target[0], 16.0, "M text padding");
+}
+
+fn errors(b: &Button) -> Vec<&'static str> {
+    check("button", &b.options())
+        .iter()
+        .filter(|v| v.severity == Severity::Error)
+        .map(|v| v.description.unwrap())
+        .collect()
+}
+
+#[test]
+fn check_reports_the_three_error_rules() {
+    let outline_accent = Button::new("a").style(Style::Outline);
+    assert_eq!(
+        errors(&outline_accent),
+        ["Outline style is only defined for primary and secondary."]
+    );
+    assert_eq!(
+        errors(&outline_accent.variant(Variant::Negative)),
+        ["Outline style is only defined for primary and secondary."]
+    );
+    assert!(errors(
+        &Button::new("a")
+            .variant(Variant::Primary)
+            .style(Style::Outline)
+    )
+    .is_empty());
+
+    assert_eq!(
+        errors(&Button::new("a").label_hidden(true)),
+        ["An icon-only button needs an icon."]
+    );
+    assert!(errors(&Button::new("a").label_hidden(true).icon(&CHECKMARK_100)).is_empty());
+}
+
+#[test]
+fn static_color_on_accent_is_advisory_not_an_error() {
+    let b = Button::new("a").static_color(StaticColor::White);
+    assert!(errors(&b).is_empty());
+    let v = check("button", &b.options());
+    assert_eq!(v.len(), 1);
+    assert_eq!(v[0].severity, Severity::Advisory);
+    // Valid: builds without a debug assertion, and renders as a plain accent button.
+    let _ = b.build(tokens(ColorScheme::Light, Scale::Desktop));
+}
+
+#[cfg(debug_assertions)]
+#[test]
+#[should_panic(expected = "Outline style is only defined")]
+fn building_an_error_combination_asserts_in_debug() {
+    let _ = Button::new("a")
+        .style(Style::Outline)
+        .build(tokens(ColorScheme::Light, Scale::Desktop));
 }
