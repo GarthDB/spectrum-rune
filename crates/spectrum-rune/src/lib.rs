@@ -1,5 +1,6 @@
 //! Adobe Spectrum components for Rune.
 
+pub mod accordion;
 pub mod action_button;
 pub mod badge;
 pub mod button;
