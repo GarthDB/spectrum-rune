@@ -198,7 +198,7 @@ fn click(rt: &mut Runtime<App>) {
 fn matches_oracle_scene() {
     let cases: Vec<Value> =
         serde_json::from_str(include_str!("fixtures/action_button_scene.json")).unwrap();
-    assert_eq!(cases.len(), 346);
+    assert_eq!(cases.len(), 412);
     for c in &cases {
         let what = c.to_string();
         let what = &what[..what.len().min(200)];

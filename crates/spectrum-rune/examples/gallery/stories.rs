@@ -378,8 +378,16 @@ fn action_button(s: &G, t: &'static Tokens) -> El {
     );
     page(vec![
         section(t, "States", states),
-        section(t, "Static white", statics(StaticColor::White, blue())),
-        section(t, "Static black", statics(StaticColor::Black, yellow())),
+        section(
+            t,
+            "Static white (Disabled stays an opaque grey pill: the oracle ignores the static colour when disabled)",
+            statics(StaticColor::White, blue()),
+        ),
+        section(
+            t,
+            "Static black (same: the oracle draws Disabled like a plain disabled button)",
+            statics(StaticColor::Black, yellow()),
+        ),
         section(t, "Sizes", sizes),
         section(t, "Icon-only sizes", icons),
     ])

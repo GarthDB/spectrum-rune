@@ -240,6 +240,9 @@ dataset changes nothing.
 - **RTL** is not handled.
 - **Groups.** Accordion (several items, `isMultiple`, arrow keys) and radio groups are not built;
   a single `AccordionItem` and `RadioButton` are (beads a14.15, a14.20).
+- **Action-button static + disabled** draws the plain disabled pill (opaque grey on the coloured
+  backdrop), because that is what the oracle renders; Button's recipe has translucent rules for it
+  and Action-button's does not (bead a14.23, proposed upstream in #1693).
 - **Recipe findings** (outline badges for 19 variants render as bold, and others) are collected
   upstream in [adobe/spectrum-design-data#1693](https://github.com/adobe/spectrum-design-data/issues/1693).
 

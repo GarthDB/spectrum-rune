@@ -9,6 +9,9 @@
 #   A. colour table at size M: quiet x selected x emphasized, rest / hover / down, in all four
 #      scheme+scale corners; disabled at rest in all four corners
 #   B. the same table for static white and black, in two corners (light desktop, dark mobile)
+#      plus static x disabled (a14.23: the oracle draws it like a plain disabled button) for
+#      quiet x selected x emphasized in all four corners, and its hover in light desktop (no
+#      `down`: the oracle scales a disabled button then, which it never receives)
 #   C. sizes XS..XL x four corners for the default look, plus selected + emphasized down in two
 #      corners (press scale and radius per size)
 #   D. flags alone, all sizes, light desktop and dark mobile: hide label, hold icon, hide label +
@@ -115,6 +118,16 @@ table() { # corner list, static, states
   for size in xs m xl; do
     render false false false none false false false false $size light desktop A down
     render false false false none false false false false $size light desktop "A much longer label here" down
+  done
+
+  # B2: static x disabled
+  for stat in white black; do
+    for corner in "light desktop" "light mobile" "dark desktop" "dark mobile"; do set -- $corner
+      for q in false true; do for sel in false true; do for emp in false true; do
+        render $q $sel $emp $stat true false false true m $1 $2 Label rest
+      done; done; done
+    done
+    for state in hover; do render false false false $stat true false false true m light desktop Label $state; done
   done
 } | jq -s 'map(
     del(.container.x, .container.y)
