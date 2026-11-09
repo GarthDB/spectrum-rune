@@ -200,11 +200,28 @@ impl Ring {
         let n = |k: &str| r[k].as_f64().unwrap();
         // The oracle strokes the ring on a rect that sits gap + width/2 outside the part.
         let t = &v["target"];
-        assert!(
-            (t["x"].as_f64().unwrap() - r["x"].as_f64().unwrap() - n("gap") - n("width") / 2.0)
-                .abs()
-                < 0.01
-        );
+        let out = n("gap") + n("width") / 2.0;
+        let d = |a: &str, b: &str| t[a].as_f64().unwrap() - r[b].as_f64().unwrap();
+        // x and y are `out` further out; w and h are `2 * out` bigger.
+        for (got, want, axis) in [
+            (d("x", "x"), out, "x"),
+            (d("y", "y"), out, "y"),
+            (
+                r["w"].as_f64().unwrap() - t["w"].as_f64().unwrap(),
+                2.0 * out,
+                "w",
+            ),
+            (
+                r["h"].as_f64().unwrap() - t["h"].as_f64().unwrap(),
+                2.0 * out,
+                "h",
+            ),
+        ] {
+            assert!(
+                (got - want).abs() < 0.01,
+                "ring fixture {axis}: {got} vs {want}: {v}"
+            );
+        }
         let c = rgba(r["stroke"].as_str().unwrap());
         Ring {
             stroke: [c[0], c[1], c[2]],
