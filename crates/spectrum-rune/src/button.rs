@@ -11,6 +11,10 @@
 //!   `focus_indicator_color` otherwise (static colour is a no-op on accent and negative).
 //! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
 //!   draw it in the content colour instead (the one deliberate departure).
+//!
+//! Verification: geometry and fill against the oracle (`tests/button.rs`); border and focus-ring colour,
+//! width, thickness and gap from pixels, against the oracle's values (`tests/button_pixels.rs`). The
+//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
 
 use crate::constraints::{self, OptionValue};
 use crate::font;
@@ -548,8 +552,8 @@ mod tests {
         }
     }
 
-    /// The border colour is not exposed by `ElementInfo` (a14.3), so the whole table (fill, border,
-    /// content) is checked against every oracle case here, where the table is reachable.
+    /// The whole table (fill, border, content) is checked against every oracle case here, where the
+    /// table is reachable; the painted border and ring are in `tests/button_pixels.rs`.
     #[test]
     fn look_table_matches_oracle() {
         let cases: Vec<Value> =
@@ -639,7 +643,7 @@ mod tests {
     fn focus_ring_color_matches_oracle() {
         let cases: Vec<Value> =
             serde_json::from_str(include_str!("../tests/fixtures/button_focus_ring.json")).unwrap();
-        assert_eq!(cases.len(), 36);
+        assert_eq!(cases.len(), 72);
         for c in &cases {
             let t = tokens(
                 if c["scheme"] == "dark" {
@@ -662,7 +666,7 @@ mod tests {
             };
             assert_color(
                 Some(focus_ring_color(t, variant, sc)),
-                &c["ring"],
+                &c["ring"]["stroke"],
                 &format!("{c}"),
             );
         }

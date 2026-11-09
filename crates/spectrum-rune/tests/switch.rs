@@ -1,5 +1,6 @@
 //! Checks the Switch against the `design-data render switch --format scene` oracle.
 //! Regenerate the fixture with `tests/fixtures/regen-switch.sh`.
+//! Border and focus ring: `switch_pixels.rs`. Not asserted: the font family, keyboard-focus colours (a14.14).
 
 use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
@@ -147,7 +148,7 @@ fn matches_oracle_scene() {
             let e = part(&rt, key).unwrap();
             let what = format!("{what} {key}");
             assert_rect(e.target, origin, want, &what);
-            // TODO(a14.3): assert border width/colour and focus ring once ElementInfo exposes them.
+            // Border and ring are asserted from pixels in switch_pixels.rs.
             assert_color(e.fill, want["fill"].as_str().unwrap(), &what);
             let r = want["radius"].as_f64().unwrap() as f32;
             assert!(

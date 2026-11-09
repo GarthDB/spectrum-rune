@@ -1,9 +1,10 @@
 //! Checks the Button against the `design-data render button --format scene` oracle.
 //! Regenerate the fixture with `tests/fixtures/regen-button.sh` (its header explains the matrix).
 //!
-//! Not asserted, because `ElementInfo` does not expose it yet (a14.3): border width and colour
-//! (the colour table, border included, is checked in `src/button.rs`'s unit test instead), the
-//! focus ring, the font family. Keyboard-focus colours are not implemented (a14.14).
+//! Border colour/width, fill over a backdrop and the focus ring (incl. static colours) are asserted
+//! from pixels in `button_pixels.rs`; the colour table is also checked in `src/button.rs`'s unit
+//! test. Not asserted: the font family (not observable) and the pending progress ink (no oracle
+//! value). Keyboard-focus colours are not implemented (a14.14).
 
 use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;

@@ -1,8 +1,8 @@
 //! Checks the RadioButton against the `design-data render radio-button --format scene` oracle.
 //! Regenerate the fixture with `tests/fixtures/regen-radio-button.sh`.
 //!
-//! Not asserted, because `ElementInfo` does not expose it yet (a14.3): border width and colour,
-//! the focus ring, the font family. Keyboard-focus colours are not implemented (a14.14).
+//! Border, dot and focus ring are asserted from pixels in `radio_button_pixels.rs`. Not asserted:
+//! the font family (not observable). Keyboard-focus colours are not implemented (a14.14).
 
 use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;

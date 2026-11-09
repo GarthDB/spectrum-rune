@@ -1,5 +1,6 @@
 //! Checks the Checkbox against the `design-data render checkbox --format scene` oracle.
 //! Regenerate the fixture with `tests/fixtures/regen-checkbox.sh`.
+//! Border, glyph ink and focus ring: `checkbox_pixels.rs`. Not asserted: the font family, keyboard-focus colours (a14.14).
 
 use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
@@ -159,7 +160,7 @@ fn matches_oracle_scene() {
         let b = part(&rt, "box").unwrap();
         let want = &c["box"];
         assert_rect(b.target, origin, want, &format!("{what} box"));
-        // TODO(a14.3): assert border width/colour and the focus ring once ElementInfo exposes them.
+        // Border and ring are asserted from pixels in checkbox_pixels.rs.
         assert_color(
             b.fill,
             want["fill"].as_str().unwrap(),

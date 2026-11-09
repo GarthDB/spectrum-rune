@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Regenerates checkbox_scene.json from the oracle: `design-data` v0.20.x run from the
-# spectrum-design-data dataset root (default ~/repos/spectrum-design-data).
+# spectrum-design-data dataset root (default ~/repos/spectrum-design-data). The committed fixtures were
+# made at dataset commit 95907289; at a later commit Button defaults and label wrapping differ, so
+# check that commit out (e.g. `git worktree add --detach <dir> 95907289`) and pass <dir> as $1.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
@@ -39,3 +41,17 @@ cd "$root"
   done; done
 } | jq -s . > "$out"
 echo "wrote $out"
+
+# Focus ring (--state keyboard-focus) around the box: checkbox_rings.json (ring.jq).
+ring="$(dirname "$out")/checkbox_rings.json"
+for scheme in light dark; do for scale in desktop mobile; do for size in s m l xl; do for value in unselected selected indeterminate; do
+  for err in false true; do
+    args=(--size "$size" --option "isError=$err" --color-scheme "$scheme" --scale "$scale" --state keyboard-focus --format scene)
+    [ "$value" = selected ] && args+=(--option isSelected=true)
+    [ "$value" = indeterminate ] && args+=(--option isIndeterminate=true)
+    design-data render checkbox "${args[@]}" | jq -c --arg target box \
+      --argjson meta "{\"scheme\":\"$scheme\",\"scale\":\"$scale\",\"size\":\"$size\",\"value\":\"$value\",\"error\":$err}" \
+      -f "$(dirname "$out")/ring.jq"
+  done
+done; done; done; done | jq -s . > "$ring"
+echo "wrote $ring"

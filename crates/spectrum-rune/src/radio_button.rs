@@ -1,6 +1,10 @@
 //! Spectrum Radio-button, from `design-data` visuals/radio-button.json (container > control (>
 //! selection-indicator), label, focus ring). Every size, colour, radius and type value comes from
 //! [`Tokens`]. A radio only selects; choosing one of several is the job of a group (not built yet).
+//!
+//! Verification: geometry and fill against the oracle (`tests/radio_button.rs`); border and focus-ring colour,
+//! width, thickness and gap from pixels, against the oracle's values (`tests/radio_button_pixels.rs`). The
+//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
 
 use crate::font;
 use crate::interaction::{Interaction, State};
