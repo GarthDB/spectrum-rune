@@ -13,6 +13,8 @@
 #      disabled + static white / black
 #   D. hover and down for pending, and for static white / black (primary, secondary x fill, outline)
 #   E. press scale at the perspective clamps: a one-letter and a long label, M and XL
+#   F. focus ring colour (--state focus; keyboard-focus renders no ring, spectrum-design-data #1693):
+#      variant x style x staticColor x scheme, written to button_focus_ring.json
 # The oracle always draws the optional icon, so every case has one. A hidden or pending button
 # has no label.
 set -euo pipefail
@@ -104,3 +106,18 @@ render() {
     | def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
       .container |= map_values(c) | (.icon, .label_part) |= (if . then map_values(c) else . end))' > "$out"
 echo "wrote $out"
+
+# F
+ring="$(dirname "$out")/button_focus_ring.json"
+for scheme in light dark; do for variant in accent negative primary secondary; do
+  for style in fill outline; do for stat in none white black; do
+    args=(--color-scheme "$scheme" --state focus --format scene
+      --option "variant=\"$variant\"" --option "style=\"$style\"")
+    [ "$stat" != none ] && args+=(--option "staticColor=\"$stat\"")
+    design-data render button "${args[@]}" | jq -c \
+      --arg scheme "$scheme" --arg variant "$variant" --arg style "$style" --arg stat "$stat" \
+      '{scheme: $scheme, variant: $variant, style: $style, static: (if $stat == "none" then null else $stat end),
+        ring: ([.nodes[] | select(.part == "focus-indicator") | .stroke][0] | gsub("rgba?\\(|\\)| "; ""))}'
+  done; done
+done; done | jq -s . > "$ring"
+echo "wrote $ring"

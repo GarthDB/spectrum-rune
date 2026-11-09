@@ -1,0 +1,338 @@
+[
+  {
+    "scheme": "light",
+    "variant": "accent",
+    "style": "fill",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "accent",
+    "style": "fill",
+    "static": "white",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "accent",
+    "style": "fill",
+    "static": "black",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "accent",
+    "style": "outline",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "accent",
+    "style": "outline",
+    "static": "white",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "accent",
+    "style": "outline",
+    "static": "black",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "negative",
+    "style": "fill",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "negative",
+    "style": "fill",
+    "static": "white",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "negative",
+    "style": "fill",
+    "static": "black",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "negative",
+    "style": "outline",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "negative",
+    "style": "outline",
+    "static": "white",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "negative",
+    "style": "outline",
+    "static": "black",
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "primary",
+    "style": "fill",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "primary",
+    "style": "fill",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "primary",
+    "style": "fill",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "light",
+    "variant": "primary",
+    "style": "outline",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "primary",
+    "style": "outline",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "primary",
+    "style": "outline",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "light",
+    "variant": "secondary",
+    "style": "fill",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "secondary",
+    "style": "fill",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "secondary",
+    "style": "fill",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "light",
+    "variant": "secondary",
+    "style": "outline",
+    "static": null,
+    "ring": "75,117,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "secondary",
+    "style": "outline",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "light",
+    "variant": "secondary",
+    "style": "outline",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "dark",
+    "variant": "accent",
+    "style": "fill",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "accent",
+    "style": "fill",
+    "static": "white",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "accent",
+    "style": "fill",
+    "static": "black",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "accent",
+    "style": "outline",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "accent",
+    "style": "outline",
+    "static": "white",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "accent",
+    "style": "outline",
+    "static": "black",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "negative",
+    "style": "fill",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "negative",
+    "style": "fill",
+    "static": "white",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "negative",
+    "style": "fill",
+    "static": "black",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "negative",
+    "style": "outline",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "negative",
+    "style": "outline",
+    "static": "white",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "negative",
+    "style": "outline",
+    "static": "black",
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "primary",
+    "style": "fill",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "primary",
+    "style": "fill",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "dark",
+    "variant": "primary",
+    "style": "fill",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "dark",
+    "variant": "primary",
+    "style": "outline",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "primary",
+    "style": "outline",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "dark",
+    "variant": "primary",
+    "style": "outline",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "dark",
+    "variant": "secondary",
+    "style": "fill",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "secondary",
+    "style": "fill",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "dark",
+    "variant": "secondary",
+    "style": "fill",
+    "static": "black",
+    "ring": "0,0,0"
+  },
+  {
+    "scheme": "dark",
+    "variant": "secondary",
+    "style": "outline",
+    "static": null,
+    "ring": "64,105,253"
+  },
+  {
+    "scheme": "dark",
+    "variant": "secondary",
+    "style": "outline",
+    "static": "white",
+    "ring": "255,255,255"
+  },
+  {
+    "scheme": "dark",
+    "variant": "secondary",
+    "style": "outline",
+    "static": "black",
+    "ring": "0,0,0"
+  }
+]

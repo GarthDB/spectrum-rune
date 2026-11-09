@@ -6,8 +6,8 @@
 //! - Accent and negative have no outline look: the container has no fill and no border, and the
 //!   content stays static white, so an outline accent/negative button is white text on nothing.
 //! - `static_color` only changes primary and secondary; on accent and negative it changes nothing.
-//! - The focus ring is always `focus_indicator_color`: the recipe names static white/black ring
-//!   colours for primary and secondary, but the oracle never applies them.
+//! - The focus ring is white or black for primary and secondary with a static colour, and
+//!   `focus_indicator_color` otherwise (static colour is a no-op on accent and negative).
 //! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
 //!   draw it in the content colour instead (the one deliberate departure).
 
@@ -238,6 +238,23 @@ pub(crate) fn look(
     }
 }
 
+/// The focus ring colour: only primary and secondary react to a static colour.
+pub(crate) fn focus_ring_color(
+    t: &Tokens,
+    variant: Variant,
+    static_color: Option<StaticColor>,
+) -> Color {
+    match (variant, static_color) {
+        (Variant::Primary | Variant::Secondary, Some(StaticColor::White)) => {
+            t.static_white_focus_indicator_color
+        }
+        (Variant::Primary | Variant::Secondary, Some(StaticColor::Black)) => {
+            t.static_black_focus_indicator_color
+        }
+        _ => t.focus_indicator_color,
+    }
+}
+
 /// The recipe presses by size difference over a perspective that grows with the width
 /// (`pressWidthRatio`, clamped to the min/max perspective), so wide buttons shrink less.
 pub(crate) fn press_scale(t: &Tokens, width: f32) -> f32 {
@@ -382,7 +399,7 @@ impl Button {
             .focus_ring(
                 t.focus_indicator_thickness,
                 t.focus_ring_gap,
-                t.focus_indicator_color,
+                focus_ring_color(t, self.variant, self.static_color),
             );
         if let Some(c) = look.stroke {
             root = root.border(t.border_width_200, c);
@@ -545,6 +562,39 @@ mod tests {
                     assert_color(Some(l.content), &c[part]["color"], what);
                 }
             }
+        }
+    }
+
+    #[test]
+    fn focus_ring_color_matches_oracle() {
+        let cases: Vec<Value> =
+            serde_json::from_str(include_str!("../tests/fixtures/button_focus_ring.json")).unwrap();
+        assert_eq!(cases.len(), 48);
+        for c in &cases {
+            let t = tokens(
+                if c["scheme"] == "dark" {
+                    ColorScheme::Dark
+                } else {
+                    ColorScheme::Light
+                },
+                Scale::Desktop,
+            );
+            let variant = match c["variant"].as_str().unwrap() {
+                "accent" => Variant::Accent,
+                "negative" => Variant::Negative,
+                "primary" => Variant::Primary,
+                _ => Variant::Secondary,
+            };
+            let sc = match c["static"].as_str() {
+                Some("white") => Some(StaticColor::White),
+                Some("black") => Some(StaticColor::Black),
+                _ => None,
+            };
+            assert_color(
+                Some(focus_ring_color(t, variant, sc)),
+                &c["ring"],
+                &format!("{c}"),
+            );
         }
     }
 
