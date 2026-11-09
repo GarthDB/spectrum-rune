@@ -9,3 +9,4 @@ rune-kit.workspace = true
 
 [dev-dependencies]
 serde_json = "1.0.154"
+rune-ref = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830", features = ["gpu"] }

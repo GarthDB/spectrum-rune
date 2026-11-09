@@ -1,5 +1,6 @@
 //! Adobe Spectrum components for Rune.
 
+pub mod action_button;
 pub mod button;
 pub mod checkbox;
 pub mod constraints;
@@ -11,4 +12,4 @@ pub mod size;
 pub mod switch;
 pub mod tokens;
 
-pub use size::Size;
+pub use size::{ActionButtonSize, Size};
