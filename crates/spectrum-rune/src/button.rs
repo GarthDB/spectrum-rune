@@ -8,7 +8,8 @@
 //! - `static_color` only changes primary and secondary; on accent and negative it changes nothing.
 //! - The focus ring is always `focus_indicator_color`: the recipe names static white/black ring
 //!   colours for primary and secondary, but the oracle never applies them.
-//! - The pending progress is gray (800 on a 300 track) on every variant, accent included.
+//! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
+//!   draw it in the content colour instead (the one deliberate departure).
 
 use crate::font;
 use crate::interaction::{Interaction, State};
@@ -391,10 +392,12 @@ impl Button {
         }
 
         if self.pending {
-            // Loader has one ink; its track is that ink at 0.2, not the recipe's gray-300 track.
+            // Deliberately not the oracle's gray_800 (spectrum-design-data #1693): that is invisible on
+            // a primary fill. The content colour is readable on every fill. Loader has one ink; its
+            // track is that ink at 0.2, not the recipe's gray_300 track.
             let spinner = Loader::new()
                 .size(d.icon)
-                .color(t.gray_800)
+                .color(look.content)
                 .build(&Kit::neutral(false))
                 .key(part("progress"));
             root = root.child(spinner);
