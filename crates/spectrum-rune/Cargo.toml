@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 rune.workspace = true
 rune-kit.workspace = true
+
+[dev-dependencies]
+serde_json = "1.0.154"
