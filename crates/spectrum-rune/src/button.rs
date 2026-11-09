@@ -3,14 +3,16 @@
 //!
 //! Where the oracle (`design-data render button`, 0.20.0) looks incomplete, the button renders what
 //! it renders and says so here, so nothing is invented:
-//! - Accent and negative have no outline look: the container has no fill and no border, and the
-//!   content stays static white, so an outline accent/negative button is white text on nothing.
+//! - Accent and negative have no outline look: that combination is an `error` constraint in the
+//!   catalog, so `build` panics in debug builds. Release builds render what the oracle does: white
+//!   text on no fill and no border.
 //! - `static_color` only changes primary and secondary; on accent and negative it changes nothing.
-//! - The focus ring is always `focus_indicator_color`: the recipe names static white/black ring
-//!   colours for primary and secondary, but the oracle never applies them.
+//! - The focus ring is white or black for primary and secondary with a static colour, and
+//!   `focus_indicator_color` otherwise (static colour is a no-op on accent and negative).
 //! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
 //!   draw it in the content colour instead (the one deliberate departure).
 
+use crate::constraints::{self, OptionValue};
 use crate::font;
 use crate::interaction::{Interaction, State};
 use crate::size::Size;
@@ -238,6 +240,23 @@ pub(crate) fn look(
     }
 }
 
+/// The focus ring colour: only primary and secondary react to a static colour.
+pub(crate) fn focus_ring_color(
+    t: &Tokens,
+    variant: Variant,
+    static_color: Option<StaticColor>,
+) -> Color {
+    match (variant, static_color) {
+        (Variant::Primary | Variant::Secondary, Some(StaticColor::White)) => {
+            t.static_white_focus_indicator_color
+        }
+        (Variant::Primary | Variant::Secondary, Some(StaticColor::Black)) => {
+            t.static_black_focus_indicator_color
+        }
+        _ => t.focus_indicator_color,
+    }
+}
+
 /// The recipe presses by size difference over a perspective that grows with the width
 /// (`pressWidthRatio`, clamped to the min/max perspective), so wide buttons shrink less.
 pub(crate) fn press_scale(t: &Tokens, width: f32) -> f32 {
@@ -332,10 +351,49 @@ impl Button {
         self
     }
 
+    /// The builder state under the catalog's option names. Unset options are left out and take
+    /// their catalog default.
+    pub fn options(&self) -> Vec<(&'static str, OptionValue<'static>)> {
+        let mut o = vec![
+            (
+                "variant",
+                OptionValue::Str(match self.variant {
+                    Variant::Accent => "accent",
+                    Variant::Negative => "negative",
+                    Variant::Primary => "primary",
+                    Variant::Secondary => "secondary",
+                }),
+            ),
+            (
+                "style",
+                OptionValue::Str(match self.style {
+                    Style::Fill => "fill",
+                    Style::Outline => "outline",
+                }),
+            ),
+            ("isLabelHidden", OptionValue::Bool(self.label_hidden)),
+        ];
+        if self.icon.is_some() {
+            o.push(("icon", OptionValue::Present));
+        }
+        if let Some(c) = self.static_color {
+            o.push((
+                "staticColor",
+                OptionValue::Str(match c {
+                    StaticColor::White => "white",
+                    StaticColor::Black => "black",
+                }),
+            ));
+        }
+        o
+    }
+
     pub fn build(self, t: &Tokens) -> El {
+        constraints::assert_valid("button", &self.options());
+        // Not a catalog constraint (accessible names belong to the accessibility spec).
         debug_assert!(
-            !self.label_hidden || (self.icon.is_some() && self.label.is_some()),
-            "a button with a hidden label needs an icon and a label (its accessible name)"
+            !self.label_hidden || self.label.is_some(),
+            "a button with a hidden label needs a label (its accessible name)"
         );
         let d = self.size.button_dims(t);
         let part = |name: &str| format!("{}/{name}", self.key);
@@ -382,7 +440,7 @@ impl Button {
             .focus_ring(
                 t.focus_indicator_thickness,
                 t.focus_ring_gap,
-                t.focus_indicator_color,
+                focus_ring_color(t, self.variant, self.static_color),
             );
         if let Some(c) = look.stroke {
             root = root.border(t.border_width_200, c);
@@ -545,6 +603,65 @@ mod tests {
                     assert_color(Some(l.content), &c[part]["color"], what);
                 }
             }
+        }
+    }
+
+    #[test]
+    fn oracle_cases_have_no_error_constraint_violations() {
+        use crate::constraints::{check, Severity};
+        let cases: Vec<Value> =
+            serde_json::from_str(include_str!("../tests/fixtures/button_scene.json")).unwrap();
+        // 264 before the matrix followed the catalog constraints: 40 accent/negative outline cases dropped.
+        assert_eq!(cases.len(), 224);
+        for c in &cases {
+            let mut o = vec![
+                ("variant", OptionValue::Str(c["variant"].as_str().unwrap())),
+                ("style", OptionValue::Str(c["style"].as_str().unwrap())),
+                ("icon", OptionValue::Present),
+                ("isLabelHidden", OptionValue::Bool(c["hidden"] == true)),
+            ];
+            if let Some(s) = c["static"].as_str() {
+                o.push(("staticColor", OptionValue::Str(s)));
+            }
+            assert!(
+                check("button", &o)
+                    .iter()
+                    .all(|v| v.severity != Severity::Error),
+                "{c}"
+            );
+        }
+    }
+
+    #[test]
+    fn focus_ring_color_matches_oracle() {
+        let cases: Vec<Value> =
+            serde_json::from_str(include_str!("../tests/fixtures/button_focus_ring.json")).unwrap();
+        assert_eq!(cases.len(), 36);
+        for c in &cases {
+            let t = tokens(
+                if c["scheme"] == "dark" {
+                    ColorScheme::Dark
+                } else {
+                    ColorScheme::Light
+                },
+                Scale::Desktop,
+            );
+            let variant = match c["variant"].as_str().unwrap() {
+                "accent" => Variant::Accent,
+                "negative" => Variant::Negative,
+                "primary" => Variant::Primary,
+                _ => Variant::Secondary,
+            };
+            let sc = match c["static"].as_str() {
+                Some("white") => Some(StaticColor::White),
+                Some("black") => Some(StaticColor::Black),
+                _ => None,
+            };
+            assert_color(
+                Some(focus_ring_color(t, variant, sc)),
+                &c["ring"],
+                &format!("{c}"),
+            );
         }
     }
 

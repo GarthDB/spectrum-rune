@@ -4,6 +4,7 @@
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
+source "$(dirname "$0")/constraints.sh"
 out="$(cd "$(dirname "$0")" && pwd)/checkbox_scene.json"
 cd "$root"
 {
@@ -14,6 +15,8 @@ cd "$root"
           # Hover and down are checked at size m only, and a disabled box ignores the pointer.
           [ "$state" != rest ] && [ "$size" != m ] && continue
           [ "$state" != rest ] && [ "$dis" = true ] && continue
+          opts="{\"isSelected\":$([ "$value" = selected ] && echo true || echo false),\"isIndeterminate\":$([ "$value" = indeterminate ] && echo true || echo false)}"
+          excluded checkbox "$opts" && continue
           args=(--size "$size" --option "isEmphasized=$emph" --option "isError=$err" --option "isDisabled=$dis"
                 --color-scheme "$scheme" --scale "$scale" --format scene)
           [ "$value" = selected ] && args+=(--option isSelected=true)

@@ -565,5 +565,200 @@ fn generate_icons(dir: &Path, version: &str, commit: &str) -> Res<()> {
     writeln!(out, "/// The UI icon `name` at `size` (the `ui.json` size key: 50, 75, 100, ...).\npub fn icon(name: &str, size: u32) -> Option<&'static Icon> {{\n    Some(match (name, size) {{\n{lookup}        _ => return None,\n    }})\n}}").unwrap();
     let target = write_rs("icons", out)?;
     println!("wrote {}", target.display());
+    generate_constraints(dir, version, commit)
+}
+
+fn lit(v: &Value, ctx: &str) -> Res<String> {
+    match v {
+        Value::String(s) => Ok(format!("Lit::Str({s:?})")),
+        Value::Bool(b) => Ok(format!("Lit::Bool({b})")),
+        _ => Err(format!(
+            "{ctx}: literal is neither a string nor a boolean: {v}"
+        )),
+    }
+}
+
+fn lits(v: &Value, ctx: &str) -> Res<Vec<Value>> {
+    match v {
+        Value::Array(a) if !a.is_empty() => Ok(a.clone()),
+        Value::Array(_) => Err(format!("{ctx}: empty array")),
+        one => Ok(vec![one.clone()]),
+    }
+}
+
+/// SPEC-064 for one literal: the option is declared, and the literal is one of its declared values
+/// (or a boolean, for a boolean option). Value checks are skipped when the option has no `values`.
+fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
+    if let Some(values) = opt["values"].as_array() {
+        if let Some(bad) = values.iter().find(|d| d.get("value").is_none()) {
+            return Err(format!(
+                "{ctx}: option `values` entry is not {{\"value\": ..}}: {bad}"
+            ));
+        }
+        if !values.iter().any(|d| &d["value"] == v) {
+            return Err(format!(
+                "{ctx}: value {v} is not a declared value of the option"
+            ));
+        }
+    } else if opt["type"] == "boolean" && !v.is_boolean() {
+        return Err(format!("{ctx}: value {v} is not a boolean"));
+    }
+    Ok(())
+}
+
+/// `constraints/generated.rs` from every `components/*.json` `constraints[]` (spec
+/// `option-constraints.md`), including components without rules. Unknown shapes and SPEC-064
+/// violations (a name or value the component's `options` does not declare) are errors.
+fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
+    let components = dir.join("packages/design-data/components");
+    let mut files: Vec<_> = std::fs::read_dir(&components)
+        .map_err(|e| format!("{}: {e}", components.display()))?
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.extension().is_some_and(|x| x == "json"))
+        .collect();
+    files.sort();
+    let (mut body, mut n_rules) = (String::new(), 0);
+    for path in &files {
+        let file = path.file_name().and_then(|s| s.to_str()).unwrap_or("?");
+        let name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("?");
+        let catalog: Value = serde_json::from_str(
+            &std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?,
+        )
+        .map_err(|e| format!("{file}: {e}"))?;
+        let rules = match &catalog["constraints"] {
+            Value::Null => &Vec::new(),
+            Value::Array(a) => a,
+            other => return Err(format!("{file}: `constraints` is not an array: {other}")),
+        };
+        let mut defaults: BTreeMap<String, String> = BTreeMap::new();
+        let mut rules_rs = String::new();
+        for (i, rule) in rules.iter().enumerate() {
+            let at = format!("{file} rule {i}");
+            let obj = rule
+                .as_object()
+                .ok_or_else(|| format!("{at}: not an object"))?;
+            if let Some(k) = obj.keys().find(|k| {
+                !["when", "require", "severity", "description", "source"].contains(&k.as_str())
+            }) {
+                return Err(format!("{at}: unknown key `{k}`"));
+            }
+            let severity = match rule["severity"].as_str() {
+                Some("error") => "Error",
+                Some("advisory") => "Advisory",
+                other => return Err(format!("{at}: unknown severity {other:?}")),
+            };
+            let description = match &rule["description"] {
+                Value::Null => "None".to_string(),
+                Value::String(s) => format!("Some({s:?})"),
+                other => return Err(format!("{at}: description is not a string: {other}")),
+            };
+            let declared = |opt: &str| -> Res<&Value> {
+                catalog["options"]
+                    .get(opt)
+                    .filter(|o| o.is_object())
+                    .ok_or_else(|| {
+                        format!("{at}: SPEC-064: option `{opt}` is not declared in `options`")
+                    })
+            };
+            let mut note_default = |opt: &str, decl: &Value| -> Res<()> {
+                match &decl["default"] {
+                    Value::Null => {}
+                    d => {
+                        defaults.insert(
+                            opt.to_string(),
+                            lit(d, &format!("{at}: default of `{opt}`"))?,
+                        );
+                    }
+                }
+                Ok(())
+            };
+            let when = rule["when"]
+                .as_object()
+                .filter(|m| !m.is_empty())
+                .ok_or_else(|| format!("{at}: `when` is not a non-empty object"))?;
+            let mut when_rs = Vec::new();
+            for (opt, v) in when {
+                let decl = declared(opt)?;
+                note_default(opt, decl)?;
+                let ls: Res<Vec<String>> = lits(v, &format!("{at} when.{opt}"))?
+                    .iter()
+                    .map(|l| {
+                        check_lit(decl, l, &format!("{at} when.{opt}"))?;
+                        lit(l, &format!("{at} when.{opt}"))
+                    })
+                    .collect();
+                when_rs.push(format!("({opt:?}, &[{}])", ls?.join(", ")));
+            }
+            let require = rule["require"]
+                .as_object()
+                .filter(|m| !m.is_empty())
+                .ok_or_else(|| format!("{at}: `require` is not a non-empty object"))?;
+            let mut require_rs = Vec::new();
+            for (opt, v) in require {
+                let decl = declared(opt)?;
+                note_default(opt, decl)?;
+                let req = match v {
+                    Value::Array(a) if !a.is_empty() => {
+                        let ls: Res<Vec<String>> = a
+                            .iter()
+                            .map(|l| {
+                                check_lit(decl, l, &format!("{at} require.{opt}"))?;
+                                lit(l, &format!("{at} require.{opt}"))
+                            })
+                            .collect();
+                        format!("Require::OneOf(&[{}])", ls?.join(", "))
+                    }
+                    Value::Object(m) if m.len() == 1 && m.get("present") == Some(&Value::Bool(true)) => {
+                        "Require::Present".to_string()
+                    }
+                    other => {
+                        return Err(format!(
+                            "{at}: require.{opt} is neither a non-empty array nor {{\"present\": true}}: {other}"
+                        ))
+                    }
+                };
+                require_rs.push(format!("({opt:?}, {req})"));
+            }
+            writeln!(
+                rules_rs,
+                "        Rule {{ when: &[{}], require: &[{}], severity: Severity::{severity}, description: {description} }},",
+                when_rs.join(", "),
+                require_rs.join(", ")
+            )
+            .unwrap();
+            n_rules += 1;
+        }
+        let defaults_rs: Vec<String> = defaults
+            .iter()
+            .map(|(k, v)| format!("({k:?}, {v})"))
+            .collect();
+        writeln!(
+            body,
+            "    ComponentConstraints {{ name: {name:?}, defaults: &[{}], rules: &[{}] }},",
+            defaults_rs.join(", "),
+            if rules_rs.is_empty() {
+                String::new()
+            } else {
+                format!("\n{rules_rs}    ")
+            }
+        )
+        .unwrap();
+    }
+    let mut out = String::new();
+    writeln!(out, "// @generated by `cargo xtask gen`. Do not edit.\n// Source: {version}, spectrum-design-data {commit}, components/*.json `constraints`.\n").unwrap();
+    writeln!(
+        out,
+        "use super::{{ComponentConstraints, Lit, Require, Rule, Severity}};\n"
+    )
+    .unwrap();
+    writeln!(out, "/// Every catalog under `components/`, sorted by name; most have no rules yet.\npub static COMPONENTS: &[ComponentConstraints] = &[\n{body}];\n").unwrap();
+    writeln!(out, "pub fn component(name: &str) -> Option<&'static ComponentConstraints> {{\n    COMPONENTS.iter().find(|c| c.name == name)\n}}").unwrap();
+    let target = write_rs("constraints", out)?;
+    println!(
+        "wrote {} ({} components, {n_rules} rules)",
+        target.display(),
+        files.len()
+    );
     Ok(())
 }

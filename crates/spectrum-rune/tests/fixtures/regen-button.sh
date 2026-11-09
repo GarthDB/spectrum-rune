@@ -13,16 +13,26 @@
 #      disabled + static white / black
 #   D. hover and down for pending, and for static white / black (primary, secondary x fill, outline)
 #   E. press scale at the perspective clamps: a one-letter and a long label, M and XL
+#   F. focus ring colour (--state focus; keyboard-focus renders no ring, spectrum-design-data #1693):
+#      variant x style x staticColor x scheme, written to button_focus_ring.json
+# Combinations an error constraint of the catalog excludes (accent/negative outline) are skipped
+# (constraints.sh); advisory ones stay.
 # The oracle always draws the optional icon, so every case has one. A hidden or pending button
 # has no label.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
+source "$(dirname "$0")/constraints.sh"
 out="$(cd "$(dirname "$0")" && pwd)/button_scene.json"
 cd "$root"
 
 # render variant style size scheme scale label disabled pending hidden static state
 render() {
   local variant=$1 style=$2 size=$3 scheme=$4 scale=$5 label=$6 dis=$7 pend=$8 hid=$9 stat=${10} state=${11}
+  # Combinations an `error` constraint excludes are undefined in the oracle: skip them. The icon
+  # is always drawn, so it is present.
+  local opts="{\"variant\":\"$variant\",\"style\":\"$style\",\"isLabelHidden\":$hid,\"icon\":true"
+  [ "$stat" != none ] && opts+=",\"staticColor\":\"$stat\""
+  excluded button "$opts}" && return 0
   local args=(--size "$size" --label "$label" --color-scheme "$scheme" --scale "$scale" --format scene
     --option "variant=\"$variant\"" --option "style=\"$style\"" --option "isDisabled=$dis"
     --option "isPending=$pend" --option "isLabelHidden=$hid")
@@ -104,3 +114,19 @@ render() {
     | def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
       .container |= map_values(c) | (.icon, .label_part) |= (if . then map_values(c) else . end))' > "$out"
 echo "wrote $out"
+
+# F
+ring="$(dirname "$out")/button_focus_ring.json"
+for scheme in light dark; do for variant in accent negative primary secondary; do
+  for style in fill outline; do for stat in none white black; do
+    [ "$style" = outline ] && excluded button "{\"variant\":\"$variant\",\"style\":\"outline\"}" && continue
+    args=(--color-scheme "$scheme" --state focus --format scene
+      --option "variant=\"$variant\"" --option "style=\"$style\"")
+    [ "$stat" != none ] && args+=(--option "staticColor=\"$stat\"")
+    design-data render button "${args[@]}" | jq -c \
+      --arg scheme "$scheme" --arg variant "$variant" --arg style "$style" --arg stat "$stat" \
+      '{scheme: $scheme, variant: $variant, style: $style, static: (if $stat == "none" then null else $stat end),
+        ring: ([.nodes[] | select(.part == "focus-indicator") | .stroke][0] | gsub("rgba?\\(|\\)| "; ""))}'
+  done; done
+done; done | jq -s . > "$ring"
+echo "wrote $ring"

@@ -4,6 +4,7 @@
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
+source "$(dirname "$0")/constraints.sh"
 out="$(cd "$(dirname "$0")" && pwd)/switch_scene.json"
 cd "$root"
 {
@@ -13,6 +14,7 @@ cd "$root"
         # Hover and down are checked at size m only; they need no per-size repeat.
         [ "$state" != rest ] && [ "$size" != m ] && continue
         [ "$state" != rest ] && [ "$dis" = true ] && continue
+        excluded switch "{\"isSelected\":$sel,\"isEmphasized\":$emph,\"isDisabled\":$dis}" && continue
         args=(--size "$size" --option "isSelected=$sel" --option "isEmphasized=$emph" --option "isDisabled=$dis"
               --color-scheme "$scheme" --scale "$scale" --format scene)
         [ "$state" != rest ] && args+=(--state "$state")
