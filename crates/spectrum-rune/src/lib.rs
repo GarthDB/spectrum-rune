@@ -1,4 +1,4 @@
-//! Adobe Spectrum components for Rune.
+#![doc = include_str!("../../../README.md")]
 
 pub mod accordion;
 pub mod action_button;
