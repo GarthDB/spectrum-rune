@@ -9,7 +9,7 @@ use crate::tokens::{Tokens, Typography};
 use rune::tok::motion::SNAPPY;
 use rune::{el, icon, row, text, El};
 
-pub use crate::switch::Size;
+pub use crate::size::Size;
 
 /// The per-size tokens the recipe reads.
 struct Dims {
@@ -24,17 +24,6 @@ struct Dims {
     label: Typography,
 }
 
-/// Scale-aware label type: `font_size_*` grow on mobile, `component_*_regular` do not.
-fn label(t: &Tokens, size: f32, line_height: f32) -> Typography {
-    Typography {
-        family: t.default_font_family,
-        size,
-        weight: t.regular_font_weight,
-        line_height,
-        letter_spacing_em: 0.0,
-    }
-}
-
 impl Size {
     fn checkbox_dims(self, t: &Tokens) -> Dims {
         match self {
@@ -45,7 +34,7 @@ impl Size {
                 radius: t.corner_radius_small_size_small,
                 mark: 8.0,
                 mark_set: 75,
-                label: label(t, t.font_size_75, t.line_height_font_size_75),
+                label: self.label_type(t),
             },
             Size::M => Dims {
                 height: t.component_height_100,
@@ -54,7 +43,7 @@ impl Size {
                 radius: t.corner_radius_small_size_medium,
                 mark: 10.0,
                 mark_set: 100,
-                label: label(t, t.font_size_100, t.line_height_font_size_100),
+                label: self.label_type(t),
             },
             Size::L => Dims {
                 height: t.component_height_200,
@@ -63,7 +52,7 @@ impl Size {
                 radius: t.corner_radius_small_size_large,
                 mark: 10.0,
                 mark_set: 200,
-                label: label(t, t.font_size_200, t.line_height_font_size_200),
+                label: self.label_type(t),
             },
             Size::XL => Dims {
                 height: t.component_height_300,
@@ -72,7 +61,7 @@ impl Size {
                 radius: t.corner_radius_small_size_extra_large,
                 mark: 12.0,
                 mark_set: 300,
-                label: label(t, t.font_size_300, t.line_height_font_size_300),
+                label: self.label_type(t),
             },
         }
     }
@@ -93,8 +82,8 @@ pub struct Checkbox {
 }
 
 impl Checkbox {
-    /// `key` must be unique per checkbox: it keys the pointer state. The part keys
-    /// (`container`, `box`, `checkmark`, `dash`, `label`) follow the recipe and repeat.
+    /// `key` must be unique per instance: it keys the pointer state, and the parts are keyed
+    /// `{key}/{recipe part}` (`container`, `box`, `checkmark`, `dash`, `label`), so `rt.find("{key}/box")` works.
     pub fn new(key: impl Into<String>) -> Self {
         Checkbox {
             key: key.into(),
@@ -146,6 +135,7 @@ impl Checkbox {
 
     pub fn build(self, t: &Tokens) -> El {
         let d = self.size.checkbox_dims(t);
+        let part = |name: &str| format!("{}/{name}", self.key);
         let interaction = Interaction::of(&self.key);
         let state = if self.disabled {
             State::Rest
@@ -212,17 +202,17 @@ impl Checkbox {
         let press = t.component_size_minimum_perspective_down
             / (t.component_size_minimum_perspective_down - t.component_size_difference_down);
         let inset = (d.control - d.mark) / 2.0;
-        let mark = |key: &str, name: &str, visible: bool| {
+        let mark = |name: &str, visible: bool| {
             let i = ui_icon(name, d.mark_set).expect("ui icon");
             icon(i, d.mark)
-                .key(key)
+                .key(part(name))
                 .absolute(inset, inset)
                 .color(t.gray_25)
                 .opacity(if visible { 1.0 } else { 0.0 })
         };
         // Spectrum has no motion tokens; Rune's SNAPPY spring stands in until it does.
         let mut control = el()
-            .key("box")
+            .key(part("box"))
             .size(d.control, d.control)
             .radius(d.radius)
             .fill(fill)
@@ -233,18 +223,14 @@ impl Checkbox {
                 t.focus_ring_gap,
                 t.focus_indicator_color,
             )
-            .child(mark(
-                "checkmark",
-                "checkmark",
-                self.selected && !self.indeterminate,
-            ))
-            .child(mark("dash", "dash", self.indeterminate));
+            .child(mark("checkmark", self.selected && !self.indeterminate))
+            .child(mark("dash", self.indeterminate));
         if !on {
             control = control.border(t.border_width_200, stroke);
         }
 
         let mut root = row()
-            .key("container")
+            .key(part("container"))
             .h(d.height)
             .gap(d.gap)
             .center_y()
@@ -260,7 +246,7 @@ impl Checkbox {
         if let Some(l) = self.label {
             root = root.label(l.clone()).child(
                 text(l)
-                    .key("label")
+                    .key(part("label"))
                     .color(label_color)
                     .a11y_hidden()
                     .font(font::text_style(&d.label)),
