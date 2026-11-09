@@ -263,4 +263,7 @@ The repository is private; nothing here links to anything that is not in it or p
 
 ## Licence
 
-Not chosen yet. The design data is Apache-2.0, Rune is MIT, and the font is licensed separately.
+Apache-2.0, see [LICENSE](LICENSE) and [NOTICE](NOTICE). The generated tokens, icons, constraints and
+the test fixtures are derived from [Spectrum Design Data](https://github.com/adobe/spectrum-design-data)
+(Apache-2.0, Adobe). Rune is MIT. The Adobe Clean Spectrum typeface is not part of this repository and
+is licensed separately; never commit it.
