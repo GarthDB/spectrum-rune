@@ -15,3 +15,8 @@
 *.woff
 *.woff2
 /fonts/
+
+# Agent tooling we do not use (OpenCode reads AGENTS.md and .agents/)
+.claude/
+.codex/
+.cursor/
