@@ -3,6 +3,7 @@
 //! runtime does not expose as a warning list, so the renamed keys are what this checks.
 
 use rune::{col, Cx, El, Env, Runtime};
+use spectrum_rune::accordion::AccordionItem;
 use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
@@ -14,6 +15,8 @@ fn view(_: &(), _: &mut Cx<()>) -> El {
         .child(Switch::new("sw2").label("Two").build(t))
         .child(Checkbox::new("cb1").label("One").build(t))
         .child(Checkbox::new("cb2").label("Two").selected(true).build(t))
+        .child(AccordionItem::new("ac1").title("One").open(true).build(t))
+        .child(AccordionItem::new("ac2").title("Two").build(t))
 }
 
 #[test]
@@ -25,7 +28,16 @@ fn two_switches_and_two_checkboxes_share_a_parent() {
         keys.iter().all(|k| !k.contains("#dup")),
         "duplicate sibling key repaired: {keys:?}"
     );
-    for k in ["sw1/track", "sw2/track", "cb1/box", "cb2/box", "cb2/label"] {
+    for k in [
+        "sw1/track",
+        "sw2/track",
+        "cb1/box",
+        "cb2/box",
+        "cb2/label",
+        "ac1/header",
+        "ac2/header",
+        "ac2/divider",
+    ] {
         assert!(keys.iter().any(|x| x == k), "{k} missing in {keys:?}");
     }
 }
