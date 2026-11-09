@@ -455,7 +455,7 @@ fn accordion(s: &G, t: &'static Tokens) -> El {
             .open(s.on(&key, open))
             .on_toggle(flip(key))
             .content(
-                text("Content below the header. Its height is the app's; the recipe adds the padding.")
+                text("Content below the header. Its height is the app's; the recipe adds only the vertical padding, so it is flush with the item edge.")
                     .wrap()
                     .font(font::text_style(&t.component_m_regular))
                     .color(t.neutral_content_color_default),

@@ -285,6 +285,15 @@ fn matches_oracle_scene() {
                 &format!("{what} content w"),
             );
             let body = part(&rt, "body").unwrap();
+            // a14.24: the oracle's content starts at the item's left edge (x 0, the regen script
+            // drops that field) and the recipe has no inline padding, so the app's content is
+            // flush with the item, left of the chevron and the title.
+            close(
+                content.target[0],
+                item.target[0],
+                &format!("{what} content x"),
+            );
+            close(body.target[0], item.target[0], &format!("{what} body x"));
             let [top, bottom] = [num(&c["content_pad"][0]), num(&c["content_pad"][1])];
             close(
                 body.target[1] - content.target[1],

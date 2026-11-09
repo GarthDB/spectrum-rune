@@ -243,6 +243,9 @@ dataset changes nothing.
 - **Action-button static + disabled** draws the plain disabled pill (opaque grey on the coloured
   backdrop), because that is what the oracle renders; Button's recipe has translucent rules for it
   and Action-button's does not (bead a14.23, proposed upstream in #1693).
+- **Accordion content inset.** `AccordionItem::content` is flush with the item's left edge (the
+  oracle's `content` has only vertical padding); pad it yourself to sit under the title (bead
+  a14.24, proposed upstream in #1693).
 - **Recipe findings** (outline badges for 19 variants render as bold, and others) are collected
   upstream in [adobe/spectrum-design-data#1693](https://github.com/adobe/spectrum-design-data/issues/1693).
 
