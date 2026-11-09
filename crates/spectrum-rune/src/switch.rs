@@ -1,10 +1,11 @@
 //! Spectrum Switch, from `design-data` visuals/switch.json (container > track > handle, label,
 //! focus ring). Every size, colour, radius and type value comes from [`Tokens`].
 
+use crate::font;
 use crate::interaction::{Interaction, State};
-use crate::tokens::Tokens;
+use crate::tokens::{Tokens, Typography};
 use rune::tok::motion::SNAPPY;
-use rune::{el, row, text, El, Family, TextStyle};
+use rune::{el, row, text, El};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Size {
@@ -23,8 +24,7 @@ struct Dims {
     track_h: f32,
     handle: f32,
     handle_selected: f32,
-    font_size: f32,
-    line_height: f32,
+    label: Typography,
 }
 
 impl Size {
@@ -37,8 +37,7 @@ impl Size {
                 track_h: t.switch_control_height_small,
                 handle: t.switch_handle_size_small,
                 handle_selected: t.switch_handle_selected_size_small,
-                font_size: t.font_size_75,
-                line_height: t.line_height_font_size_75,
+                label: t.component_s_regular,
             },
             Size::M => Dims {
                 height: t.component_height_100,
@@ -47,8 +46,7 @@ impl Size {
                 track_h: t.switch_control_height_medium,
                 handle: t.switch_handle_size_medium,
                 handle_selected: t.switch_handle_selected_size_medium,
-                font_size: t.font_size_100,
-                line_height: t.line_height_font_size_100,
+                label: t.component_m_regular,
             },
             Size::L => Dims {
                 height: t.component_height_200,
@@ -57,8 +55,7 @@ impl Size {
                 track_h: t.switch_control_height_large,
                 handle: t.switch_handle_size_large,
                 handle_selected: t.switch_handle_selected_size_large,
-                font_size: t.font_size_200,
-                line_height: t.line_height_font_size_200,
+                label: t.component_l_regular,
             },
             Size::XL => Dims {
                 height: t.component_height_300,
@@ -67,8 +64,7 @@ impl Size {
                 track_h: t.switch_control_height_extra_large,
                 handle: t.switch_handle_size_extra_large,
                 handle_selected: t.switch_handle_selected_size_extra_large,
-                font_size: t.font_size_300,
-                line_height: t.line_height_font_size_300,
+                label: t.component_xl_regular,
             },
         }
     }
@@ -222,12 +218,7 @@ impl Switch {
                         .key("label")
                         .color(label_color)
                         .a11y_hidden()
-                        // The family fallback list (a14.5) is not built yet; this needs the font installed.
-                        .font(
-                            TextStyle::new(d.font_size, f32::from(t.regular_font_weight))
-                                .family(Family::Named("Adobe Clean Spectrum VF"))
-                                .lh(d.line_height),
-                        ),
+                        .font(font::text_style(&d.label)),
                 );
             }
         }
