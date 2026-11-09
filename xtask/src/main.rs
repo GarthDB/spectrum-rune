@@ -537,13 +537,18 @@ fn generate_icons(dir: &Path, version: &str, commit: &str) -> Res<()> {
                 .ok_or_else(|| format!("icon `{id}` has no paths"))?
                 .iter()
                 .map(|p| match p["d"].as_str() {
+                    _ if p.as_object().is_some_and(|o| o.len() != 1) => {
+                        Err(format!("icon `{id}`: path has keys besides `d`: {p}"))
+                    }
                     Some(d) if !d.contains('"') => {
                         Ok(format!("<path d=\"{d}\" fill=\"currentColor\"/>"))
                     }
                     _ => Err(format!("icon `{id}`: path without usable `d`")),
                 })
                 .collect();
-            let st = ident(&id)?.to_uppercase();
+            let st = ident(&id)
+                .map_err(|_| format!("icon `{id}` is not a usable static name"))?
+                .to_uppercase();
             writeln!(
                 statics,
                 "pub static {st}: Icon = Icon {{ name: {id:?}, view: {}, body: {:?} }};",
