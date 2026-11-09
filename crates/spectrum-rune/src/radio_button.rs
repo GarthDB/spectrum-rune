@@ -69,7 +69,8 @@ impl RadioButton {
             press: None,
         }
     }
-    /// Without a label the radio is standalone: only the control is drawn.
+    /// Without a label only the control is drawn and the radio has no accessible name: the
+    /// caller must provide one (e.g. a surrounding group's label).
     pub fn label(mut self, l: impl Into<String>) -> Self {
         self.label = Some(l.into());
         self

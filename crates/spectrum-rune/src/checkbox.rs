@@ -83,7 +83,7 @@ pub struct Checkbox {
 
 impl Checkbox {
     /// `key` must be unique per instance: it keys the pointer state, and the parts are keyed
-    /// `{key}/{recipe part}` (`container`, `track`, `handle`, `label`...), so `rt.find("{key}/track")` works.
+    /// `{key}/{recipe part}` (`container`, `box`, `checkmark`, `dash`, `label`), so `rt.find("{key}/box")` works.
     pub fn new(key: impl Into<String>) -> Self {
         Checkbox {
             key: key.into(),
