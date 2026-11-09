@@ -9,6 +9,7 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  # The required check (protect-main): keep it fast.
   check:
     runs-on: ubuntu-latest
     steps:
@@ -19,7 +20,15 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
-      # The gallery scenes through Rune's CPU reference renderer (no GPU); slow unoptimised.
+  # Not required: the gallery scenes through Rune's CPU reference renderer (no GPU), in parallel.
+  gallery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: gallery
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxkbcommon-dev
       - run: cargo test --release -p spectrum-rune --example gallery -- --ignored render_scenes_to_png
       - uses: actions/upload-artifact@v4
         if: always()

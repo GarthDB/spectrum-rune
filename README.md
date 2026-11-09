@@ -247,9 +247,11 @@ dataset changes nothing.
 
 CI (`.github/workflows/ci.yml`) runs `cargo fmt --all --check`,
 `cargo clippy --workspace --all-targets -- -D warnings` and `cargo test --workspace`, on Ubuntu
-(`libxkbcommon-dev` is installed because winit, via Rune, links it). Tasks are tracked with
-[beads](https://github.com/gastownhall/beads) (`bd`); `bd ready` lists the available work and
-`bd show <id>` the details.
+(`libxkbcommon-dev` is installed because winit, via Rune, links it). That `check` job is the
+required one and stays fast. A separate `gallery` job (not required) renders every gallery scene
+with Rune's CPU reference renderer, sized to its content, and uploads them as the `gallery`
+artifact. Tasks are tracked with [beads](https://github.com/gastownhall/beads) (`bd`);
+`bd ready` lists the available work and `bd show <id>` the details.
 
 The repository is private; nothing here links to anything that is not in it or public.
 
