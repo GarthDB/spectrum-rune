@@ -1,7 +1,7 @@
 //! Checks the Switch against the `design-data render switch --format scene` oracle.
 //! Regenerate the fixture with `tests/fixtures/regen-switch.sh`.
 
-use rune::{col, Cx, El, ElementInfo, Env, Runtime};
+use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
 use spectrum_rune::switch::{Size, Switch};
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
@@ -135,6 +135,8 @@ fn matches_oracle_scene() {
         match c["state"].as_str().unwrap() {
             "hover" => rt.pointer_move(x, y),
             "down" => rt.pointer_down(x, y),
+            // A disabled switch must look the same under the pointer (oracle: disabled hover == rest).
+            _ if c["disabled"] == true => rt.pointer_down(x, y),
             _ => {}
         }
         settle(&mut rt);
@@ -143,6 +145,7 @@ fn matches_oracle_scene() {
             let e = part(&rt, key).unwrap();
             let what = format!("{what} {key}");
             assert_rect(e.target, origin, want, &what);
+            // TODO(a14.3): assert border width/colour and focus ring once ElementInfo exposes them.
             assert_color(e.fill, want["fill"].as_str().unwrap(), &what);
             let r = want["radius"].as_f64().unwrap() as f32;
             assert!(
@@ -213,4 +216,22 @@ fn handle_travel_animates() {
         mid > before && mid < after,
         "mid-flight {before} < {mid} < {after}"
     );
+}
+
+#[test]
+fn space_toggles_focused_switch() {
+    let mut rt = runtime(App::default());
+    rt.key(KeyEvent::from(Key::Tab));
+    settle(&mut rt);
+    assert!(
+        part(&rt, "container").unwrap().focused,
+        "Tab focuses the switch"
+    );
+    rt.key(KeyEvent::from(Key::Text(" ".into())));
+    settle(&mut rt);
+    assert_eq!(rt.state.toggles, 1);
+    // Enter does not toggle, as for a native switch (ARIA: Space).
+    rt.key(KeyEvent::from(Key::Enter));
+    settle(&mut rt);
+    assert_eq!(rt.state.toggles, 1);
 }

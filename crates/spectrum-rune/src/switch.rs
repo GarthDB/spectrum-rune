@@ -145,27 +145,23 @@ impl Switch {
         // Selected + emphasized switches use the accent content colour; everything else the
         // neutral one. Disabled replaces it. The recipe reads the same colour for the track
         // stroke, the unselected handle and the label.
+        let by_state = |accent: bool| match (accent, state) {
+            (false, State::Rest) => t.neutral_content_color_default,
+            (false, State::Hover) => t.neutral_content_color_hover,
+            (false, State::Down) => t.neutral_content_color_down,
+            (true, State::Rest) => t.accent_content_color_default,
+            (true, State::Hover) => t.accent_content_color_hover,
+            (true, State::Down) => t.accent_content_color_down,
+        };
         let content = if self.disabled {
             t.disabled_content_color
         } else {
-            let accent = self.selected && self.emphasized;
-            match (accent, state) {
-                (false, State::Rest) => t.neutral_content_color_default,
-                (false, State::Hover) => t.neutral_content_color_hover,
-                (false, State::Down) => t.neutral_content_color_down,
-                (true, State::Rest) => t.accent_content_color_default,
-                (true, State::Hover) => t.accent_content_color_hover,
-                (true, State::Down) => t.accent_content_color_down,
-            }
+            by_state(self.selected && self.emphasized)
         };
         let label_color = if self.disabled {
             t.disabled_content_color
         } else {
-            match state {
-                State::Rest => t.neutral_content_color_default,
-                State::Hover => t.neutral_content_color_hover,
-                State::Down => t.neutral_content_color_down,
-            }
+            by_state(false)
         };
         let (track_fill, handle_fill) = if self.selected {
             (content, t.gray_25)
