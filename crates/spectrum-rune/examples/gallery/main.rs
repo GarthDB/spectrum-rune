@@ -245,11 +245,16 @@ mod tests {
                     let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(dark, 1.0));
                     rt.frame(0.05);
                     let prefix = format!("{story}/");
-                    let n = rt
+                    let keys: Vec<_> = rt
                         .elements()
-                        .iter()
-                        .filter(|e| e.key.as_deref().is_some_and(|k| k.starts_with(&prefix)))
-                        .count();
+                        .into_iter()
+                        .filter(|e| !e.exiting)
+                        .filter_map(|e| e.key)
+                        .filter(|k| k.starts_with(&prefix))
+                        .collect();
+                    let n = keys.len();
+                    let unique: std::collections::HashSet<_> = keys.iter().collect();
+                    assert_eq!(unique.len(), n, "{id}: duplicate keys (shared Interaction)");
                     assert!(n > 0, "{id}: the story built no elements");
                 }
             }

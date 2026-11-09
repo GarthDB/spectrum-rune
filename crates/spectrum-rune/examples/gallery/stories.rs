@@ -214,11 +214,11 @@ fn button(_: &G, t: &'static Tokens) -> El {
         (Variant::Primary, "Primary"),
         (Variant::Secondary, "Secondary"),
     ];
-    let styled = |style: Style, tweak: &dyn Fn(Button) -> Button| {
+    let styled = |tag: &str, style: Style, tweak: &dyn Fn(Button) -> Button| {
         let mut r = flow();
         for (v, n) in variants {
             let b = tweak(
-                Button::new(format!("button/{v:?}-{style:?}-{n}"))
+                Button::new(format!("button/{tag}/{v:?}-{style:?}"))
                     .label(n)
                     .variant(v)
                     .style(style),
@@ -231,20 +231,34 @@ fn button(_: &G, t: &'static Tokens) -> El {
     };
     let none = |b: Button| b;
     let mut sections = vec![
-        section(t, "Fill", styled(Style::Fill, &none)),
+        section(t, "Fill", styled("fill", Style::Fill, &none)),
         section(
             t,
             "Outline (accent and negative have none)",
-            styled(Style::Outline, &none),
+            styled("outline", Style::Outline, &none),
         ),
-        section(t, "With icon", styled(Style::Fill, &|b| b.icon(&ADD_100))),
+        section(
+            t,
+            "With icon",
+            styled("icon", Style::Fill, &|b| b.icon(&ADD_100)),
+        ),
         section(
             t,
             "Icon only",
-            styled(Style::Fill, &|b| b.icon(&ADD_100).label_hidden(true)),
+            styled("icon-only", Style::Fill, &|b| {
+                b.icon(&ADD_100).label_hidden(true)
+            }),
         ),
-        section(t, "Pending", styled(Style::Fill, &|b| b.pending(true))),
-        section(t, "Disabled", styled(Style::Fill, &|b| b.disabled(true))),
+        section(
+            t,
+            "Pending",
+            styled("pending", Style::Fill, &|b| b.pending(true)),
+        ),
+        section(
+            t,
+            "Disabled",
+            styled("disabled", Style::Fill, &|b| b.disabled(true)),
+        ),
     ];
     let statics = |c: StaticColor| {
         let mut r = flow();
@@ -320,13 +334,15 @@ fn action_button(s: &G, t: &'static Tokens) -> El {
     let statics = |c: StaticColor, bg| {
         let mut r = flow();
         for b in [
-            ab("s-default", "Static").static_color(c),
-            tog("s-selected", "Selected", true).static_color(c),
-            ab("s-icon", "Add")
+            ab(&format!("s-default-{c:?}"), "Static").static_color(c),
+            tog(&format!("s-selected-{c:?}"), "Selected", true).static_color(c),
+            ab(&format!("s-icon-{c:?}"), "Add")
                 .icon(&ADD_100)
                 .hide_label(true)
                 .static_color(c),
-            ab("s-dis", "Disabled").disabled(true).static_color(c),
+            ab(&format!("s-dis-{c:?}"), "Disabled")
+                .disabled(true)
+                .static_color(c),
         ] {
             if valid("action-button", b.options()) {
                 r = r.child(b.build(t));
