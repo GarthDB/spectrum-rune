@@ -2607,6 +2607,19 @@ version = "0.1.0"
 source = "git+https://github.com/anomalyco/rune?rev=07c369b13e8bd82c3f0a74164bd132965de88830#07c369b13e8bd82c3f0a74164bd132965de88830"
 
 [[package]]
+name = "rune-ref"
+version = "0.0.1"
+source = "git+https://github.com/anomalyco/rune?rev=07c369b13e8bd82c3f0a74164bd132965de88830#07c369b13e8bd82c3f0a74164bd132965de88830"
+dependencies = [
+ "blake3",
+ "half",
+ "libm",
+ "rune",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "rune-staging"
 version = "0.0.1"
 source = "git+https://github.com/anomalyco/rune?rev=07c369b13e8bd82c3f0a74164bd132965de88830#07c369b13e8bd82c3f0a74164bd132965de88830"
@@ -2907,6 +2920,7 @@ version = "0.0.0"
 dependencies = [
  "rune",
  "rune-kit",
+ "rune-ref",
  "serde_json",
 ]
 
