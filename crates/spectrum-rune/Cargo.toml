@@ -1,0 +1,8 @@
+[package]
+name = "spectrum-rune"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+rune.workspace = true
+rune-kit.workspace = true

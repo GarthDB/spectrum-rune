@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["crates/spectrum-rune", "xtask"]
+
+[workspace.dependencies]
+# Pre-release: pin a dev rev. Swap for a path to ~/repos/rune while hacking on the fork.
+rune = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830" }
+rune-kit = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830" }

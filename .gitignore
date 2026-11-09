@@ -1,0 +1,17 @@
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
+
+# Rust
+/target
+
+# Adobe Clean Spectrum is licensed: never commit font files. Rune loads it from the system.
+*.otf
+*.ttf
+*.woff
+*.woff2
+/fonts/
