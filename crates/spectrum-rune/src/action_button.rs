@@ -364,6 +364,10 @@ impl ActionButton {
         o
     }
 
+    /// The root comes back inside a plain `row()` wrapper (see `crate::hug`), so it hugs its
+    /// content in a column and centres in a row. A modifier chained on the result (`.w_full()`,
+    /// `.w(..)`, `.key(..)`, margins) applies to the wrapper, not to the pill: to size or find the
+    /// pill use its `<key>/container` part.
     pub fn build(self, t: &Tokens) -> El {
         constraints::assert_valid("action-button", &self.options());
         // Not a catalog constraint (accessible names belong to the accessibility spec).
@@ -404,7 +408,6 @@ impl ActionButton {
 
         let mut root = row()
             .key(part("container"))
-            .self_start()
             .h(d.height)
             .px(pad)
             .gap(d.gap)
@@ -484,14 +487,14 @@ impl ActionButton {
         };
 
         if self.disabled {
-            return root;
+            return crate::hug(root);
         }
         let root = interaction.attach(root);
         let root = match (self.pending, self.press) {
             (false, Some(p)) => p(root),
             _ => root,
         };
-        root.press_scale(k)
+        crate::hug(root.press_scale(k))
     }
 }
 

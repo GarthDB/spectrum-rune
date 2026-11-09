@@ -410,6 +410,10 @@ impl Badge {
         o
     }
 
+    /// The root comes back inside a plain `row()` wrapper (see `crate::hug`), so it hugs its
+    /// content in a column and centres in a row. A modifier chained on the result (`.w_full()`,
+    /// `.w(..)`, `.key(..)`, margins) applies to the wrapper, not to the pill: to size or find the
+    /// pill use its `<key>/container` part.
     pub fn build(self, t: &Tokens) -> El {
         constraints::assert_valid("badge", &self.options());
         let d = self.size.badge_dims(t);
@@ -420,7 +424,6 @@ impl Badge {
 
         let mut root = row()
             .key(part("container"))
-            .self_start()
             .h(d.height)
             .px(if self.label.is_some() {
                 d.pad
@@ -451,7 +454,7 @@ impl Badge {
                     .font(font::text_style(&label_type)),
             );
         }
-        root
+        crate::hug(root)
     }
 }
 
