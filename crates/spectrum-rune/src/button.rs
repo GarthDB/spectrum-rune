@@ -421,7 +421,7 @@ impl Button {
             }
         }
 
-        if state == State::Down {
+        let k = {
             let mut width = 2.0 * pad;
             if self.pending {
                 width += d.icon;
@@ -434,17 +434,18 @@ impl Button {
                     width += w + if show_icon { d.gap } else { 0.0 };
                 }
             }
-            root = root.scale(press_scale(t, width));
-        }
+            press_scale(t, width)
+        };
 
         if self.disabled {
             return root;
         }
         let root = interaction.attach(root);
-        match (self.pending, self.press) {
+        let root = match (self.pending, self.press) {
             (false, Some(p)) => p(root),
             _ => root,
-        }
+        };
+        root.press_scale(k)
     }
 }
 
