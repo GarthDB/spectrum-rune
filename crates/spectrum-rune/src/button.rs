@@ -3,8 +3,9 @@
 //!
 //! Where the oracle (`design-data render button`, 0.20.0) looks incomplete, the button renders what
 //! it renders and says so here, so nothing is invented:
-//! - Accent and negative have no outline look: the container has no fill and no border, and the
-//!   content stays static white, so an outline accent/negative button is white text on nothing.
+//! - Accent and negative have no outline look: that combination is an `error` constraint in the
+//!   catalog, so `build` panics in debug builds. Release builds render what the oracle does: white
+//!   text on no fill and no border.
 //! - `static_color` only changes primary and secondary; on accent and negative it changes nothing.
 //! - The focus ring is white or black for primary and secondary with a static colour, and
 //!   `focus_indicator_color` otherwise (static colour is a no-op on accent and negative).

@@ -122,7 +122,8 @@ fn evaluate(c: &'static ComponentConstraints, options: &[(&str, OptionValue)]) -
         })
         .filter(|r| {
             r.require.iter().any(|(n, req)| match (req, value(n)) {
-                (Require::Present, v) => !matches!(v, Some(OptionValue::Present)),
+                // Present means set: any value but `false` (same as constraints.jq).
+                (Require::Present, v) => matches!(v, None | Some(OptionValue::Bool(false))),
                 (Require::OneOf(lits), v) => !v.is_some_and(|v| lits.iter().any(|l| v.is(l))),
             })
         })
@@ -248,6 +249,16 @@ mod tests {
         assert_eq!(sev(&[("mode", S("m")), ("flag", B(true))]), m);
         assert_eq!(sev(&[("mode", S("m")), ("icon", Present)]), m);
         assert!(sev(&[("mode", S("m")), ("flag", B(true)), ("icon", Present)]).is_empty());
+    }
+
+    #[test]
+    fn present_means_set_and_not_false() {
+        use OptionValue::{Bool as B, Present, Str as S};
+        let with = |v| sev(&[("mode", S("m")), ("flag", B(true)), ("icon", v)]);
+        assert!(with(Present).is_empty());
+        assert!(with(S("x")).is_empty());
+        assert!(with(B(true)).is_empty());
+        assert_eq!(with(B(false)).len(), 1);
     }
 
     #[test]

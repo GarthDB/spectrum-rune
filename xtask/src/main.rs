@@ -590,6 +590,11 @@ fn lits(v: &Value, ctx: &str) -> Res<Vec<Value>> {
 /// (or a boolean, for a boolean option). Value checks are skipped when the option has no `values`.
 fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
     if let Some(values) = opt["values"].as_array() {
+        if let Some(bad) = values.iter().find(|d| d.get("value").is_none()) {
+            return Err(format!(
+                "{ctx}: option `values` entry is not {{\"value\": ..}}: {bad}"
+            ));
+        }
         if !values.iter().any(|d| &d["value"] == v) {
             return Err(format!(
                 "{ctx}: value {v} is not a declared value of the option"
