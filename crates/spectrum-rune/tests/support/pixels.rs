@@ -41,8 +41,21 @@ impl Pixels {
     }
 
     /// The sRGB RGBA of one pixel.
+    #[allow(dead_code)]
     pub fn at(&self, x: u32, y: u32) -> [u8; 4] {
         let i = ((y * self.0.width + x) * 4) as usize;
         self.0.rgba[i..i + 4].try_into().unwrap()
+    }
+
+    /// Writes the frame as an RGBA PNG (the gallery's CI artifact).
+    #[allow(dead_code)]
+    pub fn write_png(&self, path: &std::path::Path) {
+        let file = std::fs::File::create(path).expect("create the png");
+        let mut enc = png::Encoder::new(std::io::BufWriter::new(file), self.0.width, self.0.height);
+        enc.set_color(png::ColorType::Rgba);
+        enc.set_depth(png::BitDepth::Eight);
+        enc.write_header()
+            .and_then(|mut w| w.write_image_data(&self.0.rgba))
+            .expect("write the png");
     }
 }

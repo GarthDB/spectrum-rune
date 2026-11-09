@@ -10,3 +10,10 @@ rune-kit.workspace = true
 [dev-dependencies]
 serde_json = "1.0.154"
 rune-ref.workspace = true
+png = "0.18"
+
+# Examples are not tests by default; the gallery has a no-GPU `every_story_builds`.
+[[example]]
+name = "gallery"
+path = "examples/gallery/main.rs"
+test = true
