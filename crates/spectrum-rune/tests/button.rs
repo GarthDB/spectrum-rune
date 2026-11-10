@@ -371,7 +371,9 @@ fn errors(b: &Button) -> Vec<&'static str> {
 
 #[test]
 fn check_reports_the_three_error_rules() {
-    let outline_accent = Button::new("a").style(Style::Outline);
+    let outline_accent = Button::new("a")
+        .variant(Variant::Accent)
+        .style(Style::Outline);
     assert_eq!(
         errors(&outline_accent),
         ["Outline style is only defined for primary and secondary."]
@@ -396,7 +398,9 @@ fn check_reports_the_three_error_rules() {
 
 #[test]
 fn static_color_on_accent_is_advisory_not_an_error() {
-    let b = Button::new("a").static_color(StaticColor::White);
+    let b = Button::new("a")
+        .variant(Variant::Accent)
+        .static_color(StaticColor::White);
     assert!(errors(&b).is_empty());
     let v = check("button", &b.options());
     assert_eq!(v.len(), 1);
@@ -410,6 +414,7 @@ fn static_color_on_accent_is_advisory_not_an_error() {
 #[should_panic(expected = "Outline style is only defined")]
 fn building_an_error_combination_asserts_in_debug() {
     let _ = Button::new("a")
+        .variant(Variant::Accent)
         .style(Style::Outline)
         .build(tokens(ColorScheme::Light, Scale::Desktop));
 }

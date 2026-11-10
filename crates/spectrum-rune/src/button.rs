@@ -27,9 +27,9 @@ use rune_kit::{Kit, Loader};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Variant {
-    #[default]
     Accent,
     Negative,
+    #[default]
     Primary,
     Secondary,
 }
@@ -294,7 +294,7 @@ impl Button {
         Button {
             key: key.into(),
             label: None,
-            variant: Variant::Accent,
+            variant: Variant::default(),
             style: Style::Fill,
             size: Size::M,
             icon: None,
@@ -522,6 +522,23 @@ mod tests {
     use super::*;
     use crate::tokens::{tokens, ColorScheme, Scale};
     use serde_json::Value;
+
+    /// The builder's defaults are the catalog's (primary since spectrum-design-data #1704; the
+    /// oracle's default render is a primary fill), so they cannot drift from the generated table.
+    #[test]
+    fn builder_defaults_are_the_catalog_defaults() {
+        let catalog = crate::constraints::component("button").unwrap().defaults;
+        let opts = Button::new("b").options();
+        for (name, lit) in catalog {
+            let got = opts.iter().find(|(n, _)| n == name).unwrap().1;
+            let want = match lit {
+                crate::constraints::Lit::Str(s) => OptionValue::Str(s),
+                crate::constraints::Lit::Bool(b) => OptionValue::Bool(*b),
+            };
+            assert_eq!(got, want, "default of {name}");
+        }
+        assert_eq!(Button::new("b").variant, Variant::Primary);
+    }
 
     fn rgba(s: &str) -> [f32; 4] {
         let v: Vec<f32> = s
