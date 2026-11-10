@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerates accordion_scene.json from the oracle: `design-data` v0.20.x run from the
+# Regenerates accordion_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
 # spectrum-design-data dataset root (default ~/repos/spectrum-design-data).
 # Coordinates are relative to the `item`; the tests compare with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals, colours written as `r,g,b[,a]`.
@@ -21,6 +21,7 @@
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
+source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/accordion_scene.json"
 cd "$root"
 

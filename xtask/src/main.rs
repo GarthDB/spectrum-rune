@@ -10,7 +10,6 @@ use std::process::Command;
 
 type Res<T> = Result<T, String>;
 
-const CLI_VERSION: &str = "design-data 0.20.";
 const SCHEMES: [&str; 2] = ["light", "dark"];
 const SCALES: [&str; 2] = ["desktop", "mobile"];
 const KEYWORDS: [&str; 8] = ["type", "match", "ref", "fn", "in", "as", "mod", "use"];
@@ -55,26 +54,56 @@ fn git(dir: &Path, args: &[&str]) -> Res<String> {
     run(Command::new("git").current_dir(dir).args(args)).map(|s| s.trim().to_string())
 }
 
+/// A `key = "value"` line of `oracle.toml` at the repo root.
+fn oracle(key: &str) -> Res<String> {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../oracle.toml");
+    let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+    text.lines()
+        .find_map(|l| {
+            let (k, v) = l.split_once('=')?;
+            // value is a quoted string; anything after the closing quote (a comment) is ignored
+            let v = v.trim().strip_prefix('"')?.split('"').next()?;
+            (k.trim() == key).then(|| v.to_string())
+        })
+        .filter(|v| !v.is_empty())
+        .ok_or_else(|| format!("oracle.toml has no non-empty `{key}`"))
+}
+
+fn semver(v: &str) -> Res<(u32, u32, u32)> {
+    let p: Vec<u32> = v
+        .split(|c: char| !c.is_ascii_digit())
+        .take(3)
+        .map(|n| n.parse().map_err(|_| format!("bad version `{v}`")))
+        .collect::<Res<_>>()?;
+    match p[..] {
+        [a, b, c] => Ok((a, b, c)),
+        _ => Err(format!("bad version `{v}`")),
+    }
+}
+
 fn check_inputs(dir: &Path, allow_dirty: bool) -> Res<(String, String)> {
     let version = run(Command::new("design-data").arg("--version"))?
         .trim()
         .to_string();
-    if !version.starts_with(CLI_VERSION) {
-        return Err(format!("expected `{CLI_VERSION}x`, found `{version}`"));
-    }
-    git(dir, &["fetch", "-q", "origin", "main"])?;
-    let (head, main) = (
-        git(dir, &["rev-parse", "HEAD"])?,
-        git(dir, &["rev-parse", "origin/main"])?,
-    );
-    let dirty = !git(dir, &["status", "--porcelain", "--untracked-files=no"])?.is_empty();
-    if !allow_dirty && (head != main || dirty) {
+    let (min, max) = (oracle("cli_min")?, oracle("cli_max")?);
+    let v = version.strip_prefix("design-data ").unwrap_or(&version);
+    if semver(v)? < semver(&min)? || semver(v)? >= semver(&max)? {
         return Err(format!(
-            "{} must be clean and at origin/main (use --allow-dirty to override)",
-            dir.display()
+            "oracle.toml accepts design-data {min} up to (not including) {max}, found `{version}`"
         ));
     }
-    Ok((version, git(dir, &["rev-parse", "--short", "HEAD"])?))
+    let commit = git(dir, &["rev-parse", "--short", "HEAD"])?;
+    let want = oracle("dataset")?;
+    let dirty = !git(dir, &["status", "--porcelain", "--untracked-files=no"])?.is_empty();
+    if !allow_dirty && (dirty || !commit.starts_with(&want) && !want.starts_with(&commit)) {
+        return Err(format!(
+            "{} must be clean and at the oracle.toml dataset {want} (found {commit}{}); \
+             `git worktree add --detach <dir> {want}` and set SPECTRUM_DESIGN_DATA, or --allow-dirty",
+            dir.display(),
+            if dirty { ", dirty" } else { "" }
+        ));
+    }
+    Ok((version, commit))
 }
 
 fn export(dir: &Path, scheme: &str, scale: &str, contrast: &str) -> Res<Map<String, Value>> {

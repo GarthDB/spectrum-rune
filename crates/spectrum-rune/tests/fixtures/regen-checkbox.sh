@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Regenerates checkbox_scene.json from the oracle: `design-data` v0.20.x run from the
+# Regenerates checkbox_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
 # spectrum-design-data dataset root (default ~/repos/spectrum-design-data). The committed fixtures were
-# made at dataset commit 95907289; at a later commit Button defaults and label wrapping differ, so
-# check that commit out (e.g. `git worktree add --detach <dir> 95907289`) and pass <dir> as $1.
+# made at the dataset commit in oracle.toml (the script checks the CLI version and prints the commit
+# it ran against); check that commit out (`git worktree add --detach <dir> <commit>`) and pass <dir> as $1.
+# Also writes checkbox_wrap.json: the oracle at a request width (wrap.sh), where the label wraps.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
+source "$(dirname "$0")/oracle.sh"
+source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/checkbox_scene.json"
 cd "$root"
 {
@@ -55,3 +58,4 @@ for scheme in light dark; do for scale in desktop mobile; do for size in s m l x
   done
 done; done; done; done | jq -s . > "$ring"
 echo "wrote $ring"
+regen_wrap checkbox box "$(dirname "$out")/checkbox_wrap.json"

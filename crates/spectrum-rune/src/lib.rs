@@ -13,6 +13,7 @@ pub mod radio_button;
 pub mod size;
 pub mod switch;
 pub mod tokens;
+mod wrap;
 
 pub use size::{ActionButtonSize, Size};
 

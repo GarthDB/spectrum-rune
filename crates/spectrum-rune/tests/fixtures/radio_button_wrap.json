@@ -1,0 +1,688 @@
+[
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "width": 150,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 150,
+      "h": 40,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 6,
+      "w": 12,
+      "h": 12
+    },
+    "lines": [
+      {
+        "x": 16,
+        "y": 4,
+        "w": 119.48,
+        "h": 16,
+        "text": "Wrapped label text goes"
+      },
+      {
+        "x": 16,
+        "y": 20,
+        "w": 22.48,
+        "h": 16,
+        "text": "here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "width": 170,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 170,
+      "h": 24,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 6,
+      "w": 12,
+      "h": 12
+    },
+    "lines": [
+      {
+        "x": 16,
+        "y": 4,
+        "w": 144.36,
+        "h": 16,
+        "text": "Wrapped label text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "width": 190,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 190,
+      "h": 24,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 6,
+      "w": 12,
+      "h": 12
+    },
+    "lines": [
+      {
+        "x": 16,
+        "y": 4,
+        "w": 144.36,
+        "h": 16,
+        "text": "Wrapped label text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "width": 230,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 230,
+      "h": 24,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 6,
+      "w": 12,
+      "h": 12
+    },
+    "lines": [
+      {
+        "x": 16,
+        "y": 4,
+        "w": 144.36,
+        "h": 16,
+        "text": "Wrapped label text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "width": 150,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 150,
+      "h": 50,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 9,
+      "w": 14,
+      "h": 14
+    },
+    "lines": [
+      {
+        "x": 20,
+        "y": 7,
+        "w": 109.34,
+        "h": 18,
+        "text": "Wrapped label text"
+      },
+      {
+        "x": 20,
+        "y": 25,
+        "w": 56.28,
+        "h": 18,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "width": 170,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 170,
+      "h": 50,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 9,
+      "w": 14,
+      "h": 14
+    },
+    "lines": [
+      {
+        "x": 20,
+        "y": 7,
+        "w": 139.4,
+        "h": 18,
+        "text": "Wrapped label text goes"
+      },
+      {
+        "x": 20,
+        "y": 25,
+        "w": 26.22,
+        "h": 18,
+        "text": "here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "width": 230,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 230,
+      "h": 32,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 9,
+      "w": 14,
+      "h": 14
+    },
+    "lines": [
+      {
+        "x": 20,
+        "y": 7,
+        "w": 168.42,
+        "h": 18,
+        "text": "Wrapped label text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "width": 130,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 130,
+      "h": 60,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 12,
+      "w": 16,
+      "h": 16
+    },
+    "lines": [
+      {
+        "x": 22,
+        "y": 10,
+        "w": 96.59,
+        "h": 20,
+        "text": "Wrapped label"
+      },
+      {
+        "x": 22,
+        "y": 30,
+        "w": 92.69,
+        "h": 20,
+        "text": "text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "width": 170,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 170,
+      "h": 60,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 12,
+      "w": 16,
+      "h": 16
+    },
+    "lines": [
+      {
+        "x": 22,
+        "y": 10,
+        "w": 124.96,
+        "h": 20,
+        "text": "Wrapped label text"
+      },
+      {
+        "x": 22,
+        "y": 30,
+        "w": 64.32,
+        "h": 20,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "width": 190,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 190,
+      "h": 60,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 12,
+      "w": 16,
+      "h": 16
+    },
+    "lines": [
+      {
+        "x": 22,
+        "y": 10,
+        "w": 159.31,
+        "h": 20,
+        "text": "Wrapped label text goes"
+      },
+      {
+        "x": 22,
+        "y": 30,
+        "w": 29.97,
+        "h": 20,
+        "text": "here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "width": 230,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 230,
+      "h": 40,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 12,
+      "w": 16,
+      "h": 16
+    },
+    "lines": [
+      {
+        "x": 22,
+        "y": 10,
+        "w": 192.48,
+        "h": 20,
+        "text": "Wrapped label text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "width": 110,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 110,
+      "h": 92,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 15,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 13,
+        "w": 67.93,
+        "h": 22,
+        "text": "Wrapped"
+      },
+      {
+        "x": 24,
+        "y": 35,
+        "w": 69.05,
+        "h": 22,
+        "text": "label text"
+      },
+      {
+        "x": 24,
+        "y": 57,
+        "w": 72.36,
+        "h": 22,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "width": 150,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 150,
+      "h": 70,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 15,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 13,
+        "w": 108.67,
+        "h": 22,
+        "text": "Wrapped label"
+      },
+      {
+        "x": 24,
+        "y": 35,
+        "w": 104.27,
+        "h": 22,
+        "text": "text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "width": 190,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 190,
+      "h": 70,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 15,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 13,
+        "w": 140.58,
+        "h": 22,
+        "text": "Wrapped label text"
+      },
+      {
+        "x": 24,
+        "y": 35,
+        "w": 72.36,
+        "h": 22,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "width": 230,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 230,
+      "h": 70,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 15,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 13,
+        "w": 179.23,
+        "h": 22,
+        "text": "Wrapped label text goes"
+      },
+      {
+        "x": 24,
+        "y": 35,
+        "w": 33.71,
+        "h": 22,
+        "text": "here"
+      }
+    ]
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "width": 130,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 130,
+      "h": 112,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 19,
+      "w": 22,
+      "h": 22
+    },
+    "lines": [
+      {
+        "x": 28,
+        "y": 17,
+        "w": 83.03,
+        "h": 26,
+        "text": "Wrapped"
+      },
+      {
+        "x": 28,
+        "y": 43,
+        "w": 84.39,
+        "h": 26,
+        "text": "label text"
+      },
+      {
+        "x": 28,
+        "y": 69,
+        "w": 88.44,
+        "h": 26,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "width": 170,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 170,
+      "h": 62,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 11,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 9,
+        "w": 132.77,
+        "h": 22,
+        "text": "Wrapped label text"
+      },
+      {
+        "x": 24,
+        "y": 31,
+        "w": 68.34,
+        "h": 22,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "width": 170,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 170,
+      "h": 86,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 19,
+      "w": 22,
+      "h": 22
+    },
+    "lines": [
+      {
+        "x": 28,
+        "y": 17,
+        "w": 132.81,
+        "h": 26,
+        "text": "Wrapped label"
+      },
+      {
+        "x": 28,
+        "y": 43,
+        "w": 127.45,
+        "h": 26,
+        "text": "text goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "width": 210,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 210,
+      "h": 62,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 11,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 9,
+        "w": 169.27,
+        "h": 22,
+        "text": "Wrapped label text goes"
+      },
+      {
+        "x": 24,
+        "y": 31,
+        "w": 31.84,
+        "h": 22,
+        "text": "here"
+      }
+    ]
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "width": 210,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 210,
+      "h": 86,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 19,
+      "w": 22,
+      "h": 22
+    },
+    "lines": [
+      {
+        "x": 28,
+        "y": 17,
+        "w": 171.82,
+        "h": 26,
+        "text": "Wrapped label text"
+      },
+      {
+        "x": 28,
+        "y": 43,
+        "w": 88.44,
+        "h": 26,
+        "text": "goes here"
+      }
+    ]
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "width": 250,
+    "label": "Wrapped label text goes here",
+    "container": {
+      "w": 250,
+      "h": 40,
+      "radius": 0
+    },
+    "control": {
+      "x": 0,
+      "y": 11,
+      "w": 18,
+      "h": 18
+    },
+    "lines": [
+      {
+        "x": 24,
+        "y": 9,
+        "w": 204.51,
+        "h": 22,
+        "text": "Wrapped label text goes here"
+      }
+    ]
+  }
+]

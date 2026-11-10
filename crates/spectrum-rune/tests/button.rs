@@ -211,10 +211,28 @@ fn matches_oracle_scene() {
         let want = &c["container"];
         // The label's width depends on the installed font (the oracle measures Source Sans 3), so
         // the container is compared without it: padding + icon + gap must match to 1px.
-        let text_w = part(&rt, "label").map_or(0.0, |l| l.target[2]);
-        let want_text_w = c["label_part"]["w"].as_f64().unwrap_or(0.0) as f32;
+        // Unless the minimum width binds (2.25 x height with a label not hidden, since
+        // spectrum-design-data #1704): then the container is that wide whatever the text measures.
+        // The label's own width depends on the installed font, so when the font is wide enough for
+        // the content to pass the minimum, the container is compared without it instead.
+        let w = want["w"].as_f64().unwrap();
+        let min_bound =
+            c["hidden"].is_null() && (w - 2.25 * want["h"].as_f64().unwrap()).abs() < 0.05;
+        let bound_here = min_bound && b.target[2] <= w as f32 + 1.0;
+        let text_w = if bound_here {
+            0.0
+        } else {
+            part(&rt, "label").map_or(0.0, |l| l.target[2])
+        };
         let mut want = want.clone();
-        want["w"] = (want["w"].as_f64().unwrap() as f32 - want_text_w).into();
+        if min_bound && !bound_here {
+            // Everything but the label: its left edge plus the same padding on the right.
+            let f = |k: &str| c[k]["x"].as_f64().unwrap();
+            want["w"] = (f("label_part") + f("icon")).into();
+        } else if !bound_here {
+            let want_text_w = c["label_part"]["w"].as_f64().unwrap_or(0.0);
+            want["w"] = (w - want_text_w).into();
+        }
         assert_rect(
             [b.target[0], b.target[1], b.target[2] - text_w, b.target[3]],
             origin,
@@ -271,10 +289,19 @@ fn matches_oracle_scene() {
             // The oracle's progress carries no colour in the fixture: Loader draws its own ring.
             let (w, h) = (p.target[2], p.target[3]);
             assert!(w == h && w > 0.0 && w < want["w"].as_f64().unwrap() as f32);
-            assert_eq!(
-                (p.target[0] - origin[0]).round(),
-                ((want["w"].as_f64().unwrap() as f32 - w) / 2.0).round(),
-                "{what}: progress x (centred)"
+            // At the start, not centred: with the minimum width the oracle's progress sits at the
+            // padding (x 12 in a 72px button), as the icon and label do.
+            close(
+                p.target[0] - origin[0],
+                &c["progress"]["x"],
+                1.0,
+                &format!("{what} progress x"),
+            );
+            close(
+                p.target[1] - origin[1],
+                &c["progress"]["y"],
+                1.0,
+                &format!("{what} progress y"),
             );
         }
     }
@@ -371,7 +398,9 @@ fn errors(b: &Button) -> Vec<&'static str> {
 
 #[test]
 fn check_reports_the_three_error_rules() {
-    let outline_accent = Button::new("a").style(Style::Outline);
+    let outline_accent = Button::new("a")
+        .variant(Variant::Accent)
+        .style(Style::Outline);
     assert_eq!(
         errors(&outline_accent),
         ["Outline style is only defined for primary and secondary."]
@@ -396,7 +425,9 @@ fn check_reports_the_three_error_rules() {
 
 #[test]
 fn static_color_on_accent_is_advisory_not_an_error() {
-    let b = Button::new("a").static_color(StaticColor::White);
+    let b = Button::new("a")
+        .variant(Variant::Accent)
+        .static_color(StaticColor::White);
     assert!(errors(&b).is_empty());
     let v = check("button", &b.options());
     assert_eq!(v.len(), 1);
@@ -410,6 +441,7 @@ fn static_color_on_accent_is_advisory_not_an_error() {
 #[should_panic(expected = "Outline style is only defined")]
 fn building_an_error_combination_asserts_in_debug() {
     let _ = Button::new("a")
+        .variant(Variant::Accent)
         .style(Style::Outline)
         .build(tokens(ColorScheme::Light, Scale::Desktop));
 }

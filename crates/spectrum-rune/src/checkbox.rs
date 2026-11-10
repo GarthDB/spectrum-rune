@@ -11,6 +11,7 @@ use crate::font;
 use crate::icons::icon as ui_icon;
 use crate::interaction::{Interaction, State};
 use crate::tokens::{Tokens, Typography};
+use crate::wrap::Fit;
 use rune::tok::motion::SNAPPY;
 use rune::{el, icon, row, text, El};
 
@@ -83,6 +84,7 @@ pub struct Checkbox {
     emphasized: bool,
     error: bool,
     disabled: bool,
+    width: Option<f32>,
     press: Option<Press>,
 }
 
@@ -99,12 +101,19 @@ impl Checkbox {
             emphasized: false,
             error: false,
             disabled: false,
+            width: None,
             press: None,
         }
     }
     /// Without a label the checkbox is standalone: only the box is drawn.
     pub fn label(mut self, l: impl Into<String>) -> Self {
         self.label = Some(l.into());
+        self
+    }
+    /// Request width in points, like the oracle's `--width`: the root is that wide and a label too
+    /// long for it wraps (the root grows by a line per extra line). Without it the root hugs.
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = Some(w);
         self
     }
     pub fn selected(mut self, v: bool) -> Self {
@@ -244,28 +253,41 @@ impl Checkbox {
             control = control.border(t.border_width_200, stroke);
         }
 
-        let mut root = row()
+        let fit = Fit::new(
+            self.label.as_deref(),
+            font::text_style(&d.label),
+            d.label.line_height,
+            d.control,
+            d.height,
+            self.width.map(|w| w - d.control - d.gap),
+        );
+        let mut root = fit
+            .root(row())
             .key(part("container"))
-            .h(d.height)
+            .h(fit.height)
             .gap(d.gap)
-            .center_y()
             .role("checkbox")
             .focusable(!self.disabled)
             .disabled(self.disabled)
-            .child(control);
+            .child(fit.part(control, d.control));
         root = if self.indeterminate {
             root.checked_mixed()
         } else {
             root.checked(self.selected)
         };
         if let Some(l) = self.label {
-            root = root.label(l.clone()).child(
-                text(l)
-                    .key(part("label"))
-                    .color(label_color)
-                    .a11y_hidden()
-                    .font(font::text_style(&d.label)),
-            );
+            let mut label = text(l.clone())
+                .key(part("label"))
+                .color(label_color)
+                .a11y_hidden()
+                .font(font::text_style(&d.label));
+            if self.width.is_some() {
+                label = label.wrap().shrink();
+            }
+            root = root.label(l).child(fit.part(label, d.label.line_height));
+        }
+        if let Some(w) = self.width {
+            root = root.w(w);
         }
         if self.disabled {
             root

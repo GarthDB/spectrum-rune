@@ -1,8 +1,13 @@
 //! Spectrum Button, from `design-data` visuals/button.json (container > icon (optional content),
 //! progress, label, focus ring). Every size, colour, radius and type value comes from [`Tokens`].
 //!
-//! Where the oracle (`design-data render button`, 0.20.0) looks incomplete, the button renders what
+//! Where the oracle (`design-data render button`, see oracle.toml) looks incomplete, the button renders what
 //! it renders and says so here, so nothing is invented:
+//! - The default variant is the catalog's, `primary` (it was `accent` until spectrum-design-data
+//!   #1704, and this crate's builder followed that); `builder_defaults_are_the_catalog_defaults`
+//!   keeps the two equal.
+//! - The root is at least 2.25 x its height wide unless the label is hidden, and the content
+//!   (icon, label, spinner) sits at the start padding, not centred, as the oracle draws it.
 //! - Accent and negative have no outline look: that combination is an `error` constraint in the
 //!   catalog, so `build` panics in debug builds. Release builds render what the oracle does: white
 //!   text on no fill and no border.
@@ -21,15 +26,16 @@ use crate::font;
 use crate::interaction::{Interaction, State};
 use crate::size::Size;
 use crate::tokens::Tokens;
+use crate::wrap::Fit;
 use rune::tok::motion::SNAPPY;
 use rune::{icon, row, text, Color, El, Icon};
 use rune_kit::{Kit, Loader};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Variant {
-    #[default]
     Accent,
     Negative,
+    #[default]
     Primary,
     Secondary,
 }
@@ -284,6 +290,7 @@ pub struct Button {
     disabled: bool,
     pending: bool,
     static_color: Option<StaticColor>,
+    width: Option<f32>,
     press: Option<Press>,
 }
 
@@ -294,7 +301,7 @@ impl Button {
         Button {
             key: key.into(),
             label: None,
-            variant: Variant::Accent,
+            variant: Variant::default(),
             style: Style::Fill,
             size: Size::M,
             icon: None,
@@ -302,8 +309,16 @@ impl Button {
             disabled: false,
             pending: false,
             static_color: None,
+            width: None,
             press: None,
         }
+    }
+    /// Request width in points, like the oracle's `--width`: the button is `max(width, minimum
+    /// width)` wide and a label too long for it wraps (the button grows by a line per extra line).
+    /// Without it the button hugs its label.
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = Some(w);
+        self
     }
     /// The visible label, and the accessible name even when hidden or pending.
     pub fn label(mut self, l: impl Into<String>) -> Self {
@@ -432,13 +447,32 @@ impl Button {
         let mut label_type = self.size.label_type(t);
         label_type.weight = t.bold_font_weight;
 
-        let mut root = row()
+        // Minimum width is 2.25 x the one-line height whenever the label is not hidden (even while
+        // pending); a request width never goes below it.
+        let min_w = if self.label_hidden {
+            0.0
+        } else {
+            t.button_minimum_width_multiplier * d.height
+        };
+        let outer = self.width.map(|w| w.max(min_w));
+        let label_w = outer.map(|w| w - 2.0 * pad - if show_icon { d.icon + d.gap } else { 0.0 });
+        let fit = Fit::new(
+            self.label.as_deref().filter(|_| show_label),
+            font::text_style(&label_type),
+            label_type.line_height,
+            d.icon,
+            d.height,
+            label_w,
+        );
+
+        let mut root = fit
+            .root(row())
             .key(part("container"))
-            .h(d.height)
+            .h(fit.height)
+            .min_w(min_w)
             .px(pad)
             .gap(d.gap)
-            .center()
-            .radius(t.corner_radius_full * d.height)
+            .radius(t.corner_radius_full * fit.height)
             .fill(look.fill.unwrap_or(Color::TRANSPARENT))
             .token_motion(SNAPPY)
             .role("button")
@@ -465,30 +499,38 @@ impl Button {
                 .color(look.content)
                 .build(&Kit::neutral(false))
                 .key(part("progress"));
-            root = root.child(spinner);
+            root = root.child(fit.part(spinner, d.icon));
         }
         if show_icon {
             if let Some(i) = self.icon {
                 root = root.child(
-                    icon(i, d.icon)
-                        .key(part("icon"))
-                        .color(look.content)
-                        .a11y_hidden(),
+                    fit.part(
+                        icon(i, d.icon)
+                            .key(part("icon"))
+                            .color(look.content)
+                            .a11y_hidden(),
+                        d.icon,
+                    ),
                 );
             }
         }
         if show_label {
             if let Some(l) = &self.label {
-                root = root.child(
-                    text(l.clone())
-                        .key(part("label"))
-                        .color(look.content)
-                        .a11y_hidden()
-                        .font(font::text_style(&label_type)),
-                );
+                let mut label = text(l.clone())
+                    .key(part("label"))
+                    .color(look.content)
+                    .a11y_hidden()
+                    .font(font::text_style(&label_type));
+                if outer.is_some() {
+                    label = label.wrap().shrink();
+                }
+                root = root.child(fit.part(label, label_type.line_height));
             }
         }
 
+        if let Some(w) = outer {
+            root = root.w(w);
+        }
         let k = {
             let mut width = 2.0 * pad;
             if self.pending {
@@ -502,7 +544,7 @@ impl Button {
                     width += w + if show_icon { d.gap } else { 0.0 };
                 }
             }
-            press_scale(t, width)
+            press_scale(t, outer.unwrap_or(width.max(min_w)))
         };
 
         if self.disabled {
@@ -522,6 +564,23 @@ mod tests {
     use super::*;
     use crate::tokens::{tokens, ColorScheme, Scale};
     use serde_json::Value;
+
+    /// The builder's defaults are the catalog's (primary since spectrum-design-data #1704; the
+    /// oracle's default render is a primary fill), so they cannot drift from the generated table.
+    #[test]
+    fn builder_defaults_are_the_catalog_defaults() {
+        let catalog = crate::constraints::component("button").unwrap().defaults;
+        let opts = Button::new("b").options();
+        for (name, lit) in catalog {
+            let got = opts.iter().find(|(n, _)| n == name).unwrap().1;
+            let want = match lit {
+                crate::constraints::Lit::Str(s) => OptionValue::Str(s),
+                crate::constraints::Lit::Bool(b) => OptionValue::Bool(*b),
+            };
+            assert_eq!(got, want, "default of {name}");
+        }
+        assert_eq!(Button::new("b").variant, Variant::Primary);
+    }
 
     fn rgba(s: &str) -> [f32; 4] {
         let v: Vec<f32> = s

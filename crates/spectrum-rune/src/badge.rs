@@ -3,7 +3,7 @@
 //! (catalog accessibility: `focusable: false`, no role). Every size, colour, radius and type value
 //! comes from [`Tokens`].
 //!
-//! What the oracle (`design-data render badge`, 0.20.0) renders, followed as is:
+//! What the oracle (`design-data render badge`, see oracle.toml) renders, followed as is:
 //! - All 25 variants have their own bold and subtle fill (some are aliases of one colour: neutral
 //!   and gray, informative, accent and blue, positive and green, negative and red, notice and
 //!   orange).
@@ -21,6 +21,7 @@ use crate::constraints::{self, OptionValue};
 use crate::font;
 use crate::size::Size;
 use crate::tokens::Tokens;
+use crate::wrap::Fit;
 use rune::{icon, row, text, Color, El, Icon};
 
 macro_rules! names {
@@ -339,6 +340,7 @@ pub struct Badge {
     fixed: Fixed,
     size: Size,
     icon: Option<&'static Icon>,
+    width: Option<f32>,
 }
 
 impl Badge {
@@ -353,7 +355,14 @@ impl Badge {
             // The catalog's default (the oracle CLI renders `m` unless told otherwise).
             size: Size::S,
             icon: None,
+            width: None,
         }
+    }
+    /// Request width in points, like the oracle's `--width`: the root is that wide and a label too
+    /// long for it wraps (the root grows by a line per extra line). Without it the root hugs.
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = Some(w);
+        self
     }
     /// The visible text. Without one the badge is icon-only (and has no accessible name).
     pub fn label(mut self, l: impl Into<String>) -> Self {
@@ -422,16 +431,32 @@ impl Badge {
         let mut label_type = self.size.label_type(t);
         label_type.weight = t.medium_font_weight;
 
-        let mut root = row()
+        let pad = if self.label.is_some() {
+            d.pad
+        } else {
+            d.pad_icon_only
+        };
+        let fit = Fit::new(
+            self.label.as_deref(),
+            font::text_style(&label_type),
+            label_type.line_height,
+            if self.icon.is_some() { d.icon } else { 0.0 },
+            d.height,
+            self.width.map(|w| {
+                w - 2.0 * pad
+                    - if self.icon.is_some() {
+                        d.icon + d.gap
+                    } else {
+                        0.0
+                    }
+            }),
+        );
+        let mut root = fit
+            .root(row())
             .key(part("container"))
-            .h(d.height)
-            .px(if self.label.is_some() {
-                d.pad
-            } else {
-                d.pad_icon_only
-            })
+            .h(fit.height)
+            .px(pad)
             .gap(d.gap)
-            .center()
             .corners(corner_radii(d.radius, self.fixed))
             .fill(look.fill);
         if let Some(stroke) = look.stroke {
@@ -439,20 +464,28 @@ impl Badge {
         }
         if let Some(i) = self.icon {
             root = root.child(
-                icon(i, d.icon)
-                    .key(part("icon"))
-                    .color(look.content)
-                    .a11y_hidden(),
+                fit.part(
+                    icon(i, d.icon)
+                        .key(part("icon"))
+                        .color(look.content)
+                        .a11y_hidden(),
+                    d.icon,
+                ),
             );
         }
         // The text is the accessible name; the container has no role of its own.
         if let Some(l) = self.label {
-            root = root.child(
-                text(l)
-                    .key(part("label"))
-                    .color(look.content)
-                    .font(font::text_style(&label_type)),
-            );
+            let mut label = text(l)
+                .key(part("label"))
+                .color(look.content)
+                .font(font::text_style(&label_type));
+            if self.width.is_some() {
+                label = label.wrap().shrink();
+            }
+            root = root.child(fit.part(label, label_type.line_height));
+        }
+        if let Some(w) = self.width {
+            root = root.w(w);
         }
         crate::hug(root)
     }
