@@ -238,6 +238,9 @@ dataset changes nothing.
   `*_wrap.json`: container width, height (for Rune's own line count, which depends on the installed
   font: with Adobe Clean it equals the oracle's, Rune's fallback sans is wider and breaks earlier),
   pill radius, control and label position. A case the oracle wraps must wrap here too.
+  CI cannot check the exact line count (no Adobe Clean), so after bumping `oracle.toml` or changing
+  wrapping code, run it locally with the font installed:
+  `cargo test -p spectrum-rune --test wrap -- --include-ignored`.
 - **Constraints.** The cross product of options is large and partly undefined. The regen scripts
   skip combinations a catalog marks `error` (`fixtures/constraints.sh`), and the builders refuse
   them in debug builds.
