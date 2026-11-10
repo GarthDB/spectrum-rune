@@ -3,7 +3,7 @@
 //! (catalog accessibility: `focusable: false`, no role). Every size, colour, radius and type value
 //! comes from [`Tokens`].
 //!
-//! What the oracle (`design-data render badge`, 0.20.0) renders, followed as is:
+//! What the oracle (`design-data render badge`, see oracle.toml) renders, followed as is:
 //! - All 25 variants have their own bold and subtle fill (some are aliases of one colour: neutral
 //!   and gray, informative, accent and blue, positive and green, negative and red, notice and
 //!   orange).

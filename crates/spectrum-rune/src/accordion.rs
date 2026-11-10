@@ -3,7 +3,7 @@
 //! from [`Tokens`]. One item only: the group (`items`, `isMultiple`, arrow keys between headers)
 //! is not built here.
 //!
-//! Where the oracle (`design-data render accordion`, 0.20.0) looks odd, the item renders what it
+//! Where the oracle (`design-data render accordion`, see oracle.toml) looks odd, the item renders what it
 //! renders and says so here:
 //! - The title's type is one step up from the other components' labels (S uses `font-size-100`,
 //!   XL `font-size-400`: the recipe's own `sizeScale` s100..xl400), so [`Size::label_type`] is not

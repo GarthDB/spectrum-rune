@@ -1,7 +1,7 @@
 //! Spectrum Button, from `design-data` visuals/button.json (container > icon (optional content),
 //! progress, label, focus ring). Every size, colour, radius and type value comes from [`Tokens`].
 //!
-//! Where the oracle (`design-data render button`, 0.20.0) looks incomplete, the button renders what
+//! Where the oracle (`design-data render button`, see oracle.toml) looks incomplete, the button renders what
 //! it renders and says so here, so nothing is invented:
 //! - Accent and negative have no outline look: that combination is an `error` constraint in the
 //!   catalog, so `build` panics in debug builds. Release builds render what the oracle does: white

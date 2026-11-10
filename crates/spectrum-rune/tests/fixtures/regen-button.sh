@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Regenerates button_scene.json from the oracle: `design-data` v0.20.x run from the
+# Regenerates button_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
 # spectrum-design-data dataset root (default ~/repos/spectrum-design-data). The committed fixtures were
-# made at dataset commit 95907289; at a later commit Button defaults and label wrapping differ, so
-# check that commit out (e.g. `git worktree add --detach <dir> 95907289`) and pass <dir> as $1.
+# made at the dataset commit in oracle.toml (the script checks the CLI version and prints the commit
+# it ran against); check that commit out (`git worktree add --detach <dir> <commit>`) and pass <dir> as $1.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals; nulls and false flags are
 # dropped and colours written as `r,g,b[,a]`, to keep the file small.
@@ -15,7 +15,7 @@
 #      disabled + static white / black
 #   D. hover and down for pending, and for static white / black (primary, secondary x fill, outline)
 #   E. press scale at the perspective clamps: a one-letter and a long label, M and XL
-#   F. focus ring (--state focus; keyboard-focus renders no ring, spectrum-design-data #1693):
+#   F. focus ring (--state keyboard-focus):
 #      colour, thickness, gap and rect: variant x style x staticColor x scheme at M desktop, and
 #      sizes S/L/XL x scale for three looks, written to button_focus_ring.json (ring.jq)
 # Combinations an error constraint of the catalog excludes (accent/negative outline) are skipped
@@ -25,6 +25,7 @@
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
+source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/button_scene.json"
 cd "$root"
 
@@ -64,7 +65,7 @@ render() {
 
 # ring_case scheme scale size variant style static: one row of button_focus_ring.json
 ring_case() {
-  local args=(--size "$3" --color-scheme "$1" --scale "$2" --state focus --format scene
+  local args=(--size "$3" --color-scheme "$1" --scale "$2" --state keyboard-focus --format scene
     --option "variant=\"$4\"" --option "style=\"$5\"")
   [ "$6" != none ] && args+=(--option "staticColor=\"$6\"")
   design-data render button "${args[@]}" | jq -c --arg target container \

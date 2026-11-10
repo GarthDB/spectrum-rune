@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Regenerates switch_scene.json from the oracle: `design-data` v0.20.x run from the
+# Regenerates switch_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
 # spectrum-design-data dataset root (default ~/repos/spectrum-design-data). The committed fixtures were
-# made at dataset commit 95907289; at a later commit Button defaults and label wrapping differ, so
-# check that commit out (e.g. `git worktree add --detach <dir> 95907289`) and pass <dir> as $1.
+# made at the dataset commit in oracle.toml (the script checks the CLI version and prints the commit
+# it ran against); check that commit out (`git worktree add --detach <dir> <commit>`) and pass <dir> as $1.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
+source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/switch_scene.json"
 cd "$root"
 {

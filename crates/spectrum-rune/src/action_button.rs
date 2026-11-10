@@ -2,7 +2,7 @@
 //! progress, label, hold-icon, plus the keyboard focus ring). Every size, colour, radius and type
 //! value comes from [`Tokens`].
 //!
-//! Where the oracle (`design-data render action-button`, 0.20.0) looks odd, the button renders what
+//! Where the oracle (`design-data render action-button`, see oracle.toml) looks odd, the button renders what
 //! it renders and says so here:
 //! - `isEmphasized` only matters together with `isSelected` (an advisory constraint): selected and
 //!   emphasized is accent blue, emphasized alone is the default look.
