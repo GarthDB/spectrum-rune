@@ -5,8 +5,11 @@
 //! Compared per case: the root's width, height (so the number of lines) and, for Button, radius
 //! (a pill is half the height), the control or icon's rectangle (centred on the first line), the
 //! label's left edge, top and height (one line height per line). Line widths and the break
-//! positions depend on the installed font (the oracle measures Source Sans 3) so they are not
-//! compared; each case's words are chosen so that the lines break the same with a similar font.
+//! positions depend on the installed font (the oracle measures Source Sans 3), so the line count is
+//! Rune's own, read from the label's height: the heights and the pill radius are checked for that
+//! count (oracle height plus one line height per line more or fewer), and a case the oracle wraps
+//! must wrap here too. With Adobe Clean installed the counts match the oracle's in every case;
+//! Rune's fallback sans is wider and breaks some cases earlier.
 
 use rune::{col, Cx, El, Env, Runtime};
 use serde_json::Value;
@@ -101,13 +104,23 @@ fn check(component: &'static str, json: &str, control: &str) {
             rt.frame(0.05);
         }
         let b = find(&rt, "container").unwrap().target;
-        let want = &case["container"];
-        close(b[2], &want["w"], &format!("{what}: width"));
-        close(b[3], &want["h"], &format!("{what}: height"));
+        let lines = case["lines"].as_array().unwrap();
+        let line_h = lines[0]["h"].as_f64().unwrap() as f32;
+        let label = find(&rt, "label").unwrap();
+        let n = (label.target[3] / line_h).round();
+        assert!(
+            lines.len() == 1 || n >= 2.0,
+            "{what}: wrapped to {n} lines, the oracle to {}",
+            lines.len()
+        );
+        // Height of this many lines: the oracle's, plus a line height for each line more.
+        let h = case["container"]["h"].as_f64().unwrap() as f32 + (n - lines.len() as f32) * line_h;
+        close(b[2], &case["container"]["w"], &format!("{what}: width"));
+        close(b[3], &h.into(), &format!("{what}: height"));
         if component == "button" {
             close(
                 find(&rt, "container").unwrap().radius,
-                &want["radius"],
+                &(h / 2.0).into(),
                 &format!("{what}: radius"),
             );
         }
@@ -124,16 +137,8 @@ fn check(component: &'static str, json: &str, control: &str) {
                 close(got, &case["control"][n], &format!("{what}: {part} {n}"));
             }
         }
-        let lines = case["lines"].as_array().unwrap();
-        let label = find(&rt, "label").unwrap();
         close(rel(&label, 0), &lines[0]["x"], &format!("{what}: label x"));
         close(rel(&label, 1), &lines[0]["y"], &format!("{what}: label y"));
-        let total: f64 = lines.iter().map(|l| l["h"].as_f64().unwrap()).sum();
-        close(
-            label.target[3],
-            &total.into(),
-            &format!("{what}: label height"),
-        );
         wrapped += (lines.len() > 1) as usize;
     }
     assert!(

@@ -235,9 +235,9 @@ dataset changes nothing.
   the dataset commit it ran against, and warns if that commit is not the pinned one). Each component's test builds the same case in a headless Rune runtime and compares
   geometry and colours (1 px, 3 per channel).
 - **Wrapping.** `tests/wrap.rs` checks the five wrapping components at a request width against
-  `*_wrap.json` (container size, so the line count, pill radius, control and label position). The
-  regen scripts keep a case only if its line breaks stay the same 8px narrower and wider, so the
-  installed font's slightly different widths cannot flip them; line widths are not compared.
+  `*_wrap.json`: container width, height (for Rune's own line count, which depends on the installed
+  font: with Adobe Clean it equals the oracle's, Rune's fallback sans is wider and breaks earlier),
+  pill radius, control and label position. A case the oracle wraps must wrap here too.
 - **Constraints.** The cross product of options is large and partly undefined. The regen scripts
   skip combinations a catalog marks `error` (`fixtures/constraints.sh`), and the builders refuse
   them in debug builds.

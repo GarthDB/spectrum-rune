@@ -213,21 +213,26 @@ fn matches_oracle_scene() {
         // the container is compared without it: padding + icon + gap must match to 1px.
         // Unless the minimum width binds (2.25 x height with a label not hidden, since
         // spectrum-design-data #1704): then the container is that wide whatever the text measures.
+        // The label's own width depends on the installed font, so when the font is wide enough for
+        // the content to pass the minimum, the container is compared without it instead.
         let w = want["w"].as_f64().unwrap();
         let min_bound =
             c["hidden"].is_null() && (w - 2.25 * want["h"].as_f64().unwrap()).abs() < 0.05;
-        let text_w = if min_bound {
+        let bound_here = min_bound && b.target[2] <= w as f32 + 1.0;
+        let text_w = if bound_here {
             0.0
         } else {
             part(&rt, "label").map_or(0.0, |l| l.target[2])
         };
-        let want_text_w = if min_bound {
-            0.0
-        } else {
-            c["label_part"]["w"].as_f64().unwrap_or(0.0) as f32
-        };
         let mut want = want.clone();
-        want["w"] = (want["w"].as_f64().unwrap() as f32 - want_text_w).into();
+        if min_bound && !bound_here {
+            // Everything but the label: its left edge plus the same padding on the right.
+            let f = |k: &str| c[k]["x"].as_f64().unwrap();
+            want["w"] = (f("label_part") + f("icon")).into();
+        } else if !bound_here {
+            let want_text_w = c["label_part"]["w"].as_f64().unwrap_or(0.0);
+            want["w"] = (w - want_text_w).into();
+        }
         assert_rect(
             [b.target[0], b.target[1], b.target[2] - text_w, b.target[3]],
             origin,

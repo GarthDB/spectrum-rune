@@ -4,9 +4,8 @@
 # of a `*_wrap.json` file: the oracle's render at the request width (`--width`), geometry relative to
 # the container. Several `label` lines are the scene's text nodes, one per line. A case where a word
 # is wider than the room (the oracle warns) is skipped: it is undefined whatever the font. So is a
-# case whose line breaks change with the width 8px narrower or wider: Rune lays text out with the
-# installed font, whose widths differ slightly from the oracle's Source Sans 3, and a break that
-# close to the edge would flip with it.
+# case whose line breaks change with the width 8px narrower or wider: a break that close to the
+# edge is not a clear case (Rune lays text out with the installed font, not Source Sans 3).
 wrap_label="Wrapped label text goes here"
 
 wrap_row() {
