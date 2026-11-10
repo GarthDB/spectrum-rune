@@ -9,6 +9,7 @@ rune-kit = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3
 rune-ref = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830", features = ["gpu"] }
 
 # Dependencies (rune-ref's CPU renderer, png, blake3, ...) are optimised; our own crates stay
-# unoptimised with debug assertions and overflow checks on. Pixel suites: ~69s -> ~16s locally.
+# unoptimised with debug assertions and overflow checks on; no debuginfo for them (CI disk). Pixel suites: ~69s -> ~16s locally.
 [profile.dev.package."*"]
 opt-level = 3
+debug = false
