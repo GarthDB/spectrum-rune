@@ -211,8 +211,21 @@ fn matches_oracle_scene() {
         let want = &c["container"];
         // The label's width depends on the installed font (the oracle measures Source Sans 3), so
         // the container is compared without it: padding + icon + gap must match to 1px.
-        let text_w = part(&rt, "label").map_or(0.0, |l| l.target[2]);
-        let want_text_w = c["label_part"]["w"].as_f64().unwrap_or(0.0) as f32;
+        // Unless the minimum width binds (2.25 x height with a label not hidden, since
+        // spectrum-design-data #1704): then the container is that wide whatever the text measures.
+        let w = want["w"].as_f64().unwrap();
+        let min_bound =
+            c["hidden"].is_null() && (w - 2.25 * want["h"].as_f64().unwrap()).abs() < 0.05;
+        let text_w = if min_bound {
+            0.0
+        } else {
+            part(&rt, "label").map_or(0.0, |l| l.target[2])
+        };
+        let want_text_w = if min_bound {
+            0.0
+        } else {
+            c["label_part"]["w"].as_f64().unwrap_or(0.0) as f32
+        };
         let mut want = want.clone();
         want["w"] = (want["w"].as_f64().unwrap() as f32 - want_text_w).into();
         assert_rect(
@@ -271,10 +284,19 @@ fn matches_oracle_scene() {
             // The oracle's progress carries no colour in the fixture: Loader draws its own ring.
             let (w, h) = (p.target[2], p.target[3]);
             assert!(w == h && w > 0.0 && w < want["w"].as_f64().unwrap() as f32);
-            assert_eq!(
-                (p.target[0] - origin[0]).round(),
-                ((want["w"].as_f64().unwrap() as f32 - w) / 2.0).round(),
-                "{what}: progress x (centred)"
+            // At the start, not centred: with the minimum width the oracle's progress sits at the
+            // padding (x 12 in a 72px button), as the icon and label do.
+            close(
+                p.target[0] - origin[0],
+                &c["progress"]["x"],
+                1.0,
+                &format!("{what} progress x"),
+            );
+            close(
+                p.target[1] - origin[1],
+                &c["progress"]["y"],
+                1.0,
+                &format!("{what} progress y"),
             );
         }
     }

@@ -10,6 +10,7 @@ use crate::font;
 use crate::interaction::{Interaction, State};
 use crate::size::Size;
 use crate::tokens::Tokens;
+use crate::wrap::Fit;
 use rune::tok::motion::SNAPPY;
 use rune::{el, row, text, El};
 
@@ -56,6 +57,7 @@ pub struct RadioButton {
     size: Size,
     emphasized: bool,
     disabled: bool,
+    width: Option<f32>,
     press: Option<Press>,
 }
 
@@ -70,6 +72,7 @@ impl RadioButton {
             size: Size::M,
             emphasized: false,
             disabled: false,
+            width: None,
             press: None,
         }
     }
@@ -77,6 +80,12 @@ impl RadioButton {
     /// caller must provide one (e.g. a surrounding group's label).
     pub fn label(mut self, l: impl Into<String>) -> Self {
         self.label = Some(l.into());
+        self
+    }
+    /// Request width in points, like the oracle's `--width`: the root is that wide and a label too
+    /// long for it wraps (the root grows by a line per extra line). Without it the root hugs.
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = Some(w);
         self
     }
     pub fn selected(mut self, v: bool) -> Self {
@@ -184,24 +193,38 @@ impl RadioButton {
             control = control.border(t.border_width_200, stroke);
         }
 
-        let mut root = row()
+        let label_type = self.size.label_type(t);
+        let fit = Fit::new(
+            self.label.as_deref(),
+            font::text_style(&label_type),
+            label_type.line_height,
+            d.control,
+            d.height,
+            self.width.map(|w| w - d.control - d.gap),
+        );
+        let mut root = fit
+            .root(row())
             .key(part("container"))
-            .h(d.height)
+            .h(fit.height)
             .gap(d.gap)
-            .center_y()
             .role("radio")
             .checked(self.selected)
             .focusable(!self.disabled)
             .disabled(self.disabled)
-            .child(control);
+            .child(fit.part(control, d.control));
         if let Some(l) = self.label {
-            root = root.label(l.clone()).child(
-                text(l)
-                    .key(part("label"))
-                    .color(label_color)
-                    .a11y_hidden()
-                    .font(font::text_style(&self.size.label_type(t))),
-            );
+            let mut label = text(l.clone())
+                .key(part("label"))
+                .color(label_color)
+                .a11y_hidden()
+                .font(font::text_style(&label_type));
+            if self.width.is_some() {
+                label = label.wrap().shrink();
+            }
+            root = root.label(l).child(fit.part(label, label_type.line_height));
+        }
+        if let Some(w) = self.width {
+            root = root.w(w);
         }
         if self.disabled {
             root

@@ -62,6 +62,9 @@ const SIZES: [(Size, &str); 4] = [
     (Size::XL, "XL"),
 ];
 
+/// Long enough to wrap at the stories' request width.
+const WRAPPED: &str = "Wrapped label text goes here";
+
 fn valid(component: &str, options: Vec<(&'static str, OptionValue<'static>)>) -> bool {
     !check(component, &options)
         .iter()
@@ -124,6 +127,17 @@ fn switch(s: &G, t: &'static Tokens) -> El {
     page(vec![
         section(t, "States", states),
         section(t, "Sizes", sizes),
+        section(
+            t,
+            "Wrapped label (width 150)",
+            flow().children(SIZES.map(|(z, n)| {
+                Switch::new(format!("switch/wrap-{n}"))
+                    .label(WRAPPED)
+                    .size(z)
+                    .width(150.0)
+                    .build(t)
+            })),
+        ),
     ])
 }
 
@@ -164,6 +178,17 @@ fn checkbox(s: &G, t: &'static Tokens) -> El {
     page(vec![
         section(t, "States", states),
         section(t, "Sizes", sizes),
+        section(
+            t,
+            "Wrapped label (width 150)",
+            flow().children(SIZES.map(|(z, n)| {
+                Checkbox::new(format!("checkbox/wrap-{n}"))
+                    .label(WRAPPED)
+                    .size(z)
+                    .width(150.0)
+                    .build(t)
+            })),
+        ),
     ])
 }
 
@@ -199,6 +224,17 @@ fn radio_button(s: &G, t: &'static Tokens) -> El {
     page(vec![
         section(t, "States (click to pick within a pair)", states),
         section(t, "Sizes", sizes),
+        section(
+            t,
+            "Wrapped label (width 150)",
+            flow().children(SIZES.map(|(z, n)| {
+                RadioButton::new(format!("radio-button/wrap-{n}"))
+                    .label(WRAPPED)
+                    .size(z)
+                    .width(150.0)
+                    .build(t)
+            })),
+        ),
     ])
 }
 
@@ -292,6 +328,18 @@ fn button(_: &G, t: &'static Tokens) -> El {
             .build(t)
     }));
     sections.push(section(t, "Sizes", sizes));
+    sections.push(section(
+        t,
+        "Wrapped label (width 150; min width 2.25 x height)",
+        flow().children(SIZES.map(|(z, n)| {
+            Button::new(format!("button/wrap-{n}"))
+                .label(WRAPPED)
+                .icon(&ADD_100)
+                .size(z)
+                .width(150.0)
+                .build(t)
+        })),
+    ));
     page(sections)
 }
 
@@ -444,6 +492,18 @@ fn badge(_: &G, t: &'static Tokens) -> El {
     ));
     sections.push(section(t, "With icon", icon));
     sections.push(section(t, "Sizes", sizes));
+    sections.push(section(
+        t,
+        "Wrapped label (width 150)",
+        flow().children(SIZES.map(|(z, n)| {
+            Badge::new(format!("badge/wrap-{n}"))
+                .label(WRAPPED)
+                .variant(badge::Variant::Informative)
+                .size(z)
+                .width(150.0)
+                .build(t)
+        })),
+    ));
     page(sections)
 }
 

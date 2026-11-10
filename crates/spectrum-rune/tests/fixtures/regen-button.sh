@@ -26,6 +26,7 @@ set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
+source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/button_scene.json"
 cd "$root"
 
@@ -145,3 +146,8 @@ ring="$(dirname "$out")/button_focus_ring.json"
   done; done; done
 } | jq -s . > "$ring"
 echo "wrote $ring"
+
+# G. request width (wrap.sh): the label wraps, the button grows a line height per extra line; a width
+#    below the minimum width (2.25 x height) is lifted to it. One case has a one-letter label.
+wrap_extra() { wrap_row button icon m light desktop 40 A; wrap_row button icon m light desktop 120 "Label"; }
+regen_wrap button icon "$(dirname "$out")/button_wrap.json"

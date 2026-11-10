@@ -79,6 +79,12 @@ state: Rune draws the focus ring only for the keyboard.
 `L`, `XL`). Action button's recipe also has `XS`, so it takes `ActionButtonSize`; a plain `Size`
 converts, so `.size(Size::M)` works there too, while `XS` on a Switch does not compile.
 
+**Width and wrapping.** Switch, Checkbox, Radio button, Button and Badge hug their content, and a label
+never wraps, unless you give a request width: `.width(150.0)` (the oracle's `--width`) makes the
+root that wide (a Button never narrower than 2.25 x its height) and wraps a label that does not fit,
+growing the root by one line height per extra line, with the control or icon centred on the first
+line. Action button and Accordion item have no such recipe.
+
 **Option constraints.** Spectrum's catalogs say which option combinations are undefined (an accent
 button has no outline, for instance). Builders `debug_assert!` that, so a bad combination panics in
 debug builds and renders what the reference renders in release. Call `constraints::check(name,
@@ -228,6 +234,10 @@ dataset changes nothing.
   as the generator: each script checks the CLI series against `oracle.toml`, prints the CLI version and
   the dataset commit it ran against, and warns if that commit is not the pinned one). Each component's test builds the same case in a headless Rune runtime and compares
   geometry and colours (1 px, 3 per channel).
+- **Wrapping.** `tests/wrap.rs` checks the five wrapping components at a request width against
+  `*_wrap.json` (container size, so the line count, pill radius, control and label position). The
+  regen scripts keep a case only if its line breaks stay the same 8px narrower and wider, so the
+  installed font's slightly different widths cannot flip them; line widths are not compared.
 - **Constraints.** The cross product of options is large and partly undefined. The regen scripts
   skip combinations a catalog marks `error` (`fixtures/constraints.sh`), and the builders refuse
   them in debug builds.
@@ -248,6 +258,8 @@ dataset changes nothing.
 
 ## Known gaps
 
+- **Keyboard-focus fill.** The oracle's Button takes the hover fill in the keyboard-focus state
+  (spectrum-design-data #1704); Rune gives `Interaction` no focus state, so only the ring is drawn.
 - **Keyboard-focus colours.** Rune draws a focus ring in one colour; Spectrum's per-variant
   keyboard-focus colours need a Rune change (bead a14.14).
 - **Font family.** Tests cannot observe which family Rune resolved; only the ignored font tests and the gallery's

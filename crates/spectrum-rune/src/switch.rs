@@ -9,6 +9,7 @@ use crate::font;
 use crate::interaction::{Interaction, State};
 pub use crate::size::Size;
 use crate::tokens::{Tokens, Typography};
+use crate::wrap::Fit;
 use rune::tok::motion::SNAPPY;
 use rune::{el, row, text, El};
 
@@ -76,6 +77,7 @@ pub struct Switch {
     emphasized: bool,
     disabled: bool,
     hide_label: bool,
+    width: Option<f32>,
     press: Option<Press>,
 }
 
@@ -91,11 +93,18 @@ impl Switch {
             emphasized: false,
             disabled: false,
             hide_label: false,
+            width: None,
             press: None,
         }
     }
     pub fn label(mut self, l: impl Into<String>) -> Self {
         self.label = Some(l.into());
+        self
+    }
+    /// Request width in points, like the oracle's `--width`: the root is that wide and a label too
+    /// long for it wraps (the root grows by a line per extra line). Without it the root hugs.
+    pub fn width(mut self, w: f32) -> Self {
+        self.width = Some(w);
         self
     }
     pub fn selected(mut self, v: bool) -> Self {
@@ -197,27 +206,41 @@ impl Switch {
             )
             .child(handle);
 
-        let mut root = row()
+        let shown = self.label.as_deref().filter(|_| !self.hide_label);
+        let fit = Fit::new(
+            shown,
+            font::text_style(&d.label),
+            d.label.line_height,
+            d.track_h,
+            d.height,
+            self.width.map(|w| w - d.track_w - d.gap),
+        );
+        let mut root = fit
+            .root(row())
             .key(part("container"))
-            .h(d.height)
+            .h(fit.height)
             .gap(d.gap)
-            .center_y()
             .role("switch")
             .checked(self.selected)
             .focusable(!self.disabled)
             .disabled(self.disabled)
-            .child(track);
+            .child(fit.part(track, d.track_h));
         if let Some(l) = self.label {
             root = root.label(l.clone());
             if !self.hide_label {
-                root = root.child(
-                    text(l)
-                        .key(part("label"))
-                        .color(label_color)
-                        .a11y_hidden()
-                        .font(font::text_style(&d.label)),
-                );
+                let mut label = text(l)
+                    .key(part("label"))
+                    .color(label_color)
+                    .a11y_hidden()
+                    .font(font::text_style(&d.label));
+                if self.width.is_some() {
+                    label = label.wrap().shrink();
+                }
+                root = root.child(fit.part(label, d.label.line_height));
             }
+        }
+        if let Some(w) = self.width {
+            root = root.w(w);
         }
         if self.disabled {
             root

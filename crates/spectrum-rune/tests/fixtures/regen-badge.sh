@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Regenerates badge_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
 # spectrum-design-data dataset root (default ~/repos/spectrum-design-data).
+# Also writes badge_wrap.json: the oracle at a request width (wrap.sh), where the label wraps.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals; nulls and zero strokes are
 # dropped and colours written as `r,g,b[,a]`, to keep the file small.
@@ -19,6 +20,7 @@ set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
+source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/badge_scene.json"
 cd "$root"
 
@@ -97,3 +99,4 @@ render() {
   done
 } | jq -sc '.' > "$out"
 echo "wrote $out"
+regen_wrap badge - "$(dirname "$out")/badge_wrap.json"
