@@ -1,7 +1,12 @@
 # Sourced by the regen-*.sh scripts (after $root is set). Checks the `design-data` version against
 # oracle.toml at the repo root and prints the dataset commit the script runs against.
 oracle_toml="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)/oracle.toml"
-oracle_get() { sed -n "s/^$1 *= *\"\(.*\)\"/\1/p" "$oracle_toml"; }
+oracle_get() {
+  local v
+  v=$(sed -n "s/^$1 *= *\"\([^\"]*\)\".*/\1/p" "$oracle_toml")
+  [ -n "$v" ] || { echo "oracle.toml has no non-empty '$1'" >&2; exit 1; }
+  echo "$v"
+}
 oracle_min=$(oracle_get cli_min)
 oracle_max=$(oracle_get cli_max)
 oracle_dataset=$(oracle_get dataset)

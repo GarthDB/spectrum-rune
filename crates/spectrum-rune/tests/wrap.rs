@@ -83,6 +83,11 @@ fn close(got: f32, want: &Value, what: &str) {
 }
 
 fn check(component: &'static str, json: &str, control: &str) {
+    check_with(component, json, control, false)
+}
+
+/// `strict`: Rune must break into the oracle's number of lines (needs the oracle's font widths).
+fn check_with(component: &'static str, json: &str, control: &str, strict: bool) {
     let cases: Vec<Value> = serde_json::from_str(json).unwrap();
     assert!(cases.len() >= 10, "{component}: fixture too small");
     let mut wrapped = 0;
@@ -113,6 +118,9 @@ fn check(component: &'static str, json: &str, control: &str) {
             "{what}: wrapped to {n} lines, the oracle to {}",
             lines.len()
         );
+        if strict {
+            assert_eq!(n as usize, lines.len(), "{what}: line count");
+        }
         // Height of this many lines: the oracle's, plus a line height for each line more.
         let h = case["container"]["h"].as_f64().unwrap() as f32 + (n - lines.len() as f32) * line_h;
         close(b[2], &case["container"]["w"], &format!("{what}: width"));
@@ -178,4 +186,36 @@ fn button_wraps_like_the_oracle() {
 #[test]
 fn badge_wraps_like_the_oracle() {
     check("badge", include_str!("fixtures/badge_wrap.json"), "-");
+}
+
+/// The exact line count of every case, as the oracle breaks it. Only meaningful with Adobe Clean
+/// (or another font as narrow as Source Sans 3) installed: `cargo test -- --ignored`.
+#[test]
+#[ignore = "needs the Spectrum font installed"]
+fn line_counts_match_the_oracle_with_the_spectrum_font() {
+    check_with(
+        "switch",
+        include_str!("fixtures/switch_wrap.json"),
+        "track",
+        true,
+    );
+    check_with(
+        "checkbox",
+        include_str!("fixtures/checkbox_wrap.json"),
+        "box",
+        true,
+    );
+    check_with(
+        "radio_button",
+        include_str!("fixtures/radio_button_wrap.json"),
+        "control",
+        true,
+    );
+    check_with(
+        "button",
+        include_str!("fixtures/button_wrap.json"),
+        "icon",
+        true,
+    );
+    check_with("badge", include_str!("fixtures/badge_wrap.json"), "-", true);
 }

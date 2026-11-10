@@ -61,9 +61,12 @@ fn oracle(key: &str) -> Res<String> {
     text.lines()
         .find_map(|l| {
             let (k, v) = l.split_once('=')?;
-            (k.trim() == key).then(|| v.trim().trim_matches('"').to_string())
+            // value is a quoted string; anything after the closing quote (a comment) is ignored
+            let v = v.trim().strip_prefix('"')?.split('"').next()?;
+            (k.trim() == key).then(|| v.to_string())
         })
-        .ok_or_else(|| format!("oracle.toml has no `{key}`"))
+        .filter(|v| !v.is_empty())
+        .ok_or_else(|| format!("oracle.toml has no non-empty `{key}`"))
 }
 
 fn semver(v: &str) -> Res<(u32, u32, u32)> {
