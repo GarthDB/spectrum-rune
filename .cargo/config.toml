@@ -1,6 +1,2 @@
 [alias]
 xtask = "run -q -p xtask --"
-
-# lld links the large test binaries (wgpu, rune) faster; CI installs it.
-[target.x86_64-unknown-linux-gnu]
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]

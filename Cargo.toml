@@ -14,14 +14,11 @@ rune-ref = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3
 opt-level = 3
 debug = false
 
-# Build scripts and proc-macros are not on the test hot path; keep them cheap to build.
+# package."*" would otherwise optimise build scripts and proc-macros too (cold build 65 s vs 89 s).
 [profile.dev.build-override]
 opt-level = 0
 
 # Backtraces stay usable; smaller binaries link and get scanned faster (macOS: no dsymutil step).
 [profile.dev]
-debug = "line-tables-only"
-split-debuginfo = "unpacked"
-[profile.test]
 debug = "line-tables-only"
 split-debuginfo = "unpacked"
