@@ -7,7 +7,7 @@
 #[path = "support/pixels.rs"]
 mod pixels;
 
-use pixels::{clear, composite, differs, near, probe, scaled, Pixels, Ring, SIDES};
+use pixels::{clear, closest, composite, differs, near, probe, scaled, Pixels, Ring, Side, SIDES};
 use rune::{col, Cx, El, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
 use spectrum_rune::radio_button::RadioButton;
@@ -264,4 +264,226 @@ fn no_ring_without_keyboard_focus() {
     rt.key(KeyEvent::from(Key::Tab));
     settle(&mut rt);
     ring.assert_absent(&Pixels::of(&rt, SIZE), ctl, &SIDES, "disabled, Tab pressed");
+}
+
+/// What the oracle's keyboard-focus state gives a radio button (`radio_button_focus.json`), against
+/// rest (`radio_button_scene.json`): a selected control (neutral or emphasized) takes the hover fill
+/// inside its circle (the bounding box's corner is not the fill), the 4px dot is still drawn over it,
+/// the label ink takes the hover colour (text is anti-aliased: some fully covered pixel is the
+/// colour), and the ring is as before. NOT matched: the unselected control's 2px stroke, which the
+/// oracle takes to the hover colour and Rune cannot (no focus-visible border colour, a14.14):
+/// asserted at its REST colour, with the oracle's focus colour recorded next to it. Hover +
+/// keyboard-focus draws the hover stroke, which is the oracle's. A disabled radio is not focusable
+/// and keeps the oracle's disabled colours.
+#[test]
+fn keyboard_focus_look_matches_oracle() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/radio_button_focus.json")).unwrap();
+    let scene: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/radio_button_scene.json")).unwrap();
+    let rings: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/radio_button_rings.json")).unwrap();
+    assert_eq!(cases.len(), 34);
+    let col = |v: &Value| composite(&[v.as_str().unwrap()], [0; 3]);
+    let (mut fills, mut gaps, mut dots) = (0, 0, 0);
+    for c in &cases {
+        let what = c.to_string();
+        let (sel, disabled) = (c["selected"] == true, c["disabled"] == true);
+        let hover = c["state"] == "hover+keyboard-focus";
+        let rest = scene
+            .iter()
+            .find(|r| {
+                [
+                    "scheme",
+                    "scale",
+                    "size",
+                    "selected",
+                    "emphasized",
+                    "disabled",
+                ]
+                .iter()
+                .all(|k| r[*k] == c[*k])
+                    && r["state"] == "rest"
+            })
+            .unwrap_or_else(|| panic!("no rest case for {what}"));
+        let mut rt = runtime(app_for(c));
+        rt.key(KeyEvent::from(Key::Tab));
+        if hover {
+            let (x, y) = rt.find("rb/container").unwrap();
+            rt.pointer_move(x, y);
+        }
+        settle(&mut rt);
+        let b = info(&rt, "control").target;
+        let px = Pixels::of(&rt, SIZE);
+        let fill = col(&c["control"]["fill"]);
+
+        // The fill, inside the circle (after the border when unselected).
+        for side in SIDES {
+            near(
+                probe(&px, b, side, if sel { 1 } else { 3 }),
+                fill,
+                &format!("{what} {side:?}: fill"),
+            );
+        }
+        // Clipped to the circle: the bounding box's corner is not the fill.
+        differs(
+            px.at(b[0] as u32, b[1] as u32),
+            fill,
+            &format!("{what}: clipped at the corner"),
+        );
+        if sel {
+            assert_eq!(f(&c["control"]["stroke_width"]), 0.0, "{what}: no stroke");
+            if col(&rest["control"]["fill"]) != fill {
+                fills += 1;
+            }
+            // The dot is still on top, in the oracle's indicator colour.
+            if !c["indicator"].is_null() {
+                near(
+                    px.at((b[0] + b[2] / 2.0) as u32, (b[1] + b[3] / 2.0) as u32),
+                    col(&c["indicator"]),
+                    &format!("{what}: dot"),
+                );
+                dots += 1;
+            }
+        } else {
+            // The unselected stroke is the gap; hover shows the oracle's.
+            let want = col(&c["control"]["stroke"]);
+            let at_rest = col(&rest["control"]["stroke"]);
+            for side in SIDES {
+                for d in 0..2 {
+                    let got = probe(&px, b, side, d);
+                    if hover || disabled {
+                        near(got, want, &format!("{what} {side:?}: stroke {d}"));
+                    } else {
+                        near(
+                            got,
+                            at_rest,
+                            &format!("{what} {side:?}: stroke stays at rest"),
+                        );
+                        differs(
+                            got,
+                            want,
+                            &format!("{what} {side:?}: the gap to the oracle"),
+                        );
+                        gaps += 1;
+                    }
+                }
+            }
+        }
+
+        // The label's ink, and not the rest one when it changes.
+        let label = info(&rt, "label").target;
+        let want = col(&c["label_color"]);
+        assert!(
+            closest(&px, label, want) <= 5.0,
+            "{what}: label ink is not {want:?}"
+        );
+        if col(&rest["label"]["color"]) != want {
+            assert!(
+                closest(&px, label, col(&rest["label"]["color"])) > 12.0,
+                "{what}: label still has the rest ink"
+            );
+        }
+
+        // The ring is as before (the label is on the right, so three sides).
+        let ring = rings.iter().find(|r| {
+            ["scheme", "scale", "size", "selected"]
+                .iter()
+                .all(|k| r[*k] == c[*k])
+        });
+        if let (Some(r), false) = (ring, disabled) {
+            let sides = [Side::Left, Side::Top, Side::Bottom];
+            Ring::of(r).assert_around(&px, b, &sides, &format!("{what}: ring"));
+        }
+    }
+    assert!(
+        fills >= 12 && gaps >= 50 && dots >= 14,
+        "{fills} {gaps} {dots}"
+    );
+}
+
+/// Pointer focus shows no keyboard-focus look: after a click and the pointer leaving, a selected
+/// control (neutral and emphasized) is the oracle's rest fill and the label its rest ink; Tab
+/// afterwards shows the focus fill. Hover and down (Tab first, then the pointer) keep the oracle's
+/// label ink: the group colour must not double the hover colour or override the down one.
+#[test]
+fn pointer_focus_shows_no_focus_look_and_hover_down_labels_are_the_oracles() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/radio_button_scene.json")).unwrap();
+    let find = |emph: bool, state: &str| {
+        cases
+            .iter()
+            .find(|c| {
+                c["scheme"] == "light"
+                    && c["scale"] == "desktop"
+                    && c["size"] == "m"
+                    && c["selected"] == true
+                    && c["emphasized"] == emph
+                    && c["disabled"] == false
+                    && c["state"] == state
+            })
+            .unwrap()
+    };
+    let col = |v: &Value| composite(&[v.as_str().unwrap()], [0; 3]);
+    for emph in [false, true] {
+        let what = format!("emph={emph}");
+        let rest = find(emph, "rest");
+        let app = || App {
+            selected: true,
+            emphasized: emph,
+            ..App::default()
+        };
+        let mut rt = runtime(app());
+        let (x, y) = rt.find("rb/container").unwrap();
+        rt.pointer_down(x, y);
+        rt.pointer_up(x, y);
+        rt.pointer_move(190.0, 95.0);
+        settle(&mut rt);
+        assert!(
+            !info(&rt, "container").focus_visible,
+            "{what}: a click shows no keyboard focus"
+        );
+        let sample = |rt: &Runtime<App>| {
+            let px = Pixels::of(rt, SIZE);
+            (
+                probe(&px, info(rt, "control").target, SIDES[0], 1),
+                closest(&px, info(rt, "label").target, col(&rest["label"]["color"])),
+            )
+        };
+        let (p, ink) = sample(&rt);
+        near(
+            p,
+            col(&rest["control"]["fill"]),
+            &format!("{what}: clicked, rest fill"),
+        );
+        assert!(ink <= 5.0, "{what}: clicked, rest label ink");
+        rt.key(KeyEvent::from(Key::Tab));
+        settle(&mut rt);
+        let (p, ink) = sample(&rt);
+        differs(
+            p,
+            col(&rest["control"]["fill"]),
+            &format!("{what}: Tab shows the focus fill"),
+        );
+        assert!(ink > 12.0, "{what}: Tab changes the label ink");
+
+        for state in ["hover", "down"] {
+            let want = find(emph, state);
+            let mut rt = runtime(app());
+            let (x, y) = rt.find("rb/container").unwrap();
+            rt.key(KeyEvent::from(Key::Tab));
+            if state == "hover" {
+                rt.pointer_move(x, y);
+            } else {
+                rt.pointer_down(x, y);
+            }
+            settle(&mut rt);
+            let px = Pixels::of(&rt, SIZE);
+            let ink = col(&want["label"]["color"]);
+            assert!(
+                closest(&px, info(&rt, "label").target, ink) <= 5.0,
+                "{what} {state}: label ink is the oracle's {ink:?}"
+            );
+        }
+    }
 }

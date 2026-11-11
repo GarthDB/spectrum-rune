@@ -134,6 +134,27 @@ pub fn near_within(got: [u8; 4], want: [f32; 3], tol: f32, what: &str) {
     assert!(got[3] >= 245, "{what}: not opaque, got {got:?}");
 }
 
+/// The pixel in `r` (x, y, w, h; truncated outward) closest to `want`, as its largest channel
+/// distance: text and icon edges are anti-aliased, so a glyph is present when some pixel is its
+/// colour (and a different ink is told apart when none is). Pixels under 98% alpha are skipped:
+/// over a clear page a half-covered glyph edge is darker than its ink.
+pub fn closest(px: &Pixels, r: [f32; 4], want: [f32; 3]) -> f32 {
+    let (x0, y0) = (r[0].floor() as u32, r[1].floor() as u32);
+    let (x1, y1) = ((r[0] + r[2]).ceil() as u32, (r[1] + r[3]).ceil() as u32);
+    (y0..y1)
+        .flat_map(|y| (x0..x1).map(move |x| (x, y)))
+        .map(|(x, y)| {
+            let p = px.at(x, y);
+            if p[3] < 250 {
+                return f32::MAX;
+            }
+            (0..3)
+                .map(|i| (p[i] as f32 - want[i]).abs())
+                .fold(0.0, f32::max)
+        })
+        .fold(f32::MAX, f32::min)
+}
+
 /// `got` is not the colour `unwanted` (a neighbour that must NOT be the stroke colour):
 /// transparent counts as different.
 pub fn differs(got: [u8; 4], unwanted: [f32; 3], what: &str) {

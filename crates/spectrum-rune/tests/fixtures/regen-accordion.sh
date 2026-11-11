@@ -108,3 +108,35 @@ render() {
   done
 } | jq -sc '.' > "$out"
 echo "wrote $out"
+
+# Keyboard-focus look (--state keyboard-focus, also combined with hover): accordion_focus.json, read by
+# accordion_pixels.rs. Per case the item fill and the title and chevron colours as `r,g,b[,a]` (null
+# when none): scheme x open x quiet at M and desktop for keyboard-focus, hover and hover +
+# keyboard-focus (the oracle: the hover wash and ink), and disabled
+# + keyboard-focus, each with its rest case (the oracle draws the disabled ink; ours is not focusable).
+focus="$(dirname "$out")/accordion_focus.json"
+focus_case() {
+  local scheme=$1 open=$2 quiet=$3 dis=$4 state=$5
+  local args=(--size m --color-scheme "$scheme" --scale desktop --format scene
+    --option isOpen=$open --option isQuiet=$quiet --option isDisabled=$dis)
+  for st in ${state//+/ }; do args+=(--state "$st"); done
+  design-data render accordion "${args[@]}" | jq -c \
+    --arg scheme "$scheme" --arg state "$state" --argjson open "$open" --argjson quiet "$quiet" --argjson dis "$dis" '
+    def col: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
+    def node($p): [.nodes[] | select(.part == $p)][0];
+    {scheme: $scheme, open: $open, quiet: $quiet, disabled: $dis, state: $state,
+     item_fill: (node("item").fill | col), title: (node("title").color | col),
+     icon: (node("disclosure-icon").color | col)}'
+}
+{
+  for scheme in light dark; do for open in false true; do for quiet in false true; do
+    for state in rest hover keyboard-focus hover+keyboard-focus; do
+      focus_case $scheme $open $quiet false $state
+    done
+  done; done; done
+  for scheme in light dark; do
+    focus_case $scheme false false true rest
+    focus_case $scheme false false true keyboard-focus
+  done
+} | jq -s . > "$focus"
+echo "wrote $focus"

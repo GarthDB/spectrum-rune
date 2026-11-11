@@ -4,7 +4,14 @@
 //!
 //! Verification: geometry and fill against the oracle (`tests/radio_button.rs`); border and focus-ring colour,
 //! width, thickness and gap from pixels, against the oracle's values (`tests/radio_button_pixels.rs`). The
-//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
+//! font family is not asserted (not observable).
+//!
+//! Keyboard focus takes the oracle's hover look besides the ring (a14.34): `El::focus_fill` paints
+//! the hover fill over a selected control (neutral, or the accent when emphasized), and
+//! `hover_group_focus` + `group_color` give the label the hover ink. Not matched: the UNSELECTED
+//! control's 2px stroke, from the content colour (41 light / 219 dark) to its hover colour (19 /
+//! 242), which Rune cannot draw (no focus-visible border colour, a14.14). A disabled radio is not
+//! focusable.
 
 use crate::font;
 use crate::interaction::{Interaction, State};
@@ -119,11 +126,12 @@ impl RadioButton {
         } else {
             interaction.state()
         };
-        let pick = |rest, hover, down| match state {
+        let pick_at = |s, rest, hover, down| match s {
             State::Rest => rest,
             State::Hover => hover,
             State::Down => down,
         };
+        let pick = |rest, hover, down| pick_at(state, rest, hover, down);
         let neutral = pick(
             t.neutral_content_color_default,
             t.neutral_content_color_hover,
@@ -131,23 +139,28 @@ impl RadioButton {
         );
         // Precedence follows the recipe's priorities: disabled > emphasized > selected. The
         // oracle has no selected-down colour: a pressed selected radio keeps the default fill.
-        let fill = if !self.selected {
-            t.gray_25
-        } else if self.disabled {
-            t.disabled_content_color
-        } else if self.emphasized {
-            pick(
-                t.accent_content_color_default,
-                t.accent_content_color_hover,
-                t.accent_content_color_down,
-            )
-        } else {
-            pick(
-                t.neutral_content_color_selected_default,
-                t.neutral_content_color_selected_hover,
-                t.neutral_content_color_selected_default,
-            )
+        let fill_at = |s| {
+            if !self.selected {
+                t.gray_25
+            } else if self.disabled {
+                t.disabled_content_color
+            } else if self.emphasized {
+                pick_at(
+                    s,
+                    t.accent_content_color_default,
+                    t.accent_content_color_hover,
+                    t.accent_content_color_down,
+                )
+            } else {
+                pick_at(
+                    s,
+                    t.neutral_content_color_selected_default,
+                    t.neutral_content_color_selected_hover,
+                    t.neutral_content_color_selected_default,
+                )
+            }
         };
+        let fill = fill_at(state);
         let stroke = if self.disabled {
             t.disabled_content_color
         } else {
@@ -191,6 +204,11 @@ impl RadioButton {
         // The recipe drops the border when selected (the fill takes over).
         if !self.selected {
             control = control.border(t.border_width_200, stroke);
+        } else if !self.disabled {
+            // Keyboard focus takes the hover fill of a selected control (the oracle's keyboard-focus
+            // state), laid over it by Rune. The unselected control's stroke is not matched: no
+            // focus-visible border colour (a14.14).
+            control = control.focus_fill(fill_at(State::Hover));
         }
 
         let label_type = self.size.label_type(t);
@@ -211,6 +229,7 @@ impl RadioButton {
             .checked(self.selected)
             .focusable(!self.disabled)
             .disabled(self.disabled)
+            .hover_group_focus()
             .child(fit.part(control, d.control));
         if let Some(l) = self.label {
             let mut label = text(l.clone())
@@ -218,6 +237,11 @@ impl RadioButton {
                 .color(label_color)
                 .a11y_hidden()
                 .font(font::text_style(&label_type));
+            // The hover colour while the root shows keyboard focus (`hover_group_focus`); the
+            // oracle's down colour equals its hover colour, so a held press is not overridden.
+            if !self.disabled {
+                label = label.group_color(t.neutral_content_color_hover);
+            }
             if self.width.is_some() {
                 label = label.wrap().shrink();
             }

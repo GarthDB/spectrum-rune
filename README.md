@@ -73,7 +73,7 @@ with the pointer state it reads from `interaction::Interaction::of(key)`. The `k
 `Component::new(key)` is that lookup, so it must be unique per instance across the whole view
 (two buttons with the same key share a hover). It also prefixes the parts, `{key}/container`,
 `{key}/label` and so on, which is what `rt.find(..)` and scripts address. Keyboard focus needs no
-state: Rune draws the focus ring only for the keyboard.
+state: Rune draws the focus ring, `focus_fill` and `hover_group_focus` colours only for the keyboard.
 
 **Sizes.** Switch, Checkbox, Radio button, Button, Badge and Accordion item take `Size` (`S`, `M`,
 `L`, `XL`). Action button's recipe also has `XS`, so it takes `ActionButtonSize`; a plain `Size`
@@ -248,8 +248,10 @@ dataset changes nothing.
   Rune's instance stream says it draws, not the Metal/wgpu output (text is drawn differently, and
   tests run at scale 1), and colours are read at chosen pixels rather than from a property.
   Switch, Checkbox, Radio-button and Button (`tests/{switch,checkbox,radio_button,button}_pixels.rs`)
-  assert **border colour and width and focus-ring colour, thickness and gap** this way (and Button's
-  keyboard-focus fill, clipped to the pill, with the label on top: `button_focus_fill.json`), against
+  assert **border colour and width and focus-ring colour, thickness and gap** this way, and the
+  keyboard-focus look of all of them, Action-button (`tests/pixels.rs`) and Accordion
+  (`accordion_pixels.rs`): the focus fill inside its radius, clipped, the label / icon ink, the
+  unchanged stroke where Rune cannot change it (`*_focus.json`, `button_focus_fill.json`), against
   values read from the oracle fixtures (`*_scene.json`, `*_rings.json`, `button_focus_ring.json`),
   never from our `Tokens`: a wrong token choice cannot pass. Translucent colours are blended over the
   page in linear light, as Rune does. Border drawing in Rune is inside the box and snapped to whole
@@ -261,15 +263,24 @@ dataset changes nothing.
 
 ## Known gaps
 
-- **Keyboard-focus fill and colours.** Button takes the oracle's hover fill in keyboard focus through
-  Rune's `El::focus_fill` (a14.29). The other components still draw only the ring: Switch,
-  Checkbox, Radio-button, selected Action-button and Accordion change fills and text/icon
-  colours in the oracle's keyboard-focus state, which `focus_fill` and `hover_group_focus` +
-  `group_color` can do (beads a14.32 to a14.36; analysis in `tests/fixtures/focus-diff.sh`); Badge
-  has none. Not possible with Rune's API: a **stroke** colour in focus (the unselected Switch
-  track, Checkbox box and Radio control), and the view cannot see focus, so Button's hover +
-  keyboard-focus (focus wins over hover for an outline's stroke and label and a secondary
-  fill's label) is not drawn (beads a14.14, a14.31).
+- **Keyboard-focus look.** Keyboard focus takes the oracle's hover look besides the ring, with
+  Rune's `El::focus_fill` (an opaque fill laid over the part's own fill, never from pointer focus) and
+  `hover_group_focus` + `group_color` (text and icon colour): Button's fill (a14.29), Switch (handle
+  fill unselected, track fill selected, label), Checkbox (selected / indeterminate box fill, label),
+  Radio-button (selected control fill, label), Action-button (selected container fill, also quiet
+  and static selected + emphasized) and Accordion (title and chevron); Badge has none (not
+  focusable). Matched values (light; dark is the mirrored token): neutral `41` to `19` (dark `219`
+  to `242`), emphasized accent `59,99,251` to `39,77,234`, Checkbox error `215,50,32` to
+  `183,40,24`. Analysis in `tests/fixtures/focus-diff.sh`; beads a14.32 to a14.36.
+  **Not possible with Rune's API:** the **stroke** colour in focus of the UNSELECTED Switch track,
+  Checkbox box and Radio control (2px, `41` to `19` light, `219` to `242` dark; error Checkbox
+  `215,50,32` to `183,40,24`), which stays at its rest colour (Rune has no focus-visible border colour;
+  anomalyco/rune#106, bead a14.14); and the view cannot see focus, so Button's hover +
+  keyboard-focus (focus wins over hover for an outline's stroke and label and a secondary fill's
+  label, `41`/`218` instead of hover's `19`/`198`) is not drawn, and neither is the oracle's hover +
+  keyboard-focus for an unselected Action-button (focus wins: icon and label `41` where we draw hover's
+  `19`, and a non-quiet fill `233` where we draw hover's `225`; quiet's hover wash `225` matches) (beads
+  a14.14, a14.31).
 - **Font family.** Tests cannot observe which family Rune resolved; only the ignored font tests and the gallery's
   measurement can. (Border and ring colour and geometry of Switch, Checkbox, Radio-button and
   Button are now asserted from pixels; the family is not.)
@@ -278,7 +289,7 @@ dataset changes nothing.
   gallery notes heavier light-on-dark text in `rune-ref`). Not asserted from pixels: Button's pending
   progress ink (the oracle's `gray_800` is a colour we deliberately do not copy), selected
   Switch borders (the oracle's stroke equals the fill, so the width cannot be seen), the ring's
-  rounded corners, and the oracle's keyboard-focus colours (bead a14.14).
+  rounded corners, and the oracle's focus-visible stroke colour (bead a14.14).
 - **High contrast.** The tokens exported for high contrast are identical to regular upstream, and
   Windows forced colours are not designed.
 - **RTL** is not handled.

@@ -18,6 +18,7 @@
 #      corners (press scale and radius per size)
 #   D. flags alone, all sizes, light desktop and dark mobile: hide label, hold icon, hide label +
 #      hold icon, pending, pending + hide label, quiet + hold icon selected
+#   H. keyboard-focus look (action_button_focus.json, read by pixels.rs): see the end of this file
 #   E. press scale at the perspective clamps: a one-letter and a long label, XS, M and XL
 # Combinations an error constraint of the catalog excludes are skipped (constraints.sh); advisory
 # ones (emphasized without selected) stay. The oracle always draws the optional icon, so every
@@ -39,7 +40,8 @@ render() {
     --option "isQuiet=$q" --option "isSelected=$sel" --option "isEmphasized=$emp" --option "isDisabled=$dis"
     --option "isPending=$pend" --option "hideLabel=$hid" --option "hasHoldIcon=$hold")
   [ "$stat" != none ] && args+=(--option "staticColor=\"$stat\"")
-  [ "$state" != rest ] && args+=(--state "$state")
+  # "hover+keyboard-focus" renders the combined state.
+  [ "$state" != rest ] && for st in ${state//+/ }; do args+=(--state "$st"); done
   design-data render action-button "${args[@]}" | jq -c \
     --arg scheme "$scheme" --arg scale "$scale" --arg size "$size" --arg state "$state" --arg label "$label" \
     --arg stat "$stat" --argjson q "$q" --argjson sel "$sel" --argjson emp "$emp" --argjson dis "$dis" \
@@ -139,3 +141,34 @@ table() { # corner list, static, states
       .container |= map_values(c) | (.icon, .label_part, .hold) |= (if . then map_values(c) else . end)) | .[]' \
   | jq -sc '.[]' | sed '1s/^/[/; $!s/$/,/; $s/$/]/' > "$out"
 echo "wrote $out"
+
+# H. keyboard-focus look (--state keyboard-focus, also combined with hover): action_button_focus.json,
+#    read by tests/pixels.rs. Per case the container (size, radius, fill), the icon and label colours
+#    (the same `render` as above, so the same trimming): quiet x selected x emphasized x static (none,
+#    white, black) at M in two corners (light desktop, dark mobile), hover+keyboard-focus for every
+#    non-static one and for static selected + emphasized, sizes XS/S/L/XL for the selected neutral and
+#    emphasized looks, disabled and pending with keyboard-focus (the oracle still draws its look; ours
+#    is not focusable when disabled).
+focus="$(dirname "$out")/action_button_focus.json"
+{
+  for corner in "light desktop" "dark mobile"; do set -- $corner
+    for q in false true; do for sel in false true; do for emp in false true; do for stat in none white black; do
+      render $q $sel $emp $stat false false false false m $1 $2 Label keyboard-focus
+      [ $stat = none ] || { [ $sel = true ] && [ $emp = true ]; } &&
+        render $q $sel $emp $stat false false false false m $1 $2 Label hover+keyboard-focus
+    done; done; done; done
+    for size in xs s l xl; do for emp in false true; do
+      render false true $emp none false false false false $size $1 $2 Label keyboard-focus
+    done; done
+    for q in false true; do for sel in false true; do
+      render $q $sel $sel none true false false false m $1 $2 Label keyboard-focus
+      render $q $sel $sel none false true false false m $1 $2 Label keyboard-focus
+    done; done
+  done
+} | jq -s 'map(
+    del(.container.x, .container.y)
+    | with_entries(select(.value != null and .value != false))
+    | def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
+      .container |= map_values(c) | (.icon, .label_part) |= (if . then map_values(c) else . end)) | .[]' \
+  | jq -sc '.[]' | sed '1s/^/[/; $!s/$/,/; $s/$/]/' > "$focus"
+echo "wrote $focus"

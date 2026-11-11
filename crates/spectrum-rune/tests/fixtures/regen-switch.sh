@@ -49,3 +49,34 @@ for scheme in light dark; do for scale in desktop mobile; do for size in s m l x
 done; done; done; done | jq -s . > "$ring"
 echo "wrote $ring"
 regen_wrap switch track "$(dirname "$out")/switch_wrap.json"
+
+# Keyboard-focus look (--state keyboard-focus, also combined with hover): switch_focus.json, read by
+# switch_pixels.rs. Per case the track and handle (fill, stroke, stroke width, radius, size) and the
+# label colour, colours written as `r,g,b[,a]`: scheme x scale x selected x emphasized (M), hover
+# + keyboard-focus on desktop, and disabled + keyboard-focus (the oracle still draws its ring and
+# the disabled colours; our disabled switch is not focusable). Sizes S/L/XL on the pill radius.
+focus="$(dirname "$out")/switch_focus.json"
+focus_case() {
+  local scheme=$1 scale=$2 size=$3 sel=$4 emph=$5 dis=$6 state=$7
+  local args=(--size "$size" --option "isSelected=$sel" --option "isEmphasized=$emph" --option "isDisabled=$dis"
+              --color-scheme "$scheme" --scale "$scale" --format scene)
+  for st in ${state//+/ }; do args+=(--state "$st"); done
+  design-data render switch "${args[@]}" | jq -c \
+    --arg scheme "$scheme" --arg scale "$scale" --arg size "$size" --arg state "$state" \
+    --argjson sel "$sel" --argjson emph "$emph" --argjson dis "$dis" '
+    def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
+    def part($p): .nodes[] | select(.part == $p)
+      | {w, h, radius, fill: (.fill | c), stroke: (.stroke | c), stroke_width};
+    {scheme: $scheme, scale: $scale, size: $size, selected: $sel, emphasized: $emph, disabled: $dis,
+     state: $state, track: part("track"), handle: part("handle"),
+     label_color: (.nodes[] | select(.part == "label") | .color | c)}'
+}
+{
+  for scheme in light dark; do for scale in desktop mobile; do for sel in false true; do for emph in false true; do
+    focus_case $scheme $scale m $sel $emph false keyboard-focus
+    [ $scale = desktop ] && focus_case $scheme $scale m $sel $emph false hover+keyboard-focus
+  done; done; done
+  for sel in false true; do focus_case $scheme desktop m $sel false true keyboard-focus; done; done
+  for size in s l xl; do for sel in false true; do focus_case light desktop $size $sel true false keyboard-focus; done; done
+} | jq -s . > "$focus"
+echo "wrote $focus"
