@@ -22,8 +22,10 @@
 //!   opaque, under the content, clipped to the pill, never from pointer focus; neutral 41 to 19,
 //!   emphasized accent 59,99,251 to 39,77,234, quiet or not; a14.35). Unselected buttons and static
 //!   colours keep their fill, as the oracle does, except that a static selected + emphasized one
-//!   takes the accent hover colour. Icon and label colours do not change in focus. Disabled and
-//!   pending are not focusable / keep their fill. Nothing is left unmatched here.
+//!   takes the accent hover colour. Icon and label colours do not change in focus. Disabled is not
+//!   focusable. Not drawn: hover + keyboard-focus of an unselected button, where the oracle's focus
+//!   wins over hover (ink `41`, not hover's `19`; a non-quiet fill `233`, not hover's `225`), because
+//!   the view cannot see focus (a14.31); the hover look is drawn there.
 //!
 //! A selected button is a toggle: `.selected(..)` marks it as one (role `button`, `checked` =
 //! ARIA `aria-pressed`). `on_press` only reports the press; the app flips `selected`.

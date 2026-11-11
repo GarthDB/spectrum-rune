@@ -3,7 +3,10 @@
 # oracle (versions in oracle.toml, run from the dataset root like the regen-*.sh scripts) and prints
 # every part property the keyboard-focus state changes (fill, stroke, stroke width, text/icon colour;
 # the focus-indicator ring itself is not listed): `component | options | scheme | part.prop | rest -> focus`.
-# Used for the keyboard-focus analysis in the PR that added Button's focus fill (a14.29).
+# Used for the keyboard-focus analysis in the PR that added Button's focus fill (a14.29); the
+# Switch, Checkbox, Radio-button, Action-button and Accordion looks (a14.32 to a14.36) follow it.
+# Note: a selected / indeterminate Checkbox box and a selected Radio control have stroke_width 0 in
+# the oracle, so their `stroke` lines here are not painted; only the unselected ones are.
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/oracle.sh"
