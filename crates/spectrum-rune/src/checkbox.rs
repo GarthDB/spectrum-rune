@@ -4,7 +4,15 @@
 //!
 //! Verification: geometry and fill against the oracle (`tests/checkbox.rs`); border and focus-ring colour,
 //! width, thickness and gap from pixels, against the oracle's values (`tests/checkbox_pixels.rs`). The
-//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
+//! font family is not asserted (not observable).
+//!
+//! Keyboard focus takes the oracle's hover look besides the ring (a14.33): `El::focus_fill` paints
+//! the hover fill over a selected or indeterminate box (neutral, emphasized accent, error; a plain
+//! indeterminate box keeps its fill), and `hover_group_focus` + `group_color` give the label the
+//! hover ink. The oracle's box stroke is 0 wide on those, so only the fill matters. Not matched:
+//! the UNSELECTED box's 2px stroke, from the content colour (41 light / 219 dark; error 215,50,32 /
+//! 252,67,46) to its hover colour (19 / 242; error 183,40,24 / 255,103,86), which Rune cannot draw
+//! (no focus-visible border colour, a14.14). A disabled checkbox is not focusable.
 
 use crate::constraints::{self, OptionValue};
 use crate::font;
@@ -166,11 +174,12 @@ impl Checkbox {
         } else {
             interaction.state()
         };
-        let pick = |rest, hover, down| match state {
+        let pick_at = |s, rest, hover, down| match s {
             State::Rest => rest,
             State::Hover => hover,
             State::Down => down,
         };
+        let pick = |rest, hover, down| pick_at(state, rest, hover, down);
         let neutral = pick(
             t.neutral_content_color_default,
             t.neutral_content_color_hover,
@@ -181,32 +190,41 @@ impl Checkbox {
             t.negative_content_color_hover,
             t.negative_content_color_down,
         );
-        let accent = pick(
-            t.accent_content_color_default,
-            t.accent_content_color_hover,
-            t.accent_content_color_down,
-        );
 
         let on = self.selected || self.indeterminate;
         // Precedence follows the recipe's priorities: disabled > error > emphasized > selected.
         // A plain indeterminate box keeps the default selected fill in every state (oracle).
-        let fill = if !on {
-            t.gray_25
-        } else if self.disabled {
-            t.disabled_content_color
-        } else if self.error {
-            negative
-        } else if self.emphasized {
-            accent
-        } else if self.indeterminate {
-            t.neutral_background_color_selected_default
-        } else {
-            pick(
-                t.neutral_background_color_selected_default,
-                t.neutral_background_color_selected_hover,
-                t.neutral_background_color_selected_down,
-            )
+        let fill_at = |s| {
+            if !on {
+                t.gray_25
+            } else if self.disabled {
+                t.disabled_content_color
+            } else if self.error {
+                pick_at(
+                    s,
+                    t.negative_content_color_default,
+                    t.negative_content_color_hover,
+                    t.negative_content_color_down,
+                )
+            } else if self.emphasized {
+                pick_at(
+                    s,
+                    t.accent_content_color_default,
+                    t.accent_content_color_hover,
+                    t.accent_content_color_down,
+                )
+            } else if self.indeterminate {
+                t.neutral_background_color_selected_default
+            } else {
+                pick_at(
+                    s,
+                    t.neutral_background_color_selected_default,
+                    t.neutral_background_color_selected_hover,
+                    t.neutral_background_color_selected_down,
+                )
+            }
         };
+        let fill = fill_at(state);
         let stroke = if self.disabled {
             t.disabled_content_color
         } else if self.error {
@@ -252,6 +270,12 @@ impl Checkbox {
         if !on {
             control = control.border(t.border_width_200, stroke);
         }
+        // Keyboard focus takes the hover fill of a selected or indeterminate box (the oracle's
+        // keyboard-focus state), laid over it by Rune. A plain indeterminate box keeps its fill.
+        // The unselected box's stroke is not matched: no focus-visible border colour (a14.14).
+        if on && !self.disabled && fill_at(State::Hover) != fill_at(State::Rest) {
+            control = control.focus_fill(fill_at(State::Hover));
+        }
 
         let fit = Fit::new(
             self.label.as_deref(),
@@ -269,6 +293,7 @@ impl Checkbox {
             .role("checkbox")
             .focusable(!self.disabled)
             .disabled(self.disabled)
+            .hover_group_focus()
             .child(fit.part(control, d.control));
         root = if self.indeterminate {
             root.checked_mixed()
@@ -281,6 +306,11 @@ impl Checkbox {
                 .color(label_color)
                 .a11y_hidden()
                 .font(font::text_style(&d.label));
+            // The hover colour while the root shows keyboard focus (`hover_group_focus`); the
+            // oracle's down colour equals its hover colour, so a held press is not overridden.
+            if !self.disabled {
+                label = label.group_color(t.neutral_content_color_hover);
+            }
             if self.width.is_some() {
                 label = label.wrap().shrink();
             }

@@ -59,3 +59,42 @@ for scheme in light dark; do for scale in desktop mobile; do for size in s m l x
 done; done; done; done | jq -s . > "$ring"
 echo "wrote $ring"
 regen_wrap checkbox box "$(dirname "$out")/checkbox_wrap.json"
+
+# Keyboard-focus look (--state keyboard-focus, also combined with hover): checkbox_focus.json, read by
+# checkbox_pixels.rs. Per case the box (fill, stroke, stroke width, radius, size), the mark's colour
+# and the label colour, colours written as `r,g,b[,a]`: scheme x scale x value x emphasized x error
+# (M), hover + keyboard-focus on desktop, disabled + keyboard-focus (the oracle still draws its ring
+# and the disabled colours; our disabled checkbox is not focusable), and sizes S/L/XL (the radius).
+focus="$(dirname "$out")/checkbox_focus.json"
+focus_case() {
+  local scheme=$1 scale=$2 size=$3 value=$4 emph=$5 err=$6 dis=$7 state=$8
+  local args=(--size "$size" --option "isEmphasized=$emph" --option "isError=$err" --option "isDisabled=$dis"
+              --color-scheme "$scheme" --scale "$scale" --format scene)
+  [ "$value" = selected ] && args+=(--option isSelected=true)
+  [ "$value" = indeterminate ] && args+=(--option isIndeterminate=true)
+  for st in ${state//+/ }; do args+=(--state "$st"); done
+  design-data render checkbox "${args[@]}" | jq -c \
+    --arg scheme "$scheme" --arg scale "$scale" --arg size "$size" --arg state "$state" --arg value "$value" \
+    --argjson emph "$emph" --argjson err "$err" --argjson dis "$dis" '
+    def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
+    ([.nodes[] | select(.part == "checkmark" or .part == "dash")] | first) as $m
+    | (.nodes[] | select(.part == "box")) as $b
+    | {scheme: $scheme, scale: $scale, size: $size, value: $value, emphasized: $emph, error: $err,
+       disabled: $dis, state: $state,
+       box: ($b | {w, h, radius, fill: (.fill | c), stroke: (.stroke | c), stroke_width}),
+       mark: (if $m then {part: $m.part, color: ($m.color | c)} else null end),
+       label_color: (.nodes[] | select(.part == "label") | .color | c)}'
+}
+{
+  for scheme in light dark; do for scale in desktop mobile; do for value in unselected selected indeterminate; do
+    for emph in false true; do for err in false true; do
+      focus_case $scheme $scale m $value $emph $err false keyboard-focus
+      [ $scale = desktop ] && focus_case $scheme $scale m $value $emph $err false hover+keyboard-focus
+    done; done
+  done; done; done
+  for value in unselected selected; do focus_case light desktop m $value false false true keyboard-focus; done
+  for size in s l xl; do for value in unselected selected indeterminate; do
+    focus_case light desktop $size $value true false false keyboard-focus
+  done; done
+} | jq -s . > "$focus"
+echo "wrote $focus"

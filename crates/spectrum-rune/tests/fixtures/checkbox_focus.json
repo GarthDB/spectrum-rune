@@ -1,0 +1,1827 @@
+[
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "183,40,24",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "183,40,24",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "183,40,24",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "183,40,24",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "19,19,19",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "19,19,19",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "41,41,41",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "41,41,41",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "183,40,24",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "183,40,24",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "19,19,19",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "41,41,41",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "183,40,24",
+      "stroke": "183,40,24",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "242,242,242",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "242,242,242",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "255,103,86",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "255,103,86",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "242,242,242",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "242,242,242",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "255,103,86",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "255,103,86",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "242,242,242",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "242,242,242",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "105,149,254",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "105,149,254",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "219,219,219",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "219,219,219",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "105,149,254",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "105,149,254",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "hover+keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "242,242,242",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "255,103,86",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "242,242,242",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "17,17,17",
+      "stroke": "255,103,86",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "242,242,242",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "105,149,254",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "selected",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "219,219,219",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": false,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "105,149,254",
+      "stroke": "242,242,242",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": true,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 4.0,
+      "fill": "255,103,86",
+      "stroke": "255,103,86",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "17,17,17"
+    },
+    "label_color": "242,242,242"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "unselected",
+    "emphasized": false,
+    "error": false,
+    "disabled": true,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "255,255,255",
+      "stroke": "198,198,198",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "198,198,198"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "value": "selected",
+    "emphasized": false,
+    "error": false,
+    "disabled": true,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 16.0,
+      "h": 16.0,
+      "radius": 4.0,
+      "fill": "198,198,198",
+      "stroke": "198,198,198",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "198,198,198"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 14.0,
+      "h": 14.0,
+      "radius": 3.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 14.0,
+      "h": 14.0,
+      "radius": 3.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 14.0,
+      "h": 14.0,
+      "radius": 3.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 18.0,
+      "h": 18.0,
+      "radius": 5.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 18.0,
+      "h": 18.0,
+      "radius": 5.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 18.0,
+      "h": 18.0,
+      "radius": 5.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "value": "unselected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 6.0,
+      "fill": "255,255,255",
+      "stroke": "19,19,19",
+      "stroke_width": 2.0
+    },
+    "mark": null,
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "value": "selected",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 6.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "checkmark",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "value": "indeterminate",
+    "emphasized": true,
+    "error": false,
+    "disabled": false,
+    "state": "keyboard-focus",
+    "box": {
+      "w": 20.0,
+      "h": 20.0,
+      "radius": 6.0,
+      "fill": "39,77,234",
+      "stroke": "19,19,19",
+      "stroke_width": 0.0
+    },
+    "mark": {
+      "part": "dash",
+      "color": "255,255,255"
+    },
+    "label_color": "19,19,19"
+  }
+]
