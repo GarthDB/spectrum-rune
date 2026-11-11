@@ -27,8 +27,8 @@ repo uses (the workspace `Cargo.toml` is the source of truth):
 ```toml
 [dependencies]
 spectrum-rune = { path = "../spectrum-rune/crates/spectrum-rune" }
-rune = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830" }
-rune-kit = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830" }
+rune = { git = "https://github.com/anomalyco/rune", rev = "16697feebc536c8cd09c28d62105ea5d46cb024a" }
+rune-kit = { git = "https://github.com/anomalyco/rune", rev = "16697feebc536c8cd09c28d62105ea5d46cb024a" }
 ```
 
 `rune-kit` is needed because Button and Action button borrow its progress indicator.
@@ -248,7 +248,8 @@ dataset changes nothing.
   Rune's instance stream says it draws, not the Metal/wgpu output (text is drawn differently, and
   tests run at scale 1), and colours are read at chosen pixels rather than from a property.
   Switch, Checkbox, Radio-button and Button (`tests/{switch,checkbox,radio_button,button}_pixels.rs`)
-  assert **border colour and width and focus-ring colour, thickness and gap** this way, against
+  assert **border colour and width and focus-ring colour, thickness and gap** this way (and Button's
+  keyboard-focus fill, clipped to the pill, with the label on top: `button_focus_fill.json`), against
   values read from the oracle fixtures (`*_scene.json`, `*_rings.json`, `button_focus_ring.json`),
   never from our `Tokens`: a wrong token choice cannot pass. Translucent colours are blended over the
   page in linear light, as Rune does. Border drawing in Rune is inside the box and snapped to whole
@@ -260,10 +261,15 @@ dataset changes nothing.
 
 ## Known gaps
 
-- **Keyboard-focus fill.** The oracle's Button takes the hover fill in the keyboard-focus state
-  (spectrum-design-data #1704); Rune gives `Interaction` no focus state, so only the ring is drawn.
-- **Keyboard-focus colours.** Rune draws a focus ring in one colour; Spectrum's per-variant
-  keyboard-focus colours need a Rune change (bead a14.14).
+- **Keyboard-focus fill and colours.** Button takes the oracle's hover fill in keyboard focus through
+  Rune's `El::focus_fill` (a14.29). The other components still draw only the ring: Switch,
+  Checkbox, Radio-button, selected Action-button and Accordion change fills and text/icon
+  colours in the oracle's keyboard-focus state, which `focus_fill` and `hover_group_focus` +
+  `group_color` can do (beads a14.32 to a14.36; analysis in `tests/fixtures/focus-diff.sh`); Badge
+  has none. Not possible with Rune's API: a **stroke** colour in focus (the unselected Switch
+  track, Checkbox box and Radio control), and the view cannot see focus, so Button's hover +
+  keyboard-focus (focus wins over hover for an outline's stroke and label and a secondary
+  fill's label) is not drawn (beads a14.14, a14.31).
 - **Font family.** Tests cannot observe which family Rune resolved; only the ignored font tests and the gallery's
   measurement can. (Border and ring colour and geometry of Switch, Checkbox, Radio-button and
   Button are now asserted from pixels; the family is not.)

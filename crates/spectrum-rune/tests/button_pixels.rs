@@ -1,8 +1,8 @@
 //! Pixel assertions for the Button, which `ElementInfo` cannot give: the outline border (colour and
 //! 2px width, none for fills), the fill as painted over a backdrop (static colours are translucent),
-//! and the focus ring (colour, thickness, gap), including the white and black rings of static
+//! the keyboard-focus fill, and the focus ring (colour, thickness, gap), including the white and black rings of static
 //! primary and secondary. Every expected value comes from the oracle fixtures (`button_scene.json`,
-//! `button_focus_ring.json`, from `design-data render button --format scene`), never from our
+//! `button_focus_ring.json`, `button_focus_fill.json`, from `design-data render button --format scene`), never from our
 //! `Tokens`. See `support/pixels.rs` for how it is rendered and its limits.
 //!
 //! Not asserted: the pending progress ink. The oracle draws it `gray_800` (invisible on a primary
@@ -244,4 +244,189 @@ fn no_ring_without_keyboard_focus() {
     rt.key(KeyEvent::from(Key::Tab));
     settle(&mut rt);
     ring.assert_absent(&Pixels::of(&rt, SIZE), b, &SIDES, "disabled, Tab pressed");
+}
+
+/// What the oracle gives hover + keyboard-focus that a Button cannot: the view never sees focus, so
+/// the stroke and label of an outline button, and the label of a secondary fill, stay at their
+/// hover colours where the oracle lets focus win (a14.31). Only the fill is compared there.
+fn focus_beats_hover(c: &Value) -> bool {
+    c["state"] == "hover+keyboard-focus"
+        && !c["disabled"].as_bool().unwrap_or(false)
+        && (c["style"] == "outline" || c["variant"] == "secondary")
+}
+
+/// The pixel in `r` (x, y, w, h; truncated outward) closest to `want`, as its largest channel
+/// distance: text and icon edges are anti-aliased, so a glyph is present when some pixel is its
+/// colour.
+fn closest(px: &Pixels, r: [f32; 4], want: [f32; 3]) -> f32 {
+    let (x0, y0) = (r[0].floor() as u32, r[1].floor() as u32);
+    let (x1, y1) = ((r[0] + r[2]).ceil() as u32, (r[1] + r[3]).ceil() as u32);
+    (y0..y1)
+        .flat_map(|y| (x0..x1).map(move |x| (x, y)))
+        .map(|(x, y)| {
+            let p = px.at(x, y);
+            (0..3)
+                .map(|i| (p[i] as f32 - want[i]).abs())
+                .fold(0.0, f32::max)
+        })
+        .fold(f32::MAX, f32::min)
+}
+
+/// Keyboard focus (Tab) fills the pill with the oracle's keyboard-focus fill, `button_focus_fill.json`:
+/// inside the pill (at the left, top and bottom edges, as `border_and_fill_match_oracle` does), the
+/// pill's corner pixel is still the page (the fill is clipped to the radius), the icon and label
+/// are still drawn over it in the oracle's colour (translucent static colours composed over the
+/// fill), and an outline's stroke is unchanged. Also hover + keyboard-focus (Tab, then the pointer
+/// moves in), down + keyboard-focus (Tab, then the pointer presses: a press moves focus to the
+/// pointer, so Rune drops the keyboard fill and what is left is the oracle's down look), a
+/// disabled button that Tab cannot reach, and pending.
+#[test]
+fn keyboard_focus_fill_matches_oracle() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/button_focus_fill.json")).unwrap();
+    assert_eq!(cases.len(), 118);
+    let (mut filled, mut stroked, mut contents) = (0, 0, 0);
+    for c in &cases {
+        let mut what = c.to_string();
+        what.truncate(200);
+        let mut rt = runtime(App {
+            backdrop: true,
+            ..app_for(c)
+        });
+        let (x, y) = rt.find("bt/container").unwrap();
+        rt.key(KeyEvent::from(Key::Tab));
+        match c["state"].as_str().unwrap() {
+            "hover+keyboard-focus" => rt.pointer_move(x, y),
+            "down+keyboard-focus" => rt.pointer_down(x, y),
+            _ => {}
+        }
+        settle(&mut rt);
+        let b = container(&rt);
+        let r = b.rect;
+        let down = c["state"] == "down+keyboard-focus";
+        let px = Pixels::of(&rt, SIZE);
+        let want = &c["container"];
+        let fill_s = want["fill"].as_str().unwrap_or("transparent");
+        let stroke_s = want["stroke"].as_str().unwrap_or("transparent");
+        let fill = composite(&[fill_s], BACKDROP_RGB);
+        let page = BACKDROP_RGB.map(f32::from);
+        let gap = focus_beats_hover(c);
+        let sw = f(&want["stroke_width"]);
+        for side in SIDES {
+            let w = format!("{what} {side:?}");
+            let at = |d| probe_snapped(&px, r, side, d);
+            near(at(3), fill, &format!("{w}: the fill, inside the stroke"));
+            filled += 1;
+            if sw > 0.0 && !gap && !down {
+                near(
+                    at(1),
+                    composite(&[fill_s, stroke_s], BACKDROP_RGB),
+                    &format!("{w}: stroke unchanged"),
+                );
+                stroked += 1;
+            }
+        }
+        // Corner: the bounding box's corner pixel is outside the pill, so it must still be the page
+        // where an unclipped fill would show. It is 5.9px off the arc at radius 16, clear of the
+        // ring (2px gap, 2px wide); at S's radius 12 it is 4.3px, on the ring's soft outer edge,
+        // so there it only must not be the fill.
+        if !down {
+            let (x0, y0) = (r[0].round() as u32, r[1].round() as u32);
+            let corner = px.at(x0, y0);
+            let what = format!("{what}: clipped at the corner");
+            if f(&want["radius"]) >= 14.0 {
+                near(corner, page, &what);
+            } else {
+                differs(corner, fill, &what);
+            }
+        }
+        if gap || c["pending"].as_bool().unwrap_or(false) {
+            continue;
+        }
+        // Still on top of the fill, at the oracle's colour. Pressed buttons scale about the centre.
+        let origin = [r[0], r[1]];
+        for (part, h) in [("icon", None), ("label_part", Some(f(&c["icon"]["h"])))] {
+            let Some(p) = c.get(part) else { continue };
+            let k = if down { 0.93 } else { 1.0 };
+            let (pw, ph) = (f(&p["w"]) * k, h.unwrap_or_else(|| f(&p["h"])) * k);
+            let box_ = [
+                origin[0] + f(&p["x"]) * k,
+                origin[1] + f(&p["y"]) * k,
+                pw,
+                ph,
+            ];
+            let ink = p["color"].as_str().unwrap();
+            let want = composite(&[fill_s, ink], BACKDROP_RGB);
+            let d = closest(&px, box_, want);
+            assert!(
+                d <= 12.0,
+                "{what}: {part} not drawn over the fill ({d} off {want:?})"
+            );
+            contents += 1;
+        }
+    }
+    assert!(
+        filled > 300 && stroked > 40 && contents > 150,
+        "{filled} {stroked} {contents}"
+    );
+}
+
+/// Pointer focus never paints the fill: after a click (and the pointer leaving) the pill is the
+/// oracle's rest fill and focus is not visible; a Tab afterwards does show it.
+#[test]
+fn pointer_focus_paints_no_focus_fill() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/button_scene.json")).unwrap();
+    let rest = |variant, style| {
+        let c = cases.iter().find(|c| {
+            c["state"] == "rest"
+                && c["variant"] == variant
+                && c["style"] == style
+                && c["size"] == "m"
+                && c["scheme"] == "light"
+                && c["scale"] == "desktop"
+                && c.get("disabled").is_none()
+                && c.get("static").is_none()
+                && c.get("pending").is_none()
+        });
+        c.unwrap().clone()
+    };
+    for (variant, style) in [
+        ("accent", "fill"),
+        ("primary", "fill"),
+        ("secondary", "fill"),
+    ] {
+        let c = rest(variant, style);
+        let mut rt = runtime(App {
+            backdrop: true,
+            ..app_for(&c)
+        });
+        let (x, y) = rt.find("bt/container").unwrap();
+        rt.pointer_down(x, y);
+        rt.pointer_up(x, y);
+        rt.pointer_move(1.0, 1.0);
+        settle(&mut rt);
+        let b = container(&rt);
+        assert!(
+            !b.focus_visible,
+            "{variant}: a click shows no keyboard focus"
+        );
+        let fill = composite(&[c["container"]["fill"].as_str().unwrap()], BACKDROP_RGB);
+        let probe = |rt: &Runtime<App>| {
+            probe_snapped(&Pixels::of(rt, SIZE), container(rt).rect, Side::Left, 3)
+        };
+        near(
+            probe(&rt),
+            fill,
+            &format!("{variant}: clicked, still the rest fill"),
+        );
+        rt.key(KeyEvent::from(Key::Tab));
+        settle(&mut rt);
+        assert!(container(&rt).focus_visible);
+        differs(
+            probe(&rt),
+            fill,
+            &format!("{variant}: Tab shows the focus fill"),
+        );
+    }
 }
