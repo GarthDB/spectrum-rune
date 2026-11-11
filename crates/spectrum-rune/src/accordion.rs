@@ -20,6 +20,12 @@
 //!   of the chevron and the title (the oracle's `content` is at the item's x, full width, and
 //!   neither the recipe nor the catalog has a token for an inset). It is kept as rendered; an app
 //!   that wants the content under the title pads it itself (a14.24).
+//! - Keyboard focus takes the hover ink: the title and chevron go to `neutral_content_color_hover`
+//!   (41 to 19 light, 219 to 242 dark) through `hover_group_focus` + `group_color` on the header's
+//!   children (a14.36); the item fill does not change, as in the oracle, which also gives hover +
+//!   keyboard-focus the hover wash and ink, as here. A press (held, not focused) draws the rest
+//!   ink, as the oracle's `down`. Disabled is not focusable and keeps its colour. Nothing is
+//!   left unmatched here.
 //!
 //! The header is a `button` that reports its press through `on_toggle` and exposes `expanded`
 //! (ARIA `aria-expanded`); the app owns `open`. Opening and closing spring the content's height
@@ -240,6 +246,15 @@ impl AccordionItem {
         let part = |name: &str| format!("{}/{name}", self.key);
         let interaction = Interaction::of(&self.key);
         let hover = !self.disabled && interaction.state() == State::Hover;
+        // The hover colour while the header shows keyboard focus (`hover_group_focus`), the
+        // oracle's keyboard-focus ink. Only at rest: the oracle draws a press like rest (`down` is
+        // not visual), and a group colour would turn a held press to the hover colour.
+        let focus_ink = (!self.disabled && interaction.state() == State::Rest)
+            .then_some(t.neutral_content_color_hover);
+        let tint = |e: El| match focus_ink {
+            Some(c) => e.group_color(c),
+            None => e,
+        };
 
         let ink = if self.disabled {
             t.disabled_content_color
@@ -271,15 +286,16 @@ impl AccordionItem {
                 -t.focus_indicator_thickness,
                 t.focus_indicator_color,
             )
-            .child(
+            .hover_group_focus()
+            .child(tint(
                 icon(d.glyph, d.chevron)
                     .key(part("disclosure-icon"))
                     .color(ink)
                     .a11y_hidden()
                     // The recipe's rotation is the literal 90 degrees when open.
                     .icon_rotation(if self.open { FRAC_PI_2 } else { 0.0 }),
-            )
-            .child(
+            ))
+            .child(tint(
                 text(self.title.clone())
                     .key(part("title"))
                     .color(ink)
@@ -291,7 +307,7 @@ impl AccordionItem {
                     .ml(d.title_pad)
                     .mr(d.title_pad)
                     .my(d.title_pad_v),
-            );
+            ));
         if !self.disabled {
             header = interaction.attach(header);
             if let Some(p) = self.press {
