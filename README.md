@@ -27,8 +27,8 @@ repo uses (the workspace `Cargo.toml` is the source of truth):
 ```toml
 [dependencies]
 spectrum-rune = { path = "../spectrum-rune/crates/spectrum-rune" }
-rune = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830" }
-rune-kit = { git = "https://github.com/anomalyco/rune", rev = "07c369b13e8bd82c3f0a74164bd132965de88830" }
+rune = { git = "https://github.com/anomalyco/rune", rev = "16697feebc536c8cd09c28d62105ea5d46cb024a" }
+rune-kit = { git = "https://github.com/anomalyco/rune", rev = "16697feebc536c8cd09c28d62105ea5d46cb024a" }
 ```
 
 `rune-kit` is needed because Button and Action button borrow its progress indicator.
