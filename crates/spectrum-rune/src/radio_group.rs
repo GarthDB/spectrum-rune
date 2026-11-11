@@ -57,7 +57,13 @@ impl RadioGroup {
     }
     /// An option: `value` identifies it (unique in the group), `label` is shown.
     pub fn item(mut self, value: impl Into<String>, label: impl Into<String>) -> Self {
-        self.items.push((value.into(), label.into()));
+        let value = value.into();
+        debug_assert!(
+            self.items.iter().all(|(v, _)| *v != value),
+            "RadioGroup `{}`: duplicate item value `{value}` (items are keyed by value)",
+            self.key
+        );
+        self.items.push((value, label.into()));
         self
     }
     /// The selected value; none selected when absent or not an item.

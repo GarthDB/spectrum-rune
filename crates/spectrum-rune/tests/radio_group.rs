@@ -177,3 +177,9 @@ fn one_selected_and_disabled_group_is_inert() {
     settle(&mut rt);
     assert!(rt.state.changes.is_empty());
 }
+
+#[test]
+#[should_panic(expected = "duplicate item value")]
+fn duplicate_item_values_are_rejected() {
+    let _ = RadioGroup::new("g").item("a", "One").item("a", "Two");
+}
