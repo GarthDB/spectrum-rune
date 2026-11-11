@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Regenerates radio_group_scene.json from the oracle: the `radio-group` recipe in platforms/rune/extensions/visuals
 # (the foundation has none), rendered as the `rune` platform by `design-data` (versions in oracle.toml) against the
-# oracle dataset checkout at $1 (see regen-radio-button.sh). Coordinates are relative to the container.
+# pinned foundation release (see regen-radio-button.sh). Coordinates are relative to the container.
 # The recipe's nested radio buttons carry no label, so only the gap between items and the item height are compared.
 set -euo pipefail
 root="${1:-}"

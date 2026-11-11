@@ -3,7 +3,10 @@
 # is allowed, and aborts the script if the catalog or filter is broken. Reads the component with `design-data component`.
 constraints_jq="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/constraints.jq"
 excluded() {
-  local r
-  r=$(design-data component "$1" 2>/dev/null | jq -r --argjson o "$2" -f "$constraints_jq") || exit 1
+  local r err
+  err=$(mktemp)
+  # The CLI's stderr is shown only when it fails (a fetch error, an unknown component).
+  r=$(design-data component "$1" 2>"$err" | jq -r --argjson o "$2" -f "$constraints_jq") || { cat "$err" >&2; rm -f "$err"; exit 1; }
+  rm -f "$err"
   [ "$r" = true ]
 }
