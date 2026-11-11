@@ -261,12 +261,15 @@ dataset changes nothing.
 
 ## Known gaps
 
-- **Keyboard-focus fill.** Button takes the oracle's hover fill in keyboard focus through Rune's
-  `El::focus_fill` (a14.29). The other components' keyboard-focus looks are analysed in a14.14.
-- **Keyboard-focus colours.** Rune draws a focus ring in one colour and has no stroke colour for
-  `:focus-visible`; the view cannot see focus, so a stroke or label colour that the oracle changes
-  in keyboard focus, and Button's hover + keyboard-focus (focus wins over hover for an outline's
-  stroke and label, and a secondary fill's label), are not drawn (beads a14.14, a14.31).
+- **Keyboard-focus fill and colours.** Button takes the oracle's hover fill in keyboard focus through
+  Rune's `El::focus_fill` (a14.29). The other components still draw only the ring: Switch,
+  Checkbox, Radio-button, selected Action-button and Accordion change fills and text/icon
+  colours in the oracle's keyboard-focus state, which `focus_fill` and `hover_group_focus` +
+  `group_color` can do (beads a14.32 to a14.36; analysis in `tests/fixtures/focus-diff.sh`); Badge
+  has none. Not possible with Rune's API: a **stroke** colour in focus (the unselected Switch
+  track, Checkbox box and Radio control), and the view cannot see focus, so Button's hover +
+  keyboard-focus (focus wins over hover for an outline's stroke and label and a secondary
+  fill's label) is not drawn (beads a14.14, a14.31).
 - **Font family.** Tests cannot observe which family Rune resolved; only the ignored font tests and the gallery's
   measurement can. (Border and ring colour and geometry of Switch, Checkbox, Radio-button and
   Button are now asserted from pixels; the family is not.)
