@@ -42,7 +42,8 @@ render() {
     --option "variant=\"$variant\"" --option "style=\"$style\"" --option "isDisabled=$dis"
     --option "isPending=$pend" --option "isLabelHidden=$hid")
   [ "$stat" != none ] && args+=(--option "staticColor=\"$stat\"")
-  [ "$state" != rest ] && args+=(--state "$state")
+  # "hover+keyboard-focus" renders the combined state.
+  [ "$state" != rest ] && for st in ${state//+/ }; do args+=(--state "$st"); done
   design-data render button "${args[@]}" | jq -c \
     --arg scheme "$scheme" --arg scale "$scale" --arg variant "$variant" --arg style "$style" \
     --arg size "$size" --arg state "$state" --arg label "$label" --arg stat "$stat" \
@@ -73,6 +74,13 @@ ring_case() {
     --argjson meta "{\"scheme\":\"$1\",\"scale\":\"$2\",\"size\":\"$3\",\"variant\":\"$4\",\"style\":\"$5\",\"static\":$([ "$6" = none ] && echo null || echo "\"$6\"")}" \
     -f "$(dirname "$out")/ring.jq"
 }
+
+# Drops what the tests do not read (shared by both scene files).
+tidy='map(
+    del(.container.x, .container.y)
+    | with_entries(select(.value != null and .value != false))
+    | def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
+      .container |= map_values(c) | (.icon, .label_part) |= (if . then map_values(c) else . end))'
 
 {
   # A
@@ -123,11 +131,7 @@ ring_case() {
     render accent fill $size light desktop A false false false none down
     render accent fill $size light desktop "A much longer label here" false false false none down
   done
-} | jq -s 'map(
-    del(.container.x, .container.y)
-    | with_entries(select(.value != null and .value != false))
-    | def c: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
-      .container |= map_values(c) | (.icon, .label_part) |= (if . then map_values(c) else . end))' > "$out"
+} | jq -s "$tidy" > "$out"
 echo "wrote $out"
 
 # F
@@ -146,6 +150,40 @@ ring="$(dirname "$out")/button_focus_ring.json"
   done; done; done
 } | jq -s . > "$ring"
 echo "wrote $ring"
+
+# H. keyboard-focus fill (button_focus_fill.json, read by button_pixels.rs); a "+" renders states combined:
+#    keyboard-focus alone for variant x style x scheme x scale at M, for static white / black in two
+#    corners, and for sizes S/L/XL (the pill radius) on accent and secondary fills; hover+keyboard-focus
+#    and down+keyboard-focus for every variant x style in two corners; disabled and pending (with
+#    hover) with keyboard-focus on accent / primary / secondary x fill / outline in two corners.
+fill="$(dirname "$out")/button_focus_fill.json"
+{
+  for scheme in light dark; do for scale in desktop mobile; do
+    for variant in accent negative primary secondary; do for style in fill outline; do
+      render $variant $style m $scheme $scale Label false false false none keyboard-focus
+    done; done
+    for size in s l xl; do
+      render accent fill $size $scheme $scale Label false false false none keyboard-focus
+      render secondary fill $size $scheme $scale Label false false false none keyboard-focus
+    done
+  done; done
+  for corner in "light desktop" "dark mobile"; do set -- $corner
+    for variant in primary secondary; do for style in fill outline; do for stat in white black; do
+      render $variant $style m $1 $2 Label false false false $stat keyboard-focus
+    done; done; done
+    for variant in accent negative primary secondary; do for style in fill outline; do
+      for state in hover+keyboard-focus down+keyboard-focus; do
+        render $variant $style m $1 $2 Label false false false none $state
+      done
+    done; done
+    for variant in accent primary secondary; do for style in fill outline; do
+      render $variant $style m $1 $2 Label true false false none keyboard-focus
+      render $variant $style m $1 $2 Label false true false none keyboard-focus
+      render $variant $style m $1 $2 Label false true false none hover+keyboard-focus
+    done; done
+  done
+} | jq -s "$tidy" > "$fill"
+echo "wrote $fill"
 
 # G. request width (wrap.sh): the label wraps, the button grows a line height per extra line; a width
 #    below the minimum width (2.25 x height) is lifted to it. One case has a one-letter label.

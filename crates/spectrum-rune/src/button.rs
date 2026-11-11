@@ -14,12 +14,16 @@
 //! - `static_color` only changes primary and secondary; on accent and negative it changes nothing.
 //! - The focus ring is white or black for primary and secondary with a static colour, and
 //!   `focus_indicator_color` otherwise (static colour is a no-op on accent and negative).
+//! - Keyboard focus takes the hover fill besides the ring (`El::focus_fill`: opaque, under the
+//!   content, clipped to the pill, never from pointer focus). Not drawn: the oracle's focus and
+//!   hover + focus colours for the stroke and label of outline buttons and of secondary fills
+//!   (focus beats hover there), because the view cannot see focus (bead a14.31).
 //! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
 //!   draw it in the content colour instead (the one deliberate departure).
 //!
 //! Verification: geometry and fill against the oracle (`tests/button.rs`); border and focus-ring colour,
 //! width, thickness and gap from pixels, against the oracle's values (`tests/button_pixels.rs`). The
-//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
+//! font family is not asserted (not observable); the oracle's keyboard-focus stroke colours are not implemented (a14.14).
 
 use crate::constraints::{self, OptionValue};
 use crate::font;
@@ -485,6 +489,16 @@ impl Button {
             );
         if let Some(c) = look.stroke {
             root = root.border(t.border_width_200, c);
+        }
+        // Keyboard focus takes the hover fill (the oracle's keyboard-focus state), laid over the
+        // fill by Rune. Outline buttons keep theirs, and so do static colours (hover = rest).
+        if !self.disabled && self.style == Style::Fill {
+            let at = |s| {
+                crate::button::look(t, self.variant, self.style, self.static_color, false, s).fill
+            };
+            if let Some(f) = at(State::Hover).filter(|f| Some(*f) != at(State::Rest)) {
+                root = root.focus_fill(f);
+            }
         }
         if let Some(l) = &self.label {
             root = root.label(l.clone());
