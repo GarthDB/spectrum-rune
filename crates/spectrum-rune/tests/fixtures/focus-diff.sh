@@ -10,7 +10,7 @@
 set -euo pipefail
 root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/oracle.sh"
-cd "$root"
+oracle_cd
 
 props='[.nodes[] | select(.part != "focus-indicator") | {p: .part, fill, stroke, stroke_width, color}]'
 # diff component "options" scheme [render args...]

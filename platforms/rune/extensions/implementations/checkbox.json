@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opensource.adobe.com/spectrum-design-data/schemas/v0/implementation-mapping.schema.json",
+  "component": "checkbox",
+  "implementations": [
+    {
+      "platform": "desktop",
+      "componentName": "Checkbox",
+      "package": "spectrum-rune",
+      "importPath": "spectrum_rune::checkbox::Checkbox"
+    }
+  ]
+}

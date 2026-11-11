@@ -28,7 +28,7 @@ root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/action_button_scene.json"
-cd "$root"
+oracle_cd
 
 # render quiet selected emphasized static disabled pending hidden hold size scheme scale label state
 render() {

@@ -11,7 +11,7 @@ source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/checkbox_scene.json"
-cd "$root"
+oracle_cd
 {
   for scheme in light dark; do for scale in desktop mobile; do
     for size in s m l xl; do for value in unselected selected indeterminate; do

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opensource.adobe.com/spectrum-design-data/schemas/v0/implementation-mapping.schema.json",
+  "component": "radio-button",
+  "implementations": [
+    {
+      "platform": "desktop",
+      "componentName": "RadioButton",
+      "package": "spectrum-rune",
+      "importPath": "spectrum_rune::radio_button::RadioButton"
+    }
+  ]
+}

@@ -23,3 +23,24 @@ case "$dataset_head" in
   "$oracle_dataset"*) ;;
   *) echo "warning: dataset $dataset_head is not the commit oracle.toml records ($oracle_dataset)" >&2 ;;
 esac
+
+# Runs the CLI as the `rune` platform: from a scratch dir whose .design-data.toml reads the foundation
+# from $root (the pinned oracle checkout) and the manifest from platforms/rune. A github [source]
+# cannot be used here: the CLI (0.27.1) fetches no relationships, visuals or icons from it.
+oracle_cd() {
+  local repo
+  repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+  oracle_scratch="$(mktemp -d)"
+  trap 'rm -rf "$oracle_scratch"' EXIT
+  printf 'default_platform = "rune"\n[source]\ntype = "path"\nroot = "%s"\n[platforms]\nrune = "%s/platforms/rune/manifest.json"\n' \
+    "$root" "$repo" > "$oracle_scratch/.design-data.toml"
+  cd "$oracle_scratch"
+}
+
+# The manifest pins the foundation by release tag, oracle.toml by commit: they must be the same commit.
+pin=$(sed -n 's/.*"foundationVersion": *"\([^"]*\)".*/\1/p' "$(dirname "$oracle_toml")/platforms/rune/manifest.json")
+pin_commit=$(git -C "$root" rev-parse --short "$pin^{commit}" 2>/dev/null || true)
+case "$pin_commit" in
+  "$oracle_dataset"*) ;;
+  *) echo "warning: foundationVersion $pin is commit '${pin_commit:-unknown}', not oracle.toml's $oracle_dataset" >&2 ;;
+esac
