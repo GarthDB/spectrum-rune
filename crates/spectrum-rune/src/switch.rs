@@ -3,7 +3,14 @@
 //!
 //! Verification: geometry and fill against the oracle (`tests/switch.rs`); border and focus-ring colour,
 //! width, thickness and gap from pixels, against the oracle's values (`tests/switch_pixels.rs`). The
-//! font family is not asserted (not observable); keyboard-focus colours are not implemented (a14.14).
+//! font family is not asserted (not observable).
+//!
+//! Keyboard focus takes the oracle's hover look besides the ring (a14.32): `El::focus_fill` paints
+//! the hover colour over the unselected handle and the selected track (which has no border: the
+//! oracle's stroke equals its fill there), and `hover_group_focus` + `group_color` give the label
+//! the hover ink. Not matched: the UNSELECTED track's stroke, which the oracle takes from the
+//! content colour (41 light, 219 dark) to its hover colour (19, 242) and Rune cannot, as it has no
+//! focus-visible border colour (a14.14). A disabled switch is not focusable and keeps its colours.
 
 use crate::font;
 use crate::interaction::{Interaction, State};
@@ -147,7 +154,7 @@ impl Switch {
         // Selected + emphasized switches use the accent content colour; everything else the
         // neutral one. Disabled replaces it. The recipe reads the same colour for the track
         // stroke, the unselected handle and the label.
-        let by_state = |accent: bool| match (accent, state) {
+        let by = |accent: bool, state: State| match (accent, state) {
             (false, State::Rest) => t.neutral_content_color_default,
             (false, State::Hover) => t.neutral_content_color_hover,
             (false, State::Down) => t.neutral_content_color_down,
@@ -155,15 +162,16 @@ impl Switch {
             (true, State::Hover) => t.accent_content_color_hover,
             (true, State::Down) => t.accent_content_color_down,
         };
+        let accent = self.selected && self.emphasized;
         let content = if self.disabled {
             t.disabled_content_color
         } else {
-            by_state(self.selected && self.emphasized)
+            by(accent, state)
         };
         let label_color = if self.disabled {
             t.disabled_content_color
         } else {
-            by_state(false)
+            by(false, state)
         };
         let (track_fill, handle_fill) = if self.selected {
             (content, t.gray_25)
@@ -193,18 +201,38 @@ impl Switch {
             .radius(t.corner_radius_full * hs)
             .fill(handle_fill)
             .motion(SNAPPY);
+        // Keyboard focus takes the hover look (the oracle's keyboard-focus state): `focus_fill`
+        // paints the hover colour over the part whose fill is the content colour, the unselected
+        // handle or the selected track. Not the unselected track's stroke: Rune has no
+        // focus-visible border colour (a14.14).
+        let handle = if self.disabled || self.selected {
+            handle
+        } else {
+            handle.focus_fill(by(false, State::Hover))
+        };
         let track = el()
             .key(part("track"))
             .size(d.track_w, d.track_h)
             .radius(t.corner_radius_full * d.track_h)
             .fill(track_fill)
-            .border(border, content)
             .focus_ring(
                 t.focus_indicator_thickness,
                 t.focus_ring_gap,
                 t.focus_indicator_color,
             )
             .child(handle);
+        // A selected track's stroke equals its fill in the oracle, so it has no border there: one
+        // would keep its rest colour as a rim around the focus fill. (Borders are drawn inside the
+        // box, so the layout is the same.)
+        let track = if self.selected {
+            if self.disabled {
+                track
+            } else {
+                track.focus_fill(by(accent, State::Hover))
+            }
+        } else {
+            track.border(border, content)
+        };
 
         let shown = self.label.as_deref().filter(|_| !self.hide_label);
         let fit = Fit::new(
@@ -224,6 +252,7 @@ impl Switch {
             .checked(self.selected)
             .focusable(!self.disabled)
             .disabled(self.disabled)
+            .hover_group_focus()
             .child(fit.part(track, d.track_h));
         if let Some(l) = self.label {
             root = root.label(l.clone());
@@ -233,6 +262,12 @@ impl Switch {
                     .color(label_color)
                     .a11y_hidden()
                     .font(font::text_style(&d.label));
+                // The hover colour while the root shows keyboard focus (`hover_group_focus`). The
+                // oracle's down colour equals its hover colour, so while a press is held the group
+                // colour is the same as the rebuilt one (`tests/switch_pixels.rs`).
+                if !self.disabled {
+                    label = label.group_color(by(false, State::Hover));
+                }
                 if self.width.is_some() {
                     label = label.wrap().shrink();
                 }
