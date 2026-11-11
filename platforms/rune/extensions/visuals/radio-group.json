@@ -1,0 +1,39 @@
+{
+  "$schema": "https://opensource.adobe.com/spectrum-design-data/schemas/v0/component-visual.schema.json",
+  "specVersion": "1.0.0-draft",
+  "component": "radio-group",
+  "root": "container",
+  "sizeScale": { "s": 75, "m": 100, "l": 200, "xl": 300 },
+  "parts": {
+    "container": {
+      "kind": "box",
+      "children": ["item-1", "item-2", "item-3"],
+      "props": {
+        "direction": [
+          { "value": "column" },
+          { "when": { "options": { "orientation": "horizontal" } }, "value": "row" }
+        ],
+        "align": { "value": "start" },
+        "gap": { "token": { "property": "gap", "structure": "group", "size": "{size}" } }
+      }
+    },
+    "item-1": {
+      "kind": "component",
+      "component": "radio-button",
+      "sizeMap": { "s": "s", "m": "m", "l": "l", "xl": "xl" },
+      "with": { "isSelected": true, "isEmphasized": { "option": "isEmphasized" }, "isDisabled": { "option": "isDisabled" } }
+    },
+    "item-2": {
+      "kind": "component",
+      "component": "radio-button",
+      "sizeMap": { "s": "s", "m": "m", "l": "l", "xl": "xl" },
+      "with": { "isSelected": false, "isEmphasized": { "option": "isEmphasized" }, "isDisabled": { "option": "isDisabled" } }
+    },
+    "item-3": {
+      "kind": "component",
+      "component": "radio-button",
+      "sizeMap": { "s": "s", "m": "m", "l": "l", "xl": "xl" },
+      "with": { "isSelected": false, "isEmphasized": { "option": "isEmphasized" }, "isDisabled": { "option": "isDisabled" } }
+    }
+  }
+}

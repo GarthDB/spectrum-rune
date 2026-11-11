@@ -6,6 +6,8 @@ manifest.
 
 - `manifest.json`: identity and the foundation pin (`@adobe/spectrum-design-data@3.10.0`, the commit in `oracle.toml`).
 - `extensions/implementations/`: the `spectrum_rune::` type behind each component.
+- `extensions/visuals/radio-group.json`: a recipe the foundation does not have yet. It is the oracle for
+  `RadioGroup` and a candidate to promote (artifact move, `platforms/README.md` in spectrum-design-data).
 
 `.design-data.toml` at the repo root selects it (`default_platform = "rune"`):
 
@@ -26,3 +28,5 @@ No token overrides: every value comes from the foundation.
   (#1733), so `cargo xtask gen` still reads `icons/ui.json` from the oracle checkout.
 - Where Rune cannot draw what a recipe says (focus-visible stroke colour, hover-vs-focus precedence, busy state, font
   family) the manifest has nowhere to say so; those are tracked in beads (a14.14, wav), not in the manifest.
+- The `radio-group` recipe's nested radio buttons carry no label (nested parts get none), so `RadioGroup` is checked
+  for gap and item geometry only.
