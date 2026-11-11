@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opensource.adobe.com/spectrum-design-data/schemas/v0/implementation-mapping.schema.json",
+  "component": "action-button",
+  "implementations": [
+    {
+      "platform": "desktop",
+      "componentName": "ActionButton",
+      "package": "spectrum-rune",
+      "importPath": "spectrum_rune::action_button::ActionButton"
+    }
+  ]
+}

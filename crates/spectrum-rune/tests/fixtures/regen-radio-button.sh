@@ -12,7 +12,7 @@ source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/radio_button_scene.json"
-cd "$root"
+oracle_cd
 {
   for scheme in light dark; do for scale in desktop mobile; do
     for size in s m l xl; do for sel in false true; do for emph in false true; do for dis in false true; do

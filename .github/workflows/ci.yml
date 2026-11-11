@@ -37,3 +37,13 @@ jobs:
         with:
           name: gallery
           path: target/gallery/*.png
+  # Not required: the platform manifest (platforms/rune) validates against the pinned foundation.
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: adobe/spectrum-design-data/.github/actions/validate@2836616b37bef88268cba27e57d9a4df7270dc4c # main on 2026-11-11
+        with:
+          cli-version: 0.27.1
+          manifest: platforms/rune/manifest.json
+          skip-dataset-validation: true

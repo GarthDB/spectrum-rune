@@ -1,0 +1,12 @@
+# The foundation comes from a published release (the same commit as oracle.toml's dataset), and the
+# platform manifest is owned by this repo. `cargo xtask gen` and the regen scripts run the
+# `design-data` CLI from this directory so they pick this file up.
+default_platform = "rune"
+
+[source]
+type = "github"
+repo = "adobe/spectrum-design-data"
+tag = "@adobe/spectrum-design-data@3.10.0"
+
+[platforms]
+rune = "platforms/rune/manifest.json"

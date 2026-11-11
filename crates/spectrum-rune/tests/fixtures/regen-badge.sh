@@ -22,7 +22,7 @@ source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/badge_scene.json"
-cd "$root"
+oracle_cd
 
 CORNERS=("light desktop" "light mobile" "dark desktop" "dark mobile")
 VARIANTS="neutral informative positive negative indigo yellow magenta fuchsia purple seafoam accent notice gray red orange chartreuse celery green cyan blue pink turquoise brown cinnamon silver"

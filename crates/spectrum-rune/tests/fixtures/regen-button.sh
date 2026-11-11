@@ -28,7 +28,7 @@ source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"
 out="$(cd "$(dirname "$0")" && pwd)/button_scene.json"
-cd "$root"
+oracle_cd
 
 # render variant style size scheme scale label disabled pending hidden static state
 render() {

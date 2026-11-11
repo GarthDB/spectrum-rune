@@ -23,7 +23,7 @@ root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/accordion_scene.json"
-cd "$root"
+oracle_cd
 
 CORNERS=("light desktop" "light mobile" "dark desktop" "dark mobile")
 SIZES="s m l xl"
