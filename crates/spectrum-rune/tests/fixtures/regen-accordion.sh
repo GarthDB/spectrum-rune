@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Regenerates accordion_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
-# spectrum-design-data dataset root (default ~/repos/spectrum-design-data).
+# Regenerates accordion_scene.json from the oracle: `design-data` (the versions in oracle.toml) against
+# the foundation release pinned in .design-data.toml (fetched by the CLI). Optional $1: a spectrum-design-data
+# checkout to read instead (at the oracle.toml dataset commit).
 # Coordinates are relative to the `item`; the tests compare with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals, colours written as `r,g,b[,a]`.
 # `content_pad` is the content's own padding (top, bottom) from the scene's measurements: the
@@ -19,7 +20,7 @@
 # Combinations an error constraint of the catalog excludes are skipped (constraints.sh); there is
 # none for the accordion today, so the call only keeps the matrix honest when one is added.
 set -euo pipefail
-root="${1:-$HOME/repos/spectrum-design-data}"
+root="${1:-}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/accordion_scene.json"

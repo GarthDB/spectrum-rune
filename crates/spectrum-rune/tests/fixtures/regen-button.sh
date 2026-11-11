@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Regenerates button_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
-# spectrum-design-data dataset root (default ~/repos/spectrum-design-data). The committed fixtures were
-# made at the dataset commit in oracle.toml (the script checks the CLI version and prints the commit
-# it ran against); check that commit out (`git worktree add --detach <dir> <commit>`) and pass <dir> as $1.
+# Regenerates button_scene.json from the oracle: `design-data` (the versions in oracle.toml) against
+# the foundation release pinned in .design-data.toml (fetched by the CLI). Optional $1: a spectrum-design-data
+# checkout to read instead (at the oracle.toml dataset commit; `git worktree add --detach <dir> <commit>`).
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals; nulls and false flags are
 # dropped and colours written as `r,g,b[,a]`, to keep the file small.
@@ -23,7 +22,7 @@
 # The oracle always draws the optional icon, so every case has one. A hidden or pending button
 # has no label.
 set -euo pipefail
-root="${1:-$HOME/repos/spectrum-design-data}"
+root="${1:-}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"

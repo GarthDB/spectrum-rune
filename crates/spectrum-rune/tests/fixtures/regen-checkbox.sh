@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Regenerates checkbox_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
-# spectrum-design-data dataset root (default ~/repos/spectrum-design-data). The committed fixtures were
-# made at the dataset commit in oracle.toml (the script checks the CLI version and prints the commit
-# it ran against); check that commit out (`git worktree add --detach <dir> <commit>`) and pass <dir> as $1.
+# Regenerates checkbox_scene.json from the oracle: `design-data` (the versions in oracle.toml) against
+# the foundation release pinned in .design-data.toml (fetched by the CLI). Optional $1: a spectrum-design-data
+# checkout to read instead (at the oracle.toml dataset commit; `git worktree add --detach <dir> <commit>`).
 # Also writes checkbox_wrap.json: the oracle at a request width (wrap.sh), where the label wraps.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 set -euo pipefail
-root="${1:-$HOME/repos/spectrum-design-data}"
+root="${1:-}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"

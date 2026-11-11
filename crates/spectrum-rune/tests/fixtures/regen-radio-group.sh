@@ -4,7 +4,7 @@
 # oracle dataset checkout at $1 (see regen-radio-button.sh). Coordinates are relative to the container.
 # The recipe's nested radio buttons carry no label, so only the gap between items and the item height are compared.
 set -euo pipefail
-root="${1:-$HOME/repos/spectrum-design-data}"
+root="${1:-}"
 source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/radio_group_scene.json"
 oracle_cd
