@@ -1,5 +1,7 @@
 # Sourced by the regen-*.sh scripts (after $root is set). Checks the `design-data` version against
 # oracle.toml at the repo root and prints the dataset commit the script runs against.
+# $root may be relative; the scripts change directory, so make it absolute once.
+root="$(cd "$root" && pwd)"
 oracle_toml="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)/oracle.toml"
 oracle_get() {
   local v
@@ -42,5 +44,5 @@ pin=$(sed -n 's/.*"foundationVersion": *"\([^"]*\)".*/\1/p' "$(dirname "$oracle_
 pin_commit=$(git -C "$root" rev-parse --short "$pin^{commit}" 2>/dev/null || true)
 case "$pin_commit" in
   "$oracle_dataset"*) ;;
-  *) echo "warning: foundationVersion $pin is commit '${pin_commit:-unknown}', not oracle.toml's $oracle_dataset" >&2 ;;
+  *) echo "warning: foundationVersion $pin is commit '${pin_commit:-unknown}', not oracle.toml's $oracle_dataset (unknown: the checkout may lack tags, \`git fetch --tags\`)" >&2 ;;
 esac
