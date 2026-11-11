@@ -1,13 +1,12 @@
-# The oracle every committed generated file and fixture was made from.
+# The oracle every committed generated file and fixture was made from: the RELEASED design-data
+# CLI 0.27.1 (tag design-data-cli@0.27.1, Homebrew `design-data`) and the dataset at that tag.
 # Read by `cargo xtask gen` and by the tests/fixtures/regen-*.sh scripts; change it only together
 # with a regeneration of all of them (see README, "The generator").
 #
 # cli_min / cli_max: accepted `design-data` versions, cli_min <= version < cli_max.
-#   0.27.0 (the Homebrew release) is NOT accepted: it predates the renderer change that reads a
-#   root `minWidth` as a multiple of the height (spectrum-design-data #1704), which the dataset's
-#   Button recipe needs. 0.27.1 is the CLI source at the dataset commit (build it from the
-#   dataset checkout: `cargo build --release -p design-data-cli` in its `sdk/`).
-# dataset: spectrum-design-data commit the committed files were made from.
+#   0.27.0 is too old: it predates the renderer change the Button recipe needs
+#   (spectrum-design-data #1704, root `minWidth` as a multiple of the height).
+# dataset: spectrum-design-data commit the committed files were made from (the 0.27.1 release).
 cli_min = "0.27.1"
 cli_max = "0.28.0"
-dataset = "2e6bc576"
+dataset = "a0934e02"
