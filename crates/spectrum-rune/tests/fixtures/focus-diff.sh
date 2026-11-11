@@ -9,8 +9,7 @@ root="${1:-$HOME/repos/spectrum-design-data}"
 source "$(dirname "$0")/oracle.sh"
 cd "$root"
 
-props='[.nodes[] | select(.part != "focus-indicator") | .part as $p
-  | (.fill, .stroke, .stroke_width, .color) as $_ | {p: $p, fill, stroke, stroke_width, color}]'
+props='[.nodes[] | select(.part != "focus-indicator") | {p: .part, fill, stroke, stroke_width, color}]'
 # diff component "options" scheme [render args...]
 diff_states() {
   local comp=$1 label=$2 scheme=$3; shift 3

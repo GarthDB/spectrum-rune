@@ -23,7 +23,8 @@
 //!
 //! Verification: geometry and fill against the oracle (`tests/button.rs`); border and focus-ring colour,
 //! width, thickness and gap from pixels, against the oracle's values (`tests/button_pixels.rs`). The
-//! font family is not asserted (not observable); the oracle's keyboard-focus stroke colours are not implemented (a14.14).
+//! font family is not asserted (not observable); the oracle's keyboard-focus stroke colours are
+//! not implemented (a14.14).
 
 use crate::constraints::{self, OptionValue};
 use crate::font;
