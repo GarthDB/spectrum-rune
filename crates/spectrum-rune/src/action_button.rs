@@ -18,6 +18,12 @@
 //!   and this one does not; this is kept as rendered, not borrowed from Button (a14.23, see
 //!   `disabled_ignores_the_static_colour`).
 //! - The focus ring is `focus_indicator_color` for every static colour.
+//! - Keyboard focus takes the hover fill of a selected button besides the ring (`El::focus_fill`:
+//!   opaque, under the content, clipped to the pill, never from pointer focus; neutral 41 to 19,
+//!   emphasized accent 59,99,251 to 39,77,234, quiet or not; a14.35). Unselected buttons and static
+//!   colours keep their fill, as the oracle does, except that a static selected + emphasized one
+//!   takes the accent hover colour. Icon and label colours do not change in focus. Disabled and
+//!   pending are not focusable / keep their fill. Nothing is left unmatched here.
 //!
 //! A selected button is a toggle: `.selected(..)` marks it as one (role `button`, `checked` =
 //! ARIA `aria-pressed`). `on_press` only reports the press; the app flips `selected`.
@@ -428,6 +434,20 @@ impl ActionButton {
                 t.focus_ring_gap,
                 t.focus_indicator_color,
             );
+        // Keyboard focus takes the hover fill of a selected button (the oracle's keyboard-focus
+        // state), laid over its fill by Rune. Unselected buttons and static colours keep theirs
+        // (translucent hover fills would stack, not replace), except that a static selected +
+        // emphasized one goes from accent to the accent hover colour.
+        if !self.disabled && !self.pending && self.selected == Some(true) {
+            let focus = match (self.emphasized, self.static_color) {
+                (true, _) => Some(t.accent_background_color_hover),
+                (false, None) => Some(t.neutral_background_color_selected_hover),
+                (false, Some(_)) => None,
+            };
+            if let Some(f) = focus {
+                root = root.focus_fill(f);
+            }
+        }
         if let Some(on) = self.selected {
             root = root.checked(on);
         }
