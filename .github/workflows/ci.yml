@@ -15,6 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: opt-deps
       # winit (via rune) links libxkbcommon.
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxkbcommon-dev
       - run: cargo fmt --all --check
