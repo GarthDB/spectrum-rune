@@ -10,6 +10,7 @@ pub mod font;
 pub mod icons;
 pub mod interaction;
 pub mod radio_button;
+pub mod radio_group;
 pub mod size;
 pub mod switch;
 pub mod tokens;
