@@ -1,12 +1,14 @@
 # The oracle every committed generated file and fixture was made from: the RELEASED design-data
-# CLI 0.27.1 (tag design-data-cli@0.27.1, Homebrew `design-data`) and the dataset at that tag.
+# CLI 0.31.0 (tag design-data-cli@0.31.0, Homebrew `design-data`) and the dataset at the pinned release.
 # Read by `cargo xtask gen` and by the tests/fixtures/regen-*.sh scripts; change it only together
 # with a regeneration of all of them (see README, "The generator").
 #
 # cli_min / cli_max: accepted `design-data` versions, cli_min <= version < cli_max.
-#   0.27.0 is too old: it predates the renderer change the Button recipe needs
-#   (spectrum-design-data #1704, root `minWidth` as a multiple of the height).
-# dataset: spectrum-design-data commit the committed files were made from (the 0.27.1 release).
-cli_min = "0.27.1"
-cli_max = "0.28.0"
+#   0.31.0 is the first whose `github` [source] fetches the render inputs (spectrum-design-data #1732/#1734)
+#   and whose `catalog export` writes icon sets (#1733/#1735). Every fixture and generated file came out
+#   identical to the 0.27.1 ones (the Button recipe's `minWidth` multiplier, #1704, landed in 0.27.1).
+# dataset: spectrum-design-data commit the committed files were made from: @adobe/spectrum-design-data@3.10.0,
+#   the release platforms/rune/manifest.json and .design-data.toml pin.
+cli_min = "0.31.0"
+cli_max = "0.32.0"
 dataset = "a0934e02"

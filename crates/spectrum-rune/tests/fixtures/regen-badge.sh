@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Regenerates badge_scene.json from the oracle: `design-data` (the versions in oracle.toml) run from the
-# spectrum-design-data dataset root (default ~/repos/spectrum-design-data).
+# Regenerates badge_scene.json from the oracle: `design-data` (the versions in oracle.toml) against
+# the foundation release pinned in .design-data.toml (fetched by the CLI). Optional $1: a spectrum-design-data
+# checkout to read instead (at the oracle.toml dataset commit).
 # Also writes badge_wrap.json: the oracle at a request width (wrap.sh), where the label wraps.
 # Coordinates are relative to the container; the test compares with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals; nulls and zero strokes are
@@ -17,7 +18,7 @@
 # Combinations an error constraint of the catalog excludes are skipped (constraints.sh); there is
 # none for the badge today, so the call only keeps the matrix honest when one is added.
 set -euo pipefail
-root="${1:-$HOME/repos/spectrum-design-data}"
+root="${1:-}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 source "$(dirname "$0")/wrap.sh"
