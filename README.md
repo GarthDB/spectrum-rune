@@ -212,9 +212,8 @@ The generator needs a `design-data` CLI inside that range on `PATH` and a clean 
 [spectrum-design-data](https://github.com/adobe/spectrum-design-data) at exactly the `dataset` commit,
 at `~/repos/spectrum-design-data` or `SPECTRUM_DESIGN_DATA=/path`. To leave your own checkout alone use
 a detached worktree: `git worktree add --detach <dir> <commit>`. `--allow-dirty` skips the clean and
-commit check. The Homebrew `design-data` 0.27.0 is too old for the current dataset (it ignores the
-Button recipe's `minWidth` multiplier); build the CLI from the dataset checkout instead:
-`cd <dir>/sdk && cargo build --release -p design-data-cli`, and put `target/release` first on `PATH`.
+commit check. The CLI is the released one (`brew install design-data`; 0.27.0 is too old, it ignores the
+Button recipe's `minWidth` multiplier), and `dataset` is that release's commit.
 The generated files' headers record the real CLI version and dataset commit. To move to
 a newer oracle: edit `oracle.toml`, run `cargo xtask gen` and every `regen-*.sh`, and fix what the
 diffs show, all in one change.
