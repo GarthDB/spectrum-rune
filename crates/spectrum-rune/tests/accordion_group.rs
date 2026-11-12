@@ -389,6 +389,7 @@ fn a_disabled_item_does_not_toggle() {
 }
 
 #[test]
+#[cfg(debug_assertions)] // a debug_assert!: release builds do not check
 #[should_panic(expected = "duplicate item key")]
 fn duplicate_item_keys_are_rejected() {
     let _ = AccordionGroup::new("g")

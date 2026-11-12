@@ -637,7 +637,8 @@ fn lits(v: &Value, ctx: &str) -> Res<Vec<Value>> {
 }
 
 /// SPEC-064 for one literal: the option is declared, and the literal is one of its declared values
-/// (or a boolean, for a boolean option). Value checks are skipped when the option has no `values`.
+/// (or a boolean, for a boolean option). An option that is neither (free-form) has nothing to compare:
+/// an error, see below.
 fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
     if let Some(values) = opt["values"].as_array() {
         if let Some(bad) = values.iter().find(|d| d.get("value").is_none()) {
@@ -659,7 +660,7 @@ fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
         // literal in `constraints::check`, while `tests/fixtures/constraints.jq` would compare the real one.
         // `require` takes `{"present": true}` for these; `when` cannot name them.
         return Err(format!(
-            "{ctx}: the option is free-form (no `values`, not boolean), so a rule cannot compare it with {v}"
+            "{ctx}: the option is free-form (`values` is not an array and it is not boolean), so a rule cannot compare it with {v}"
         ));
     }
     Ok(())
