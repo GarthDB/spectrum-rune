@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/GarthDB/spectrum-rune/compare/v0.2.0...v0.3.0) - 2026-11-12
+
+### Added
+
+- *(gallery)* disable macOS font smoothing to match Spectrum web ([#39](https://github.com/GarthDB/spectrum-rune/pull/39))
+
+### Other
+
+- Bump Rune to dev d6d04d3e; pending Button is unavailable but focusable (67k, wav) ([#40](https://github.com/GarthDB/spectrum-rune/pull/40))
+
 ## [0.2.0](https://github.com/GarthDB/spectrum-rune/compare/v0.1.0...v0.2.0) - 2026-11-12
 
 ### Added
