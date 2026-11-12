@@ -548,12 +548,17 @@ fn accordion(s: &G, t: &'static Tokens) -> El {
             .map(|(z, n)| item(&format!("size-{n}"), &format!("Size {n}"), false).size(z))
             .into(),
     );
+    let sw = |name: &str| {
+        let key = format!("accordion/{name}/switch-on");
+        let on = s.on(&key, false);
+        move |b: Switch| b.label("Enable").selected(on).on_toggle(flip(key))
+    };
     let actions = stack(vec![
         item("act-button", "Action button", false).action_button(|b| b.icon(&ADD_100).label("Add")),
-        item("act-switch", "Switch", false).switch(|s| s.label("Enable")),
+        item("act-switch", "Switch", false).switch(sw("act-switch")),
         item("act-both", "Both", true)
             .action_button(|b| b.icon(&ADD_100).label("Add"))
-            .switch(|s| s.label("Enable")),
+            .switch(sw("act-both")),
         item("act-dis", "Disabled", false)
             .disabled(true)
             .action_button(|b| b.icon(&ADD_100).label("Add"))
