@@ -42,9 +42,9 @@ impl Pixels {
         Pixels(frame)
     }
 
-    /// Whether every pixel of `other` is the same.
+    /// Whether `other` has the same size and every pixel the same.
     pub fn identical(&self, other: &Pixels) -> bool {
-        self.0.rgba == other.0.rgba
+        self.0.width == other.0.width && self.0.rgba == other.0.rgba
     }
 
     /// The sRGB RGBA of one pixel.

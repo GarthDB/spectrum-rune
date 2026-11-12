@@ -17,13 +17,17 @@ source "$(dirname "$0")/oracle.sh"
 oracle_cd
 
 props='[.nodes[] | select(.part != "focus-indicator") | {p: .part, fill, stroke, stroke_width, color}]'
+# render component scheme [render args...]: the compared properties of one render
+render() {
+  local comp=$1 scheme=$2; shift 2
+  design-data render "$comp" --size m --color-scheme "$scheme" --scale desktop --format scene "$@" | jq -c "$props"
+}
 # cmp component label scheme [render args...]
 cmp() {
   local comp=$1 label=$2 scheme=$3; shift 3
-  r() { design-data render "$comp" --size m --color-scheme "$scheme" --scale desktop --format scene "$@" | jq -c "$props"; }
   local d df h hf a=same b=same c=differ
-  d=$(r --state down "$@"); df=$(r --state down --state keyboard-focus "$@")
-  h=$(r --state hover "$@"); hf=$(r --state hover --state keyboard-focus "$@")
+  d=$(render "$comp" "$scheme" --state down "$@"); df=$(render "$comp" "$scheme" --state down --state keyboard-focus "$@")
+  h=$(render "$comp" "$scheme" --state hover "$@"); hf=$(render "$comp" "$scheme" --state hover --state keyboard-focus "$@")
   [ "$d" = "$df" ] || a=DIFF
   [ "$h" = "$hf" ] || b=DIFF
   [ "$d" = "$h" ] && c=same
