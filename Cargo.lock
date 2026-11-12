@@ -2959,7 +2959,7 @@ dependencies = [
 
 [[package]]
 name = "spectrum-rune"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "png 0.18.1",
  "rune",
