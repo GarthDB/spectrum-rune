@@ -294,6 +294,7 @@ pub struct Button {
     label_hidden: bool,
     disabled: bool,
     pending: bool,
+    pending_label: String,
     static_color: Option<StaticColor>,
     width: Option<f32>,
     press: Option<Press>,
@@ -313,6 +314,7 @@ impl Button {
             label_hidden: false,
             disabled: false,
             pending: false,
+            pending_label: "pending".into(),
             static_color: None,
             width: None,
             press: None,
@@ -360,9 +362,17 @@ impl Button {
     /// Replaces the icon and label with a progress indicator. The button keeps reacting to the
     /// pointer, as the oracle shows (hover/down colours and press scale), but `on_press` no longer
     /// fires, so a second click cannot submit twice. The catalog's 1 s delay before showing
-    /// pending is the app's to implement.
+    /// pending is the app's to implement. To assistive technology the button is disabled but still focusable,
+    /// described by "pending". Like React Aria, a screen reader is told only when the app says so: call
+    /// `tx.announce(label, LiveRegion::Assertive)` when `pending` flips while the button has focus.
     pub fn pending(mut self, v: bool) -> Self {
         self.pending = v;
+        self
+    }
+    /// What a screen reader says for the progress while pending, and so the button's description. Defaults to the
+    /// English "pending" (S2's `button.pending`); there is no localisation here, so pass the translated word.
+    pub fn pending_label(mut self, l: impl Into<String>) -> Self {
+        self.pending_label = l.into();
         self
     }
     pub fn static_color(mut self, c: StaticColor) -> Self {
@@ -513,7 +523,8 @@ impl Button {
                 .size(d.icon)
                 .color(look.content)
                 .build(&Kit::neutral(false))
-                .key(part("progress"));
+                .key(part("progress"))
+                .label(self.pending_label.clone());
             root = root.child(fit.part(spinner, d.icon));
         }
         if show_icon {
@@ -545,6 +556,16 @@ impl Button {
 
         if let Some(w) = outer {
             root = root.w(w);
+        }
+        if self.pending {
+            // aria-disabled, as React Aria's Button does: read as unavailable but still a Tab stop, with the
+            // progress as its description. `disabled` turns focus off, so `focusable` must come after; an app-
+            // disabled button stays out of the Tab order (isDisabled wins over pending).
+            // (`busy` would do nothing on macOS: accesskit_macos does not map it.)
+            root = root
+                .disabled(true)
+                .focusable(!self.disabled)
+                .described_by(part("progress"));
         }
         let k = {
             let mut width = 2.0 * pad;

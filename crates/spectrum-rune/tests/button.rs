@@ -25,6 +25,7 @@ struct App {
     icon: bool,
     disabled: bool,
     pending: bool,
+    pending_label: Option<String>,
     hidden: bool,
     static_color: Option<StaticColor>,
     presses: u32,
@@ -42,6 +43,7 @@ impl Default for App {
             icon: true,
             disabled: false,
             pending: false,
+            pending_label: None,
             hidden: false,
             static_color: None,
             presses: 0,
@@ -71,6 +73,9 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
         .pending(a.pending)
         .label_hidden(a.hidden)
         .on_press(|s: &mut App| s.presses += 1);
+    if let Some(l) = &a.pending_label {
+        b = b.pending_label(l.clone());
+    }
     if a.icon {
         b = b.icon(&CHECKMARK_100);
     }
@@ -356,6 +361,80 @@ fn pending_hides_label_shows_progress_and_ignores_press() {
     assert!(part(&rt, "progress").is_none());
     click(&mut rt);
     assert_eq!(rt.state.presses, 1);
+}
+
+#[test]
+fn pending_button_is_unavailable_but_focusable_and_described_by_its_progress() {
+    let mut rt = runtime(App {
+        pending: true,
+        disabled: true,
+        ..App::default()
+    });
+    rt.key(KeyEvent::from(Key::Tab));
+    settle(&mut rt);
+    assert!(
+        !part(&rt, "container").unwrap().focused,
+        "an app-disabled pending button is not a Tab stop"
+    );
+
+    let node = |pending: bool| {
+        let rt = runtime(App {
+            pending,
+            ..App::default()
+        });
+        let tree = rt.accessibility_tree();
+        let n = tree
+            .nodes
+            .iter()
+            .find(|(_, n)| n.author_id() == Some("bt/container"))
+            .map(|(_, n)| n.clone())
+            .expect("button node");
+        let progress = tree
+            .nodes
+            .iter()
+            .find(|(_, n)| n.author_id() == Some("bt/progress"))
+            .map(|(_, n)| n.label().map(str::to_string));
+        (n, progress)
+    };
+    let (n, progress) = node(true);
+    assert!(n.is_disabled());
+    assert!(!n.supports_action(rune::accesskit::Action::Click));
+    assert_eq!(n.description(), Some("pending"));
+    assert_eq!(progress, Some(Some("pending".to_string())));
+    let (n, _) = node(false);
+    assert!(!n.is_disabled());
+    assert!(n.description().is_none());
+
+    // Still a Tab stop, and a press does nothing.
+    let mut rt = runtime(App {
+        pending: true,
+        ..App::default()
+    });
+    rt.key(KeyEvent::from(Key::Tab));
+    settle(&mut rt);
+    assert!(part(&rt, "container").unwrap().focused);
+    rt.key(KeyEvent::from(Key::Text(" ".into())));
+    settle(&mut rt);
+    assert_eq!(rt.state.presses, 0);
+}
+
+#[test]
+fn pending_label_is_what_a_screen_reader_says() {
+    let rt = runtime(App {
+        pending: true,
+        pending_label: Some("en cours".into()),
+        ..App::default()
+    });
+    let tree = rt.accessibility_tree();
+    let n = |k: &str| {
+        tree.nodes
+            .iter()
+            .find(|(_, n)| n.author_id() == Some(k))
+            .map(|(_, n)| n.clone())
+            .unwrap()
+    };
+    assert_eq!(n("bt/progress").label(), Some("en cours"));
+    assert_eq!(n("bt/container").description(), Some("en cours"));
 }
 
 #[test]
