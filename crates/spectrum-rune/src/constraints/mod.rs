@@ -29,7 +29,9 @@ pub enum Lit {
 pub enum OptionValue<'a> {
     Str(&'a str),
     Bool(bool),
-    /// An option with a free-form value (an icon, say) that is set. Leave it out when unset.
+    /// An option with a free-form value (an icon, say) that is set. Leave it out when unset. A rule can only say
+    /// `Require::Present` about such an option: `Present` equals no literal, and `cargo xtask gen` rejects a catalog
+    /// rule that compares a free-form option with one (`when` cannot name it, `require` takes `{"present": true}`).
     Present,
 }
 
