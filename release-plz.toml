@@ -1,0 +1,11 @@
+[workspace]
+# Git deps (rune) mean nothing can go to crates.io: versions come from v* tags.
+git_only = true
+git_tag_name = "v{{ version }}"
+git_release_name = "spectrum-rune {{ version }}"
+# Tag and release only when the release PR is merged, not on every push to main.
+release_always = false
+
+[[package]]
+name = "xtask"
+release = false
