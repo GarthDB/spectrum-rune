@@ -548,6 +548,17 @@ fn accordion(s: &G, t: &'static Tokens) -> El {
             .map(|(z, n)| item(&format!("size-{n}"), &format!("Size {n}"), false).size(z))
             .into(),
     );
+    let actions = stack(vec![
+        item("act-button", "Action button", false).action_button(|b| b.icon(&ADD_100).label("Add")),
+        item("act-switch", "Switch", false).switch(|s| s.label("Enable")),
+        item("act-both", "Both", true)
+            .action_button(|b| b.icon(&ADD_100).label("Add"))
+            .switch(|s| s.label("Enable")),
+        item("act-dis", "Disabled", false)
+            .disabled(true)
+            .action_button(|b| b.icon(&ADD_100).label("Add"))
+            .switch(|s| s.label("Enable")),
+    ]);
     let long = stack(vec![item(
         "long",
         "A long title that has to wrap onto a second line because the item is only 360 points wide",
@@ -557,6 +568,7 @@ fn accordion(s: &G, t: &'static Tokens) -> El {
         section(t, "States (click or Space/Enter)", basic),
         section(t, "Density", density),
         section(t, "Sizes", sizes),
+        section(t, "Direct actions", actions),
         section(t, "Long title", long),
     ])
 }
