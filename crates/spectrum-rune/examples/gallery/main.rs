@@ -71,6 +71,8 @@ pub struct G {
     pub flipped: HashSet<String>,
     /// The chosen radio per group.
     pub picked: HashMap<String, String>,
+    /// The open items per accordion group.
+    pub open: HashMap<String, Vec<String>>,
 }
 
 impl G {
@@ -92,6 +94,7 @@ fn init() -> G {
         scale: Scale::Desktop,
         flipped: HashSet::new(),
         picked: HashMap::new(),
+        open: HashMap::new(),
     }
 }
 

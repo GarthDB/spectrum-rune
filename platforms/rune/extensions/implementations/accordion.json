@@ -7,6 +7,12 @@
       "componentName": "AccordionItem",
       "package": "spectrum-rune",
       "importPath": "spectrum_rune::accordion::AccordionItem"
+    },
+    {
+      "platform": "desktop",
+      "componentName": "AccordionGroup",
+      "package": "spectrum-rune",
+      "importPath": "spectrum_rune::accordion_group::AccordionGroup"
     }
   ]
 }
