@@ -394,6 +394,10 @@ open on main with the version bump (`crates/spectrum-rune/Cargo.toml`, `Cargo.lo
 3. In spectrum-design-data, set `tag = "vX.Y.Z"` under `[platforms.rune]` in `.design-data.toml`, check
    `design-data validate-manifest --platform rune` from a clean `[cache] dir`, and open a PR.
 
+release-plz prepares a release only for `feat`, `fix` or `perf` commits and breaking (`!`) ones
+(`release_commits` in `release-plz.toml`); a `test:`, `docs:`, `ci:` or `xtask:` commit does not open a release PR, so a
+mistitled `fix` is silently left out of the next release: check the PR title before merging.
+
 Before merging, check the release PR's changelog against "Compatibility" above: the release notes (step 2) should say
 whether the Rune rev, the `[patch.crates-io]` block or any behaviour changed. The release PR is overwritten by
 release-plz when `main` moves (a hand-edit survives only if the PR is merged before then), so fix wording by merging

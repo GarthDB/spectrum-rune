@@ -7,6 +7,10 @@ git_release_name = "spectrum-rune {{ version }}"
 release_always = false
 # Pre-1.0: a `feat:` bumps the minor (0.2.0), a `fix:` the patch.
 features_always_increment_minor = true
+# Prepare a release only for a feat, fix or perf commit, or any breaking (`!`) one. Test, docs, xtask and CI commits
+# that touch the package would otherwise open a release PR with nothing a user can see (0.3.1 after #43).
+# They still appear in the changelog of the next real release. Squash-merge titles must be conventional.
+release_commits = '^(feat|fix|perf)[(:!]|^[a-z]+(\(.*\))?!:'
 
 [[package]]
 name = "xtask"
