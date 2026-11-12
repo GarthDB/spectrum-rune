@@ -17,7 +17,9 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Button | `button` | none (`pending` and `disabled` are inputs) |
 | Action button | `action_button` | `selected` for a toggle |
 | Badge | `badge` | none (static) |
-| Accordion item (one item, not a group) | `accordion` | `open` |
+| Radio group | `radio_group` | `value` |
+| Accordion item (one item) | `accordion` | `open` |
+| Accordion (a group of items; single or multiple) | `accordion_group` | the open set |
 
 ## Installing
 
@@ -173,7 +175,7 @@ cargo run -p spectrum-rune --example gallery -- --scene button --theme dark --si
 cargo run -p spectrum-rune --example gallery -- --scene button-mobile --theme light --snap /tmp/button-mobile.png
 ```
 
-Scenes: `switch`, `checkbox`, `radio-button`, `button`, `action-button`, `badge`, `accordion`.
+Scenes: `switch`, `checkbox`, `radio-button`, `button`, `action-button`, `badge`, `accordion`, `accordion-group`.
 
 CI also renders every scene with Rune's CPU reference renderer (no GPU) and uploads the PNGs as the
 `gallery` artifact; locally: `cargo test --release -p spectrum-rune --example gallery -- --ignored`
@@ -296,8 +298,10 @@ dataset changes nothing.
 - **High contrast.** The tokens exported for high contrast are identical to regular upstream, and
   Windows forced colours are not designed.
 - **RTL** is not handled.
-- **Groups.** Accordion (several items, `isMultiple`, arrow keys) and radio groups are not built;
-  a single `AccordionItem` and `RadioButton` are (beads a14.15, a14.20).
+- **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
+  group's layout (gap 0, each item keeping its divider) has no oracle: only the stacked item heights are
+  checked against the item oracle. Per-item `disabled` is a Rune-side convenience; the catalog's
+  `items[]` has no `isDisabled`. Not built: per-item action button and switch (bead a14.28).
 - **Action-button static + disabled** draws the plain disabled pill (opaque grey on the coloured
   backdrop), because that is what the oracle renders; Button's recipe has translucent rules for it
   and Action-button's does not (bead a14.23, proposed upstream in #1693).

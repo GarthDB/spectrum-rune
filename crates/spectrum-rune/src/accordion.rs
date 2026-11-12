@@ -1,7 +1,7 @@
 //! Spectrum Accordion item, from `design-data` visuals/accordion.json (item > header >
 //! disclosure-icon + title, content, divider). Every size, colour, padding and type value comes
 //! from [`Tokens`]. One item only: the group (`items`, `isMultiple`, arrow keys between headers)
-//! is not built here.
+//! is [`AccordionGroup`](crate::accordion_group::AccordionGroup).
 //!
 //! Where the oracle (`design-data render accordion`, see oracle.toml) looks odd, the item renders what it
 //! renders and says so here:
@@ -134,12 +134,12 @@ impl Size {
 type Press = Box<dyn FnOnce(El) -> El>;
 
 pub struct AccordionItem {
-    key: String,
+    pub(crate) key: String,
     title: String,
     size: Size,
     density: Density,
     quiet: bool,
-    disabled: bool,
+    pub(crate) disabled: bool,
     open: bool,
     content: Vec<El>,
     press: Option<Press>,

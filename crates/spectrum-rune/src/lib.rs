@@ -1,6 +1,7 @@
 #![doc = include_str!("../../../README.md")]
 
 pub mod accordion;
+pub mod accordion_group;
 pub mod action_button;
 pub mod badge;
 pub mod button;

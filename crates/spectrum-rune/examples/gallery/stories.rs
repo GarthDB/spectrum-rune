@@ -4,6 +4,7 @@
 use crate::G;
 use rune::{col, el, row, text, El};
 use spectrum_rune::accordion::{AccordionItem, Density};
+use spectrum_rune::accordion_group::AccordionGroup;
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::button::{self, Button, StaticColor};
@@ -44,6 +45,7 @@ stories! {
     "action-button" => "Action button", action_button;
     "badge" => "Badge", badge;
     "accordion" => "Accordion item", accordion;
+    "accordion-group" => "Accordion", accordion_group;
 }
 
 /// Backdrops for the static colours. Fixed hex values: the `blue_*`/`yellow_*` tokens invert in the
@@ -556,5 +558,54 @@ fn accordion(s: &G, t: &'static Tokens) -> El {
         section(t, "Density", density),
         section(t, "Sizes", sizes),
         section(t, "Long title", long),
+    ])
+}
+
+fn accordion_group(s: &G, t: &'static Tokens) -> El {
+    let group = |name: &str, multiple: bool, first_open: &str| {
+        let key = format!("accordion-group/{name}");
+        let item = |k: &str, title: &str| {
+            AccordionItem::new(k).title(title).content(
+                text("Content below the header.")
+                    .font(font::text_style(&t.component_m_regular))
+                    .color(t.neutral_content_color_default),
+            )
+        };
+        let k = key.clone();
+        AccordionGroup::new(key.clone())
+            .label(name.to_owned())
+            .item(item("shipping", "Shipping"))
+            .item(item("returns", "Returns"))
+            .item(item("sizing", "Sizing").disabled(true))
+            .item(item("care", "Care"))
+            .multiple(multiple)
+            .open(
+                s.open
+                    .get(&key)
+                    .cloned()
+                    .unwrap_or_else(|| vec![first_open.to_owned()]),
+            )
+            .on_change(move |s: &mut G, open: &[String]| {
+                s.open.insert(k.clone(), open.to_vec());
+            })
+    };
+    let w = |g: AccordionGroup| col().w(360.0).child(g.build(t));
+    page(vec![
+        section(
+            t,
+            "Single (one open; Up/Down, Home/End between headers)",
+            w(group("single", false, "shipping")),
+        ),
+        section(t, "Multiple", w(group("multiple", true, "returns"))),
+        section(
+            t,
+            "Quiet, size L",
+            w(group("quiet", false, "care").quiet(true).size(Size::L)),
+        ),
+        section(
+            t,
+            "Disabled",
+            w(group("disabled", false, "shipping").disabled(true)),
+        ),
     ])
 }
