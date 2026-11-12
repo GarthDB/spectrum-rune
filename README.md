@@ -325,7 +325,12 @@ dataset changes nothing.
   label, `41`/`218` instead of hover's `19`/`198`) is not drawn, and neither is the oracle's hover +
   keyboard-focus for an unselected Action-button (focus wins: icon and label `41` where we draw hover's
   `19`, and a non-quiet fill `233` where we draw hover's `225`; quiet's hover wash `225` matches) (beads
-  a14.14, a14.31).
+  a14.14, a14.31). **Down + keyboard-focus cannot be drawn:** a pointer press hides keyboard focus in Rune
+  (`focus_visible` is false until a navigation key), so a press on a Tab-focused control draws the plain down
+  look. That matches the oracle for Switch, Checkbox, Action-button and Button (their down + focus is their
+  down) but not for a selected neutral Radio (the oracle takes the hover fill) or the Accordion header (the
+  focus ink); `tests/fixtures/combined-diff.sh` prints the oracle's combinations and `a_press_on_a_keyboard_focused_*`
+  tests pin ours.
 - **Font family.** Tests cannot observe which family Rune resolved; only the ignored font tests and the gallery's
   measurement can. (Border and ring colour and geometry of Switch, Checkbox, Radio-button and
   Button are now asserted from pixels; the family is not.)

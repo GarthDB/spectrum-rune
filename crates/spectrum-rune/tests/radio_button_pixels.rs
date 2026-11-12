@@ -487,3 +487,36 @@ fn pointer_focus_shows_no_focus_look_and_hover_down_labels_are_the_oracles() {
         }
     }
 }
+
+/// The oracle's down + keyboard-focus look differs from its plain down for a selected neutral radio (the control
+/// takes the hover fill, 19 not 41), but Rune cannot draw it: a pointer press hides keyboard focus
+/// (`focus_visible` goes false until a navigation key), so a press on a Tab-focused radio draws exactly the plain
+/// down look. Asserted whole-frame, so the focus fill and the ring are gone, not merely hidden in a probe.
+/// `fixtures/combined-diff.sh` prints the oracle's side (a14.31).
+#[test]
+fn a_press_on_a_keyboard_focused_radio_draws_the_plain_down_look() {
+    for selected in [false, true] {
+        let app = App {
+            selected,
+            ..App::default()
+        };
+        let pressed = |tab: bool| {
+            let mut rt = runtime(app.clone());
+            if tab {
+                rt.key(KeyEvent::from(Key::Tab));
+                settle(&mut rt);
+                assert!(info(&rt, "container").focus_visible, "Tab shows focus");
+            }
+            let (x, y) = rt.find("rb/container").unwrap();
+            rt.pointer_move(x, y);
+            rt.pointer_down(x, y);
+            settle(&mut rt);
+            assert!(!info(&rt, "container").focus_visible, "a press hides it");
+            Pixels::of(&rt, SIZE)
+        };
+        assert!(
+            pressed(true).identical(&pressed(false)),
+            "selected={selected}: Tab then press differs from press alone"
+        );
+    }
+}
