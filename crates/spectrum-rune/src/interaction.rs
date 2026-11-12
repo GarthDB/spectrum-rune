@@ -57,14 +57,25 @@ impl Interaction {
     /// Reports the pointer's hover and press on `e` to this interaction. Skip it for a disabled
     /// component, so it stays at rest. Replaces any hover or drag handler `e` already has.
     pub fn attach(&self, e: El) -> El {
-        let (hover, down) = (self.clone(), self.clone());
+        self.attach_press(self.attach_hover(e))
+    }
+
+    /// Only the hover half of [`Interaction::attach`], for a row that wraps the pressable part
+    /// and more, so hover holds across all of it.
+    pub fn attach_hover(&self, e: El) -> El {
+        let hover = self.clone();
         e.on_hover_change_any(move |inside, _| hover.0.hover.set(inside))
-            .on_drag_any(move |drag, tx| match drag.phase {
-                Phase::Down => down.0.down.set(true),
-                Phase::Up => down.0.down.set(false),
-                // Moves change nothing the view reads.
-                Phase::Move => tx.live_only(),
-            })
+    }
+
+    /// Only the press half of [`Interaction::attach`].
+    pub fn attach_press(&self, e: El) -> El {
+        let down = self.clone();
+        e.on_drag_any(move |drag, tx| match drag.phase {
+            Phase::Down => down.0.down.set(true),
+            Phase::Up => down.0.down.set(false),
+            // Moves change nothing the view reads.
+            Phase::Move => tx.live_only(),
+        })
     }
 }
 
