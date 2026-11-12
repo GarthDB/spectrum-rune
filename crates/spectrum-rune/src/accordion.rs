@@ -36,10 +36,10 @@
 //!   the wrapping row instead of the header, so the item's wash and title and chevron ink hold
 //!   while the pointer is over the actions (which keep their own hover, press and focus looks).
 //!   Press stays on the header alone (the oracle's `down` is not visual), and keyboard focus is
-//!   the header's, unchanged: the oracle draws it on the header's ink only. Without either the tree is exactly the item's alone.
-//!   The oracle draws the switch unselected and the button at rest, so those states of the two
-//!   have no oracle here (their own tests cover them). The parts are keyed `{key}/direct-actions`,
-//!   `{key}/action-button/...` and `{key}/switch/...`.
+//!   the header's, unchanged: the oracle draws it on the header's ink only. Without either the
+//!   tree is exactly the item's alone. The oracle draws the switch unselected and the button at
+//!   rest, so those states of the two have no oracle here (their own tests cover them). The
+//!   parts are keyed `{key}/direct-actions`, `{key}/action-button/...` and `{key}/switch/...`.
 //!
 //! The header is a `button` that reports its press through `on_toggle` and exposes `expanded`
 //! (ARIA `aria-expanded`); the app owns `open`. Opening and closing spring the content's height
