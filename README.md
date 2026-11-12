@@ -24,17 +24,43 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 ## Installing
 
 The crate is not on crates.io. Depend on it by path or git, and pin Rune to the same rev this
-repo uses (the workspace `Cargo.toml` is the source of truth):
+repo uses (the workspace `Cargo.toml` is the source of truth). Rune builds winit and three other crates
+with its own patches, and a dependency's `[patch]` does not reach your workspace, so patch them too:
 
 ```toml
 [dependencies]
-spectrum-rune = { path = "../spectrum-rune/crates/spectrum-rune" }
-rune = { git = "https://github.com/anomalyco/rune", rev = "16697feebc536c8cd09c28d62105ea5d46cb024a" }
-rune-kit = { git = "https://github.com/anomalyco/rune", rev = "16697feebc536c8cd09c28d62105ea5d46cb024a" }
+spectrum-rune = { git = "https://github.com/GarthDB/spectrum-rune", tag = "vX.Y.Z" } # a release tag (see Releases)
+rune = { git = "https://github.com/anomalyco/rune", rev = "d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0" }
+rune-kit = { git = "https://github.com/anomalyco/rune", rev = "d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0" }
+
+[patch.crates-io]
+winit = { git = "https://github.com/anomalyco/rune", rev = "d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0" }
+wgpu-hal = { git = "https://github.com/anomalyco/rune", rev = "d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0" }
+parley_engine = { git = "https://github.com/anomalyco/rune", rev = "d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0" }
+accesskit_windows = { git = "https://github.com/anomalyco/rune", rev = "d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0" }
 ```
 
 `rune-kit` is needed because Button and Action button borrow its progress indicator.
-The toolchain is pinned in `rust-toolchain.toml`.
+The toolchain is pinned in `rust-toolchain.toml`. (A path dependency, as in the gallery, works the same way.)
+
+## Compatibility
+
+Cargo's semver check sees only our own public items. What a user of this crate must match is wider:
+
+- **The Rune rev is part of the API.** Public methods take and return `rune::El`, so an app on another Rune rev
+  gets mismatched types. Every release note names the rev; it moves when Rune is bumped.
+- **The `[patch.crates-io]` block above.** Without it the build fails on macOS: Rune's own code calls IME functions that
+  exist only in its patched winit (`cannot find function set_ime_text in winit::platform::macos`); a scratch crate
+  depending on this repo by git failed to build without the block, and built with winit patched alone. The other three
+  are what Rune itself builds and tests (parley_engine changes text shaping; accesskit_windows and wgpu-hal matter on
+  Windows), so patch all four.
+- **Behaviour.** Some changes keep every signature and still change what a user sees or hears, for example the pending
+  Button's accessibility semantics in 0.3.0. They are listed in the release notes.
+- **For contributors:** the `design-data` CLI range and the foundation release the generated values come from are in
+  `oracle.toml`, `platforms/rune/manifest.json` and `.design-data.toml`.
+
+A change that needs the user to edit their build or code is marked breaking in its commit (`chore(deps)!: bump Rune to ...`),
+so the changelog has a Breaking entry; below 1.0 that raises the minor version.
 
 ## Using it
 
@@ -362,6 +388,12 @@ open on main with the version bump (`crates/spectrum-rune/Cargo.toml`, `Cargo.lo
 2. Edit the release notes: what ships, the oracle (CLI and foundation versions) and the known gaps.
 3. In spectrum-design-data, set `tag = "vX.Y.Z"` under `[platforms.rune]` in `.design-data.toml`, check
    `design-data validate-manifest --platform rune` from a clean `[cache] dir`, and open a PR.
+
+Before merging, check the release PR's changelog against "Compatibility" above: the release notes (step 2) should say
+whether the Rune rev, the `[patch.crates-io]` block or any behaviour changed. The release PR is overwritten by
+release-plz when `main` moves (a hand-edit survives only if the PR is merged before then), so fix wording by merging
+promptly, and use conventional PR titles (`fix(button): ...`, `chore(deps)!: ...`): the repo squash-merges with the PR
+title, and a non-conventional one lands under "Other".
 
 A pin must name a commit whose `platforms/rune/manifest.json` is the one consumers should validate. Without
 conventional commits (`feat:`, `fix:`) release-plz proposes a patch bump; override the version in the release PR.
