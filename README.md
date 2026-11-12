@@ -325,14 +325,17 @@ The repository is private; nothing here links to anything that is not in it or p
 
 ## Releasing
 
-1. Open a "Release X.Y.Z" PR that bumps `version` in `crates/spectrum-rune/Cargo.toml` and `xtask/Cargo.toml`
-   (and `Cargo.lock`), and merge it once CI is green.
-2. Tag the merge commit `vX.Y.Z` (annotated) and run `gh release create vX.Y.Z --verify-tag` with notes: what ships,
-   the oracle (CLI and foundation versions) and the known gaps.
+[release-plz](https://release-plz.dev) (`release-plz.toml`, `.github/workflows/release-plz.yml`) keeps a release PR
+open on main with the version bump (`crates/spectrum-rune/Cargo.toml`, `Cargo.lock`) and `CHANGELOG.md`.
+
+1. Merge the release PR once CI is green. release-plz then tags the merge commit `vX.Y.Z` and creates the GitHub
+   release (versions come from `v*` tags; nothing goes to crates.io because `rune` is a git dependency).
+2. Edit the release notes: what ships, the oracle (CLI and foundation versions) and the known gaps.
 3. In spectrum-design-data, set `tag = "vX.Y.Z"` under `[platforms.rune]` in `.design-data.toml`, check
    `design-data validate-manifest --platform rune` from a clean `[cache] dir`, and open a PR.
 
-A pin must name a commit whose `platforms/rune/manifest.json` is the one consumers should validate.
+A pin must name a commit whose `platforms/rune/manifest.json` is the one consumers should validate. Without
+conventional commits (`feat:`, `fix:`) release-plz proposes a patch bump; override the version in the release PR.
 
 ## Licence
 
