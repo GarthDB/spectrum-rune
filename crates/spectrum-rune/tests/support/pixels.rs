@@ -42,6 +42,11 @@ impl Pixels {
         Pixels(frame)
     }
 
+    /// Whether every pixel of `other` is the same.
+    pub fn identical(&self, other: &Pixels) -> bool {
+        self.0.rgba == other.0.rgba
+    }
+
     /// The sRGB RGBA of one pixel.
     #[allow(dead_code)]
     pub fn at(&self, x: u32, y: u32) -> [u8; 4] {

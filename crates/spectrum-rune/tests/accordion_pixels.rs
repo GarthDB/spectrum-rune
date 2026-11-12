@@ -549,3 +549,27 @@ fn pointer_focus_shows_no_focus_ink_and_a_press_is_the_rest_ink() {
     fsettle(&mut rt);
     is(title(&rt), f_ink, "Tab: the focus ink");
 }
+
+/// Same as the radio's: the oracle gives down + keyboard-focus the focus look (title and chevron 19 not 41), Rune
+/// cannot enter it (a pointer press hides keyboard focus), so a press on a Tab-focused header draws the plain
+/// down look (the same as rest, as the oracle's down is). `fixtures/combined-diff.sh` prints the oracle's side.
+#[test]
+fn a_press_on_a_keyboard_focused_header_draws_the_plain_down_look() {
+    let pressed = |tab: bool| {
+        let mut rt = runtime(app());
+        if tab {
+            rt.key(KeyEvent::from(Key::Tab));
+            for _ in 0..40 {
+                rt.frame(0.05);
+            }
+        }
+        let (x, y) = rt.find("ac/header").unwrap();
+        rt.pointer_move(x, y);
+        rt.pointer_down(x, y);
+        for _ in 0..40 {
+            rt.frame(0.05);
+        }
+        Pixels::of(&rt, SIZE)
+    };
+    assert!(pressed(true).identical(&pressed(false)));
+}
