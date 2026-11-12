@@ -19,6 +19,8 @@ jobs:
           key: opt-deps
       # winit (via rune) links libxkbcommon.
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxkbcommon-dev
+      # rune, rune-kit, rune-ref and the [patch.crates-io] vendored crates must all name one Rune rev.
+      - run: test "$(grep -o 'rev = "[0-9a-f]\{40\}"' Cargo.toml | sort -u | wc -l)" = 1
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace

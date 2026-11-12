@@ -294,6 +294,7 @@ pub struct Button {
     label_hidden: bool,
     disabled: bool,
     pending: bool,
+    pending_label: String,
     static_color: Option<StaticColor>,
     width: Option<f32>,
     press: Option<Press>,
@@ -313,6 +314,7 @@ impl Button {
             label_hidden: false,
             disabled: false,
             pending: false,
+            pending_label: "pending".into(),
             static_color: None,
             width: None,
             press: None,
@@ -365,6 +367,12 @@ impl Button {
     /// `tx.announce(label, LiveRegion::Assertive)` when `pending` flips while the button has focus.
     pub fn pending(mut self, v: bool) -> Self {
         self.pending = v;
+        self
+    }
+    /// What a screen reader says for the progress while pending, and so the button's description. Defaults to the
+    /// English "pending" (S2's `button.pending`); there is no localisation here, so pass the translated word.
+    pub fn pending_label(mut self, l: impl Into<String>) -> Self {
+        self.pending_label = l.into();
         self
     }
     pub fn static_color(mut self, c: StaticColor) -> Self {
@@ -516,7 +524,7 @@ impl Button {
                 .color(look.content)
                 .build(&Kit::neutral(false))
                 .key(part("progress"))
-                .label("pending");
+                .label(self.pending_label.clone());
             root = root.child(fit.part(spinner, d.icon));
         }
         if show_icon {
@@ -551,11 +559,12 @@ impl Button {
         }
         if self.pending {
             // aria-disabled, as React Aria's Button does: read as unavailable but still a Tab stop, with the
-            // progress as its description. `disabled` turns focus off, so `focusable(true)` must come after.
+            // progress as its description. `disabled` turns focus off, so `focusable` must come after; an app-
+            // disabled button stays out of the Tab order (isDisabled wins over pending).
             // (`busy` would do nothing on macOS: accesskit_macos does not map it.)
             root = root
                 .disabled(true)
-                .focusable(true)
+                .focusable(!self.disabled)
                 .described_by(part("progress"));
         }
         let k = {

@@ -25,6 +25,7 @@ struct App {
     icon: bool,
     disabled: bool,
     pending: bool,
+    pending_label: Option<String>,
     hidden: bool,
     static_color: Option<StaticColor>,
     presses: u32,
@@ -42,6 +43,7 @@ impl Default for App {
             icon: true,
             disabled: false,
             pending: false,
+            pending_label: None,
             hidden: false,
             static_color: None,
             presses: 0,
@@ -71,6 +73,9 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
         .pending(a.pending)
         .label_hidden(a.hidden)
         .on_press(|s: &mut App| s.presses += 1);
+    if let Some(l) = &a.pending_label {
+        b = b.pending_label(l.clone());
+    }
     if a.icon {
         b = b.icon(&CHECKMARK_100);
     }
@@ -360,6 +365,18 @@ fn pending_hides_label_shows_progress_and_ignores_press() {
 
 #[test]
 fn pending_button_is_unavailable_but_focusable_and_described_by_its_progress() {
+    let mut rt = runtime(App {
+        pending: true,
+        disabled: true,
+        ..App::default()
+    });
+    rt.key(KeyEvent::from(Key::Tab));
+    settle(&mut rt);
+    assert!(
+        !part(&rt, "container").unwrap().focused,
+        "an app-disabled pending button is not a Tab stop"
+    );
+
     let node = |pending: bool| {
         let rt = runtime(App {
             pending,
@@ -399,6 +416,25 @@ fn pending_button_is_unavailable_but_focusable_and_described_by_its_progress() {
     rt.key(KeyEvent::from(Key::Text(" ".into())));
     settle(&mut rt);
     assert_eq!(rt.state.presses, 0);
+}
+
+#[test]
+fn pending_label_is_what_a_screen_reader_says() {
+    let rt = runtime(App {
+        pending: true,
+        pending_label: Some("en cours".into()),
+        ..App::default()
+    });
+    let tree = rt.accessibility_tree();
+    let n = |k: &str| {
+        tree.nodes
+            .iter()
+            .find(|(_, n)| n.author_id() == Some(k))
+            .map(|(_, n)| n.clone())
+            .unwrap()
+    };
+    assert_eq!(n("bt/progress").label(), Some("en cours"));
+    assert_eq!(n("bt/container").description(), Some("en cours"));
 }
 
 #[test]
