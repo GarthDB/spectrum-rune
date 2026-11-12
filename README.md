@@ -207,7 +207,7 @@ which draws heavier and less crisp than Spectrum on the web. `FontSmoothing::Off
 `-webkit-font-smoothing: antialiased` draws in macOS browsers, and is the closer match. Smoothing is
 a window setting in Rune, so components can't set it: **the app does**.
 
-```rust
+```rust,ignore
 use rune::{App, FontSmoothing};
 
 App::new(spec).font_smoothing(FontSmoothing::Off).run();
