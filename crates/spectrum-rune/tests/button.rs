@@ -359,6 +359,49 @@ fn pending_hides_label_shows_progress_and_ignores_press() {
 }
 
 #[test]
+fn pending_button_is_unavailable_but_focusable_and_described_by_its_progress() {
+    let node = |pending: bool| {
+        let rt = runtime(App {
+            pending,
+            ..App::default()
+        });
+        let tree = rt.accessibility_tree();
+        let n = tree
+            .nodes
+            .iter()
+            .find(|(_, n)| n.author_id() == Some("bt/container"))
+            .map(|(_, n)| n.clone())
+            .expect("button node");
+        let progress = tree
+            .nodes
+            .iter()
+            .find(|(_, n)| n.author_id() == Some("bt/progress"))
+            .map(|(_, n)| n.label().map(str::to_string));
+        (n, progress)
+    };
+    let (n, progress) = node(true);
+    assert!(n.is_disabled());
+    assert!(!n.supports_action(rune::accesskit::Action::Click));
+    assert_eq!(n.description(), Some("pending"));
+    assert_eq!(progress, Some(Some("pending".to_string())));
+    let (n, _) = node(false);
+    assert!(!n.is_disabled());
+    assert!(n.description().is_none());
+
+    // Still a Tab stop, and a press does nothing.
+    let mut rt = runtime(App {
+        pending: true,
+        ..App::default()
+    });
+    rt.key(KeyEvent::from(Key::Tab));
+    settle(&mut rt);
+    assert!(part(&rt, "container").unwrap().focused);
+    rt.key(KeyEvent::from(Key::Text(" ".into())));
+    settle(&mut rt);
+    assert_eq!(rt.state.presses, 0);
+}
+
+#[test]
 fn hidden_label_is_a_square_icon_button_with_an_accessible_name() {
     for size in [Size::S, Size::M, Size::L, Size::XL] {
         let rt = runtime(App {

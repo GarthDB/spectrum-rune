@@ -360,7 +360,9 @@ impl Button {
     /// Replaces the icon and label with a progress indicator. The button keeps reacting to the
     /// pointer, as the oracle shows (hover/down colours and press scale), but `on_press` no longer
     /// fires, so a second click cannot submit twice. The catalog's 1 s delay before showing
-    /// pending is the app's to implement.
+    /// pending is the app's to implement. To assistive technology the button is disabled but still focusable,
+    /// described by "pending". Like React Aria, a screen reader is told only when the app says so: call
+    /// `tx.announce(label, LiveRegion::Assertive)` when `pending` flips while the button has focus.
     pub fn pending(mut self, v: bool) -> Self {
         self.pending = v;
         self
@@ -513,7 +515,8 @@ impl Button {
                 .size(d.icon)
                 .color(look.content)
                 .build(&Kit::neutral(false))
-                .key(part("progress"));
+                .key(part("progress"))
+                .label("pending");
             root = root.child(fit.part(spinner, d.icon));
         }
         if show_icon {
@@ -545,6 +548,15 @@ impl Button {
 
         if let Some(w) = outer {
             root = root.w(w);
+        }
+        if self.pending {
+            // aria-disabled, as React Aria's Button does: read as unavailable but still a Tab stop, with the
+            // progress as its description. `disabled` turns focus off, so `focusable(true)` must come after.
+            // (`busy` would do nothing on macOS: accesskit_macos does not map it.)
+            root = root
+                .disabled(true)
+                .focusable(true)
+                .described_by(part("progress"));
         }
         let k = {
             let mut width = 2.0 * pad;
