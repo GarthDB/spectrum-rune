@@ -210,14 +210,12 @@ cargo xtask gen
 ```
 
 The oracle (CLI version range and dataset commit) is pinned in one file, [`oracle.toml`](oracle.toml).
-The generator needs a `design-data` CLI inside that range on `PATH` and a clean checkout of
-[spectrum-design-data](https://github.com/adobe/spectrum-design-data) at exactly the `dataset` commit,
-at `~/repos/spectrum-design-data` or `SPECTRUM_DESIGN_DATA=/path`. To leave your own checkout alone use
-a detached worktree: `git worktree add --detach <dir> <commit>`. `--allow-dirty` skips the clean and
-commit check. The CLI is the released one (`brew install design-data`; older than the `cli_min` in `oracle.toml`
-is rejected), and `dataset` is the commit of the foundation release pinned in `platforms/rune/manifest.json`.
-(The `regen-*.sh` scripts no longer need the checkout: they read that release through the CLI. Only
-`cargo xtask gen` does, until it moves to `catalog export`; bead spectrum-rune-4qa.3.)
+The generator needs a `design-data` CLI inside that range on `PATH` (`brew install design-data`; outside the
+`cli_min`/`cli_max` in `oracle.toml` is rejected). It needs no checkout: the CLI reads the foundation release
+pinned in `.design-data.toml` (a github source, fetched and cached), and `dataset` is the commit of the release
+pinned in `platforms/rune/manifest.json`. It runs `design-data catalog export` for the components, icons and
+recipes, so it needs a CLI that writes `visuals/` (0.32.0, adobe/spectrum-design-data#1750); the `regen-*.sh`
+scripts read the same release.
 The generated files' headers record the real CLI version and dataset commit. To move to
 a newer oracle: edit `oracle.toml`, run `cargo xtask gen` and every `regen-*.sh`, and fix what the
 diffs show, all in one change.
