@@ -307,11 +307,14 @@ dataset changes nothing.
   recipe's trailing icon-only action button (hold icon always on) and label-less switch from our
   `ActionButton` and `Switch`, and the item fixes their size, hidden label, hold icon and disabled state
   (`tests/accordion_actions.rs`: geometry and colours of 69 oracle cases, each action alone and both).
-  The row is a sibling of the header button, not inside it, so the header's hover area and focus ring
-  stop before the actions and an item hover does not wash through them (the oracle's `header` spans
-  them). The oracle draws the switch unselected and the button at rest, so there is no oracle for their
-  selected, hover, keyboard-focus or pending states (the controls' own tests cover those), and the
-  switch track's stroke is not asserted here (`ElementInfo` has no border; `switch_pixels.rs` does).
+  The row is a sibling of the header button, not inside it, so the header's focus ring stops before the
+  actions (the oracle's `header` spans them). Hover is tracked on the wrapping row, so the item's wash
+  and title and chevron ink hold while the pointer is over the actions, which keep their own looks;
+  press and keyboard focus stay on the header (the oracle changes nothing else in those states). Hold
+  is checked headlessly, not with a real pointer. The oracle draws the switch unselected and the button
+  at rest, so there is no oracle for their selected, hover, keyboard-focus or pending states (the
+  controls' own tests cover those), and the switch track's stroke is not asserted here
+  (`ElementInfo` has no border; `switch_pixels.rs` does).
   From M up the oracle's item is at its minimum width, so the title-to-actions gap is only asserted
   at S, laid out at its natural width. Bead a14.28.
 - **Accordion content inset.** `AccordionItem::content` is flush with the item's left edge (the

@@ -31,12 +31,15 @@
 //!   action button (hold icon always on, the recipe fixes it) and a switch with its label hidden,
 //!   both at the item's size and disabled with it, `spacing_100` apart, ending at the header's
 //!   inline padding. The row is a *sibling* of the header button, not inside it (a control inside
-//!   a `button` role is not reachable and its Enter would toggle the item), so the header's hover
-//!   area and focus ring stop before the actions, while the oracle's `header` spans them; an item
-//!   hover does not wash through them. Without either the tree is exactly the item's alone.
-//!   The oracle draws the switch unselected and the button at rest, so those states of the two
-//!   have no oracle here (their own tests cover them). The parts are keyed `{key}/direct-actions`,
-//!   `{key}/action-button/...` and `{key}/switch/...`.
+//!   a `button` role is not reachable and its Enter would toggle the item), so the header's focus
+//!   ring stops before the actions, while the oracle's `header` spans them. Hover is tracked on
+//!   the wrapping row instead of the header, so the item's wash and title and chevron ink hold
+//!   while the pointer is over the actions (which keep their own hover, press and focus looks).
+//!   Press stays on the header alone (the oracle's `down` is not visual), and keyboard focus is
+//!   the header's, unchanged: the oracle draws it on the header's ink only. Without either the
+//!   tree is exactly the item's alone. The oracle draws the switch unselected and the button at
+//!   rest, so those states of the two have no oracle here (their own tests cover them). The
+//!   parts are keyed `{key}/direct-actions`, `{key}/action-button/...` and `{key}/switch/...`.
 //!
 //! The header is a `button` that reports its press through `on_toggle` and exposes `expanded`
 //! (ARIA `aria-expanded`); the app owns `open`. Opening and closing spring the content's height
@@ -349,7 +352,13 @@ impl AccordionItem {
                     .my(d.title_pad_v),
             ));
         if !self.disabled {
-            header = interaction.attach(header);
+            // With actions the wrapping row owns hover, so it holds while the pointer is over
+            // them; the header alone would drop it on leaving for a sibling.
+            header = if direct {
+                interaction.attach_press(header)
+            } else {
+                interaction.attach(header)
+            };
             if let Some(p) = self.press {
                 header = p(header);
             }
@@ -382,10 +391,15 @@ impl AccordionItem {
             }
             // The header's vertical padding also surrounds the actions, and the header stretches
             // to whichever is taller.
-            row()
+            let top = row()
                 .items_stretch()
                 .child(header.grow(1.0).shrink())
-                .child(row().py(header_pad_v).pr(d.pad).center_y().child(actions))
+                .child(row().py(header_pad_v).pr(d.pad).center_y().child(actions));
+            if self.disabled {
+                top
+            } else {
+                interaction.attach_hover(top)
+            }
         } else {
             header
         };

@@ -4,7 +4,7 @@
 //! tolerance. Not asserted: the switch track's stroke (`ElementInfo` has no border; the Switch's
 //! own pixel tests cover it) and the states the oracle does not draw for these controls.
 
-use rune::{col, el, row, Color, Cx, El, ElementInfo, Env, Runtime};
+use rune::{col, el, row, Color, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
 use spectrum_rune::accordion::{AccordionItem, Density};
 use spectrum_rune::icons::ADD_100;
@@ -346,4 +346,98 @@ fn disabled_item_disables_its_actions() {
     for key in ["action-button/container", "switch/container"] {
         assert!(!part(&rt, key).unwrap().focusable, "{key}");
     }
+}
+
+fn settle(rt: &mut Runtime<App>) {
+    for _ in 0..10 {
+        rt.frame(0.05);
+    }
+}
+
+fn washed(rt: &Runtime<App>) -> bool {
+    part(rt, "item").unwrap().fill.a > 0.02
+}
+
+fn title_ink(rt: &Runtime<App>) -> String {
+    part(rt, "title").unwrap().text_color.unwrap().hex()
+}
+
+#[test]
+fn hover_holds_across_the_actions() {
+    let mut rt = runtime(App {
+        button: true,
+        switch: true,
+        ..App::default()
+    });
+    let rest_ink = title_ink(&rt);
+    assert!(!washed(&rt));
+    let (x, y) = rt.find("ac/header").unwrap();
+    rt.pointer_move(x, y);
+    settle(&mut rt);
+    let hover_ink = title_ink(&rt);
+    assert!(washed(&rt));
+    assert_ne!(hover_ink, rest_ink);
+    for key in ["ac/action-button/container", "ac/switch/container"] {
+        let (x, y) = rt.find(key).unwrap();
+        rt.pointer_move(x, y);
+        settle(&mut rt);
+        assert!(washed(&rt), "{key}: item keeps the hover wash");
+        assert_eq!(
+            title_ink(&rt),
+            hover_ink,
+            "{key}: title keeps the hover ink"
+        );
+    }
+    rt.pointer_move(399.0, 299.0);
+    settle(&mut rt);
+    assert!(!washed(&rt));
+    assert_eq!(title_ink(&rt), rest_ink);
+}
+
+#[test]
+fn press_and_focus_stay_on_the_header_with_actions() {
+    let mut rt = runtime(App {
+        button: true,
+        switch: true,
+        ..App::default()
+    });
+    let rest_ink = title_ink(&rt);
+    // A held header press draws the rest ink, as the oracle's `down`.
+    let (x, y) = rt.find("ac/header").unwrap();
+    rt.pointer_move(x, y);
+    rt.pointer_down(x, y);
+    settle(&mut rt);
+    assert_eq!(
+        title_ink(&rt),
+        rest_ink,
+        "held header press draws the rest ink"
+    );
+    rt.pointer_up(x, y);
+    settle(&mut rt);
+    assert_eq!(rt.state.toggles, 1);
+    // Keyboard focus lands on the header and takes the hover ink, not the wash.
+    let mut rt = runtime(App {
+        button: true,
+        switch: true,
+        ..App::default()
+    });
+    rt.key(KeyEvent::from(Key::Tab));
+    settle(&mut rt);
+    let h = part(&rt, "header").unwrap();
+    assert!(h.focused && h.focus_visible);
+    assert_ne!(title_ink(&rt), rest_ink);
+    assert!(!washed(&rt));
+}
+
+#[test]
+fn disabled_item_does_not_hover_across_actions() {
+    let mut rt = runtime(App {
+        button: true,
+        disabled: true,
+        ..App::default()
+    });
+    let (x, y) = rt.find("ac/action-button/container").unwrap();
+    rt.pointer_move(x, y);
+    settle(&mut rt);
+    assert!(!washed(&rt));
 }
