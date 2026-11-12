@@ -388,10 +388,6 @@ fn a_disabled_item_does_not_toggle() {
     assert_eq!(open_items(&rt), ["a"]);
 }
 
-fn t() -> &'static spectrum_rune::tokens::Tokens {
-    tokens(ColorScheme::Light, Scale::Desktop)
-}
-
 #[test]
 #[should_panic(expected = "duplicate item key")]
 fn duplicate_item_keys_are_rejected() {
@@ -401,11 +397,15 @@ fn duplicate_item_keys_are_rejected() {
 }
 
 #[test]
-#[should_panic(expected = "more than one item open in single mode")]
-fn two_open_in_single_mode_is_rejected() {
-    let _ = AccordionGroup::new("g")
-        .item(AccordionItem::new("a"))
-        .item(AccordionItem::new("b"))
-        .open(["a", "b"])
-        .build(t());
+fn stale_state_with_two_open_in_single_mode_shows_the_first() {
+    let mut rt = runtime(App {
+        open: vec!["c".into(), "b".into()],
+        ..App::default()
+    });
+    assert_eq!(open_items(&rt), ["b"]);
+    click(&mut rt, "b");
+    assert!(
+        rt.state.open.is_empty(),
+        "pressing the shown one closes all"
+    );
 }

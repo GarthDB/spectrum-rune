@@ -98,7 +98,7 @@ impl AccordionGroup {
         self.multiple = v;
         self
     }
-    /// The open items' keys. Keys that are not items are ignored. In single mode, give at most one.
+    /// The open items' keys. Keys that are not items are ignored. In single mode only the first (in item order) shows open.
     pub fn open<I, V>(mut self, values: I) -> Self
     where
         I: IntoIterator<Item = V>,
@@ -123,19 +123,16 @@ impl AccordionGroup {
     }
 
     pub fn build(self, t: &Tokens) -> El {
-        debug_assert!(
-            self.multiple
-                || self
-                    .items
-                    .iter()
-                    .filter(|i| self.open.contains(&i.key))
-                    .count()
-                    <= 1,
-            "AccordionGroup `{}`: more than one item open in single mode",
-            self.key
-        );
         let values: Vec<String> = self.items.iter().map(|i| i.key.clone()).collect();
-        let is_open = |v: &str| self.open.iter().any(|o| o == v);
+        // Single mode shows the first open item only, so stale state cannot open several.
+        let shown: Vec<String> = self
+            .items
+            .iter()
+            .map(|i| i.key.clone())
+            .filter(|k| self.open.contains(k))
+            .take(if self.multiple { usize::MAX } else { 1 })
+            .collect();
+        let is_open = |v: &str| shown.iter().any(|o| o == v);
         let mut headers = Vec::new();
         let mut root = col()
             .key(self.key.clone())
