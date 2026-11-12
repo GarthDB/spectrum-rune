@@ -665,36 +665,6 @@ fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::check_lit;
-    use serde_json::json;
-
-    #[test]
-    fn literals_are_checked_against_declared_values_and_booleans() {
-        let enumd = json!({"type": "string", "values": [{"value": "a"}, {"value": "b"}]});
-        let boolean = json!({"type": "boolean"});
-        assert!(check_lit(&enumd, &json!("a"), "t").is_ok());
-        assert!(check_lit(&enumd, &json!("c"), "t").is_err());
-        assert!(check_lit(&boolean, &json!(true), "t").is_ok());
-        assert!(check_lit(&boolean, &json!("true"), "t").is_err());
-    }
-
-    #[test]
-    fn a_free_form_option_cannot_be_compared_with_a_literal() {
-        for decl in [
-            json!({"type": "string"}),
-            json!({"type": "object"}),
-            json!({}),
-        ] {
-            for v in [json!(true), json!("x")] {
-                let e = check_lit(&decl, &v, "icon rule").unwrap_err();
-                assert!(e.contains("free-form"), "{e}");
-            }
-        }
-    }
-}
-
 /// `constraints/generated.rs` from every `components/*.json` `constraints[]` (spec
 /// `option-constraints.md`), including components without rules. Unknown shapes and SPEC-064
 /// violations (a name or value the component's `options` does not declare) are errors.
@@ -850,4 +820,34 @@ fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
         files.len()
     );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check_lit;
+    use serde_json::json;
+
+    #[test]
+    fn literals_are_checked_against_declared_values_and_booleans() {
+        let enumd = json!({"type": "string", "values": [{"value": "a"}, {"value": "b"}]});
+        let boolean = json!({"type": "boolean"});
+        assert!(check_lit(&enumd, &json!("a"), "t").is_ok());
+        assert!(check_lit(&enumd, &json!("c"), "t").is_err());
+        assert!(check_lit(&boolean, &json!(true), "t").is_ok());
+        assert!(check_lit(&boolean, &json!("true"), "t").is_err());
+    }
+
+    #[test]
+    fn a_free_form_option_cannot_be_compared_with_a_literal() {
+        for decl in [
+            json!({"type": "string"}),
+            json!({"type": "object"}),
+            json!({}),
+        ] {
+            for v in [json!(true), json!("x")] {
+                let e = check_lit(&decl, &v, "icon rule").unwrap_err();
+                assert!(e.contains("free-form"), "{e}");
+            }
+        }
+    }
 }
