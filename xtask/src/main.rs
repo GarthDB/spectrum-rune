@@ -1,6 +1,6 @@
-//! `cargo xtask gen`: writes `crates/spectrum-rune/src/tokens/generated.rs` from the
-//! `design-data` CLI. Needs spectrum-design-data checked out (`SPECTRUM_DESIGN_DATA`,
-//! default `~/repos/spectrum-design-data`).
+//! `cargo xtask gen`: writes the `generated.rs` files under `crates/spectrum-rune/src/` from the
+//! `design-data` CLI, which reads the foundation release pinned in `.design-data.toml`
+//! (a github source, fetched and cached by the CLI). No spectrum-design-data checkout needed.
 
 use serde_json::{Map, Value};
 use std::collections::{BTreeMap, BTreeSet};
@@ -15,12 +15,11 @@ const SCALES: [&str; 2] = ["desktop", "mobile"];
 const KEYWORDS: [&str; 8] = ["type", "match", "ref", "fn", "in", "as", "mod", "use"];
 
 fn main() {
-    let allow_dirty = std::env::args().any(|a| a == "--allow-dirty");
     if std::env::args().nth(1).as_deref() != Some("gen") {
-        eprintln!("usage: cargo xtask gen [--allow-dirty]");
+        eprintln!("usage: cargo xtask gen");
         std::process::exit(2);
     }
-    if let Err(e) = generate(allow_dirty) {
+    if let Err(e) = generate() {
         eprintln!("xtask gen failed: {e}");
         std::process::exit(1);
     }
@@ -41,17 +40,9 @@ fn json(cmd: &mut Command) -> Res<Value> {
     serde_json::from_str(&run(cmd)?).map_err(|e| format!("{cmd:?}: bad JSON: {e}"))
 }
 
-fn dataset_dir() -> PathBuf {
-    std::env::var_os("SPECTRUM_DESIGN_DATA")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| {
-            PathBuf::from(std::env::var("HOME").unwrap_or_default())
-                .join("repos/spectrum-design-data")
-        })
-}
-
-fn git(dir: &Path, args: &[&str]) -> Res<String> {
-    run(Command::new("git").current_dir(dir).args(args)).map(|s| s.trim().to_string())
+/// The repo root: the CLI runs here so it picks up `.design-data.toml`.
+fn root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("..")
 }
 
 /// A `key = "value"` line of `oracle.toml` at the repo root.
@@ -81,7 +72,7 @@ fn semver(v: &str) -> Res<(u32, u32, u32)> {
     }
 }
 
-fn check_inputs(dir: &Path, allow_dirty: bool) -> Res<(String, String)> {
+fn check_inputs() -> Res<(String, String)> {
     let version = run(Command::new("design-data").arg("--version"))?
         .trim()
         .to_string();
@@ -92,25 +83,26 @@ fn check_inputs(dir: &Path, allow_dirty: bool) -> Res<(String, String)> {
             "oracle.toml accepts design-data {min} up to (not including) {max}, found `{version}`"
         ));
     }
-    let commit = git(dir, &["rev-parse", "--short", "HEAD"])?;
-    let want = oracle("dataset")?;
-    let dirty = !git(dir, &["status", "--porcelain", "--untracked-files=no"])?.is_empty();
-    if !allow_dirty && (dirty || !commit.starts_with(&want) && !want.starts_with(&commit)) {
-        return Err(format!(
-            "{} must be clean and at the oracle.toml dataset {want} (found {commit}{}); \
-             `git worktree add --detach <dir> {want}` and set SPECTRUM_DESIGN_DATA, or --allow-dirty",
-            dir.display(),
-            if dirty { ", dirty" } else { "" }
-        ));
-    }
-    Ok((version, commit))
+    Ok((version, oracle("dataset")?))
 }
 
-fn export(dir: &Path, scheme: &str, scale: &str, contrast: &str) -> Res<Map<String, Value>> {
+/// `design-data catalog export` of the pinned release (with the rune platform): `components/`,
+/// `icons/` and `visuals/`, which the generators read instead of a checkout.
+fn catalog_export() -> Res<PathBuf> {
+    let out = std::env::temp_dir().join("spectrum-rune-catalog");
+    let _ = std::fs::remove_dir_all(&out);
+    run(Command::new("design-data")
+        .current_dir(root())
+        .args(["catalog", "export", "--out"])
+        .arg(&out))?;
+    Ok(out)
+}
+
+fn export(scheme: &str, scale: &str, contrast: &str) -> Res<Map<String, Value>> {
     let v = json(
         Command::new("design-data")
+            .current_dir(root())
             .arg("export")
-            .arg(dir.join("packages/design-data/tokens"))
             .args([
                 "--color-scheme",
                 scheme,
@@ -153,9 +145,8 @@ fn scoped_values(
     dir: &Path,
     exported: &BTreeSet<String>,
 ) -> Res<BTreeMap<String, BTreeMap<String, f64>>> {
-    let data = dir.join("packages/design-data");
     let mut states = Vec::new();
-    let mut recipes: Vec<_> = std::fs::read_dir(data.join("visuals"))
+    let mut recipes: Vec<_> = std::fs::read_dir(dir.join("visuals"))
         .map_err(|e| e.to_string())?
         .flatten()
         .collect();
@@ -174,7 +165,7 @@ fn scoped_values(
             .map_err(|e| e.to_string())
         };
         let recipe = read(path)?;
-        let catalog = read(data.join(format!("components/{name}.json")))?;
+        let catalog = read(dir.join(format!("components/{name}.json")))?;
         let sizes: Vec<String> = recipe["sizeScale"]
             .as_object()
             .map_or_else(|| vec!["m".into()], |m| m.keys().cloned().collect());
@@ -210,7 +201,7 @@ fn scoped_values(
     )
     .map_err(|e| e.to_string())?;
     run(Command::new("design-data")
-        .current_dir(dir)
+        .current_dir(root())
         .arg("render")
         .arg("--batch")
         .arg(&batch)
@@ -397,15 +388,15 @@ fn emit(token: &Value) -> Res<Option<(&'static str, String, Option<String>)>> {
     }))
 }
 
-fn generate(allow_dirty: bool) -> Res<()> {
-    let dir = dataset_dir();
-    let (version, commit) = check_inputs(&dir, allow_dirty)?;
+fn generate() -> Res<()> {
+    let (version, commit) = check_inputs()?;
+    let dir = catalog_export()?;
 
     let mut modes: Vec<(String, Map<String, Value>)> = Vec::new();
     for scheme in SCHEMES {
         for scale in SCALES {
-            let regular = export(&dir, scheme, scale, "regular")?;
-            if regular != export(&dir, scheme, scale, "high")? {
+            let regular = export(scheme, scale, "regular")?;
+            if regular != export(scheme, scale, "high")? {
                 return Err(format!("contrast=high now differs from regular for {scheme}/{scale}: add a high-contrast token set"));
             }
             modes.push((
@@ -523,7 +514,7 @@ fn write_rs(module: &str, out: String) -> Res<PathBuf> {
 /// Several paths are joined into one body. A non-square viewBox cannot be a Rune `Icon` (one `view`
 /// number), so it is skipped and listed in the header; any other odd shape is an error.
 fn generate_icons(dir: &Path, version: &str, commit: &str) -> Res<()> {
-    let src = dir.join("packages/design-data/icons/ui.json");
+    let src = dir.join("icons/ui.json");
     let ui: Value = serde_json::from_str(
         &std::fs::read_to_string(&src).map_err(|e| format!("{}: {e}", src.display()))?,
     )
@@ -639,7 +630,7 @@ fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
 /// `option-constraints.md`), including components without rules. Unknown shapes and SPEC-064
 /// violations (a name or value the component's `options` does not declare) are errors.
 fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
-    let components = dir.join("packages/design-data/components");
+    let components = dir.join("components");
     let mut files: Vec<_> = std::fs::read_dir(&components)
         .map_err(|e| format!("{}: {e}", components.display()))?
         .flatten()
