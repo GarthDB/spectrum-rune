@@ -650,10 +650,49 @@ fn check_lit(opt: &Value, v: &Value, ctx: &str) -> Res<()> {
                 "{ctx}: value {v} is not a declared value of the option"
             ));
         }
-    } else if opt["type"] == "boolean" && !v.is_boolean() {
-        return Err(format!("{ctx}: value {v} is not a boolean"));
+    } else if opt["type"] == "boolean" {
+        if !v.is_boolean() {
+            return Err(format!("{ctx}: value {v} is not a boolean"));
+        }
+    } else {
+        // A free-form option (an icon, a label) has no value to compare: `OptionValue::Present` never equals a
+        // literal in `constraints::check`, while `tests/fixtures/constraints.jq` would compare the real one.
+        // `require` takes `{"present": true}` for these; `when` cannot name them.
+        return Err(format!(
+            "{ctx}: the option is free-form (no `values`, not boolean), so a rule cannot compare it with {v}"
+        ));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check_lit;
+    use serde_json::json;
+
+    #[test]
+    fn literals_are_checked_against_declared_values_and_booleans() {
+        let enumd = json!({"type": "string", "values": [{"value": "a"}, {"value": "b"}]});
+        let boolean = json!({"type": "boolean"});
+        assert!(check_lit(&enumd, &json!("a"), "t").is_ok());
+        assert!(check_lit(&enumd, &json!("c"), "t").is_err());
+        assert!(check_lit(&boolean, &json!(true), "t").is_ok());
+        assert!(check_lit(&boolean, &json!("true"), "t").is_err());
+    }
+
+    #[test]
+    fn a_free_form_option_cannot_be_compared_with_a_literal() {
+        for decl in [
+            json!({"type": "string"}),
+            json!({"type": "object"}),
+            json!({}),
+        ] {
+            for v in [json!(true), json!("x")] {
+                let e = check_lit(&decl, &v, "icon rule").unwrap_err();
+                assert!(e.contains("free-form"), "{e}");
+            }
+        }
+    }
 }
 
 /// `constraints/generated.rs` from every `components/*.json` `constraints[]` (spec
