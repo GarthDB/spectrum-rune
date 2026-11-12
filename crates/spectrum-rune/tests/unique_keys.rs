@@ -6,6 +6,7 @@ use rune::{col, Cx, El, Env, Runtime};
 use spectrum_rune::accordion::AccordionItem;
 use spectrum_rune::accordion_group::AccordionGroup;
 use spectrum_rune::checkbox::Checkbox;
+use spectrum_rune::icons::ADD_100;
 use spectrum_rune::radio_group::RadioGroup;
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
@@ -28,6 +29,13 @@ fn view(_: &(), _: &mut Cx<()>) -> El {
         .child(Checkbox::new("cb2").label("Two").selected(true).build(t))
         .child(AccordionItem::new("ac1").title("One").open(true).build(t))
         .child(AccordionItem::new("ac2").title("Two").build(t))
+        .child(
+            AccordionItem::new("ac3")
+                .title("Three")
+                .action_button(|b| b.icon(&ADD_100).label("Add"))
+                .switch(|s| s.label("On"))
+                .build(t),
+        )
         .child(group("agr1", t))
         .child(group("agr2", t))
         .child(
@@ -62,6 +70,8 @@ fn two_switches_and_two_checkboxes_share_a_parent() {
         "ac1/header",
         "ac2/header",
         "ac2/divider",
+        "ac3/action-button/container",
+        "ac3/switch/track",
         "agr1/a/header",
         "agr2/b/divider",
         "rg1/a/control",

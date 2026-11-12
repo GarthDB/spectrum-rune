@@ -141,3 +141,49 @@ focus_case() {
   done
 } | jq -s . > "$focus"
 echo "wrote $focus"
+
+# Direct actions (hasActionButton / hasSwitch): accordion_actions.json, read by accordion_actions.rs.
+# x is the distance from the item's right edge (the oracle's item is content-sized, the test's is
+# not), y and sizes are relative to the item; `title_gap` is direct-actions.x minus the title's end.
+# Matrix: {button, switch, both} x sizes x the four corners at regular density, closed; plus M at
+# compact and spacious, open, and disabled (rest) at all four corners.
+actions="$(dirname "$out")/accordion_actions.json"
+actions_case() {
+  local acts=$1 size=$2 density=$3 open=$4 dis=$5 scheme=$6 scale=$7
+  local args=(--size "$size" --color-scheme "$scheme" --scale "$scale" --format scene
+    --option isOpen=$open --option isDisabled=$dis --option "density=\"$density\"")
+  [ "$acts" != switch ] && args+=(--option hasActionButton=true)
+  [ "$acts" != button ] && args+=(--option hasSwitch=true)
+  design-data render accordion "${args[@]}" | jq -c \
+    --arg acts "$acts" --arg size "$size" --arg density "$density" --arg scheme "$scheme" --arg scale "$scale" \
+    --argjson open "$open" --argjson dis "$dis" '
+    (.nodes[] | select(.part == "item")) as $i
+    | def r: if type == "number" then (. * 100 | round / 100) else . end;
+      def col: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
+      def part($p): [.nodes[] | select(.part == $p)][0]
+        | if . == null then null
+          else ({right: (($i.x + $i.w) - (.x + .w)), y: (.y - $i.y), w, h, fill, color, stroke}
+                | with_entries(select(.value != null and .value != "transparent")))
+               | map_values(r) | (if .fill then .fill |= col else . end)
+               | (if .color then .color |= col else . end)
+               | (if .stroke then .stroke |= col else . end) end;
+      (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "direct-actions")) as $d
+    | {scheme: $scheme, scale: $scale, size: $size, density: $density, open: $open, disabled: $dis, actions: $acts,
+       item_h: ($i.h | r), header_h: (part("header").h),
+       title_gap: (($d.x - ($t.x + $t.w)) | r),
+       direct: part("direct-actions"),
+       button: part("action-button"), button_icon: part("action-button.icon"), button_hold: part("action-button.hold-icon"),
+       switch: part("switch"), track: part("switch.track"), handle: part("switch.handle")}
+    | with_entries(select(.value != null))'
+}
+{
+  for acts in button switch both; do
+    for corner in "${CORNERS[@]}"; do set -- $corner
+      for size in $SIZES; do actions_case $acts $size regular false false $1 $2; done
+      actions_case $acts m regular false true $1 $2
+    done
+    for d in compact spacious; do actions_case $acts m $d false false light desktop; done
+    actions_case $acts m regular true false light desktop
+  done
+} | jq -s . > "$actions"
+echo "wrote $actions"

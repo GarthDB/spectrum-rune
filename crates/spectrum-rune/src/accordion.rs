@@ -27,15 +27,28 @@
 //!   ink, as the oracle's `down`. Disabled is not focusable and keeps its colour. Nothing is
 //!   left unmatched here.
 //!
+//! - `hasActionButton` and `hasSwitch` add the recipe's trailing `direct-actions` row: an icon-only
+//!   action button (hold icon always on, the recipe fixes it) and a switch with its label hidden,
+//!   both at the item's size and disabled with it, `spacing_100` apart, ending at the header's
+//!   inline padding. The row is a *sibling* of the header button, not inside it (a control inside
+//!   a `button` role is not reachable and its Enter would toggle the item), so the header's hover
+//!   area and focus ring stop before the actions, while the oracle's `header` spans them; an item
+//!   hover does not wash through them. Without either the tree is exactly the item's alone.
+//!   The oracle draws the switch unselected and the button at rest, so those states of the two
+//!   have no oracle here (their own tests cover them). The parts are keyed `{key}/direct-actions`,
+//!   `{key}/action-button/...` and `{key}/switch/...`.
+//!
 //! The header is a `button` that reports its press through `on_toggle` and exposes `expanded`
 //! (ARIA `aria-expanded`); the app owns `open`. Opening and closing spring the content's height
 //! and turn the chevron on [`DISCLOSURE`]. Under Reduce Motion both land at once.
 
+use crate::action_button::ActionButton;
 use crate::constraints::{self, OptionValue};
 use crate::font;
 use crate::icons::{CHEVRON_100, CHEVRON_200, CHEVRON_300};
 use crate::interaction::{Interaction, State};
 use crate::size::Size;
+use crate::switch::Switch;
 use crate::tokens::{Tokens, Typography};
 use rune::tok::motion::DEFAULT;
 use rune::{col, el, icon, row, text, Color, El, Icon, Key, Mods, Spring};
@@ -132,6 +145,8 @@ impl Size {
 }
 
 type Press = Box<dyn FnOnce(El) -> El>;
+type ActionBuild = Box<dyn FnOnce(ActionButton) -> ActionButton>;
+type SwitchBuild = Box<dyn FnOnce(Switch) -> Switch>;
 
 pub struct AccordionItem {
     pub(crate) key: String,
@@ -143,6 +158,8 @@ pub struct AccordionItem {
     open: bool,
     content: Vec<El>,
     press: Option<Press>,
+    action_button: Option<ActionBuild>,
+    switch: Option<SwitchBuild>,
 }
 
 impl AccordionItem {
@@ -160,6 +177,8 @@ impl AccordionItem {
             open: false,
             content: Vec::new(),
             press: None,
+            action_button: None,
+            switch: None,
         }
     }
     /// The visible title and the header's accessible name.
@@ -200,6 +219,20 @@ impl AccordionItem {
         self.content.extend(c);
         self
     }
+    /// Shows the trailing icon-only action button (`hasActionButton`). `f` receives a button the
+    /// item has keyed (`{key}/action-button`), sized, disabled and given a hold icon; set its
+    /// `icon`, `label` (the accessible name, required) and `on_press`. The size, hidden label, hold
+    /// icon and disabled state are re-applied after `f`, since the recipe fixes them.
+    pub fn action_button(mut self, f: impl FnOnce(ActionButton) -> ActionButton + 'static) -> Self {
+        self.action_button = Some(Box::new(f));
+        self
+    }
+    /// Shows the trailing switch (`hasSwitch`), keyed `{key}/switch`. Set its `label` (the
+    /// accessible name; it is never drawn), `selected` and `on_toggle` in `f`.
+    pub fn switch(mut self, f: impl FnOnce(Switch) -> Switch + 'static) -> Self {
+        self.switch = Some(Box::new(f));
+        self
+    }
     /// Called on press, Space or Enter of the header; flip your own `open` state here.
     pub fn on_toggle<S: 'static>(mut self, f: impl Fn(&mut S) + 'static) -> Self {
         let f = Rc::new(f);
@@ -237,6 +270,11 @@ impl AccordionItem {
             ("isDisabled", OptionValue::Bool(self.disabled)),
             ("isOpen", OptionValue::Bool(self.open)),
             ("density", OptionValue::Str(self.density.as_str())),
+            (
+                "hasActionButton",
+                OptionValue::Bool(self.action_button.is_some()),
+            ),
+            ("hasSwitch", OptionValue::Bool(self.switch.is_some())),
         ]
     }
 
@@ -269,9 +307,11 @@ impl AccordionItem {
             Density::Spacious => t.list_item_padding_vertical_spacious,
         };
 
+        let direct = self.action_button.is_some() || self.switch.is_some();
         let mut header = row()
             .key(part("header"))
-            .px(d.pad)
+            .pl(d.pad)
+            .pr(if direct { 0.0 } else { d.pad })
             .py(header_pad_v)
             .center_y()
             .role("button")
@@ -315,6 +355,41 @@ impl AccordionItem {
             }
         }
 
+        // The actions sit beside the header button, not in it; the row only exists with them.
+        let top = if direct {
+            let mut actions = row()
+                .key(part("direct-actions"))
+                .gap(t.spacing_100)
+                .center_y();
+            if let Some(f) = self.action_button {
+                actions = actions.child(
+                    f(ActionButton::new(part("action-button")))
+                        .size(self.size)
+                        .hide_label(true)
+                        .hold_icon(true)
+                        .disabled(self.disabled)
+                        .build(t),
+                );
+            }
+            if let Some(f) = self.switch {
+                actions = actions.child(
+                    f(Switch::new(part("switch")))
+                        .size(self.size)
+                        .hide_label(true)
+                        .disabled(self.disabled)
+                        .build(t),
+                );
+            }
+            // The header's vertical padding also surrounds the actions, and the header stretches
+            // to whichever is taller.
+            row()
+                .items_stretch()
+                .child(header.grow(1.0).shrink())
+                .child(row().py(header_pad_v).pr(d.pad).center_y().child(actions))
+        } else {
+            header
+        };
+
         // The content's height is app-supplied, so the clip cannot animate a fixed number: while
         // closed it is 0 high and holds nothing, while open it is as high as its content, and
         // the layout spring moves between the two.
@@ -346,7 +421,7 @@ impl AccordionItem {
                 Color::TRANSPARENT
             })
             .token_motion(DISCLOSURE)
-            .child(header)
+            .child(top)
             .child(clip);
         if !self.quiet {
             // The recipe writes the divider's height as the literal 1.

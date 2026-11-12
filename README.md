@@ -299,10 +299,21 @@ dataset changes nothing.
 - **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
   group's layout (gap 0, each item keeping its divider) has no oracle: only the stacked item heights are
   checked against the item oracle. Per-item `disabled` is a Rune-side convenience; the catalog's
-  `items[]` has no `isDisabled`. Not built: per-item action button and switch (bead a14.28).
+  `items[]` has no `isDisabled`. Items are `AccordionItem`s, so each can carry the direct actions below.
 - **Action-button static + disabled** draws the plain disabled pill (opaque grey on the coloured
   backdrop), because that is what the oracle renders; Button's recipe has translucent rules for it
   and Action-button's does not (bead a14.23, proposed upstream in #1693).
+- **Accordion direct actions.** `AccordionItem::action_button(|b| ..)` and `::switch(|s| ..)` build the
+  recipe's trailing icon-only action button (hold icon always on) and label-less switch from our
+  `ActionButton` and `Switch`, and the item fixes their size, hidden label, hold icon and disabled state
+  (`tests/accordion_actions.rs`: geometry and colours of 69 oracle cases, each action alone and both).
+  The row is a sibling of the header button, not inside it, so the header's hover area and focus ring
+  stop before the actions and an item hover does not wash through them (the oracle's `header` spans
+  them). The oracle draws the switch unselected and the button at rest, so there is no oracle for their
+  selected, hover, keyboard-focus or pending states (the controls' own tests cover those), and the
+  switch track's stroke is not asserted here (`ElementInfo` has no border; `switch_pixels.rs` does).
+  From M up the oracle's item is at its minimum width, so the title-to-actions gap is only asserted
+  at S, laid out at its natural width. Bead a14.28.
 - **Accordion content inset.** `AccordionItem::content` is flush with the item's left edge (the
   oracle's `content` has only vertical padding); pad it yourself to sit under the title (bead
   a14.24, proposed upstream in #1693).
