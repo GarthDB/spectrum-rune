@@ -83,17 +83,47 @@ fn check_inputs() -> Res<(String, String)> {
             "oracle.toml accepts design-data {min} up to (not including) {max}, found `{version}`"
         ));
     }
+    // The CLI fetches the tag `.design-data.toml` pins; the headers record oracle.toml's `dataset`, so the
+    // pin and the manifest's foundationVersion must agree (a bump of one without the other is an error).
+    let toml =
+        std::fs::read_to_string(root().join(".design-data.toml")).map_err(|e| e.to_string())?;
+    let tag = toml
+        .lines()
+        .find_map(|l| {
+            l.trim()
+                .strip_prefix("tag")?
+                .trim()
+                .strip_prefix('=')?
+                .trim()
+                .strip_prefix('"')?
+                .split('"')
+                .next()
+                .map(String::from)
+        })
+        .ok_or(".design-data.toml has no `tag`")?;
+    let manifest: Value = serde_json::from_str(
+        &std::fs::read_to_string(root().join("platforms/rune/manifest.json"))
+            .map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| e.to_string())?;
+    if manifest["foundationVersion"] != tag.as_str() {
+        return Err(format!(
+            ".design-data.toml pins `{tag}` but platforms/rune/manifest.json foundationVersion is {}; \
+             bump both and oracle.toml's `dataset` together",
+            manifest["foundationVersion"]
+        ));
+    }
     Ok((version, oracle("dataset")?))
 }
 
-/// `design-data catalog export` of the pinned release (with the rune platform): `components/`,
+/// `design-data catalog export` of the pinned release with the rune platform: `components/`,
 /// `icons/` and `visuals/`, which the generators read instead of a checkout.
 fn catalog_export() -> Res<PathBuf> {
-    let out = std::env::temp_dir().join("spectrum-rune-catalog");
+    let out = std::env::temp_dir().join(format!("spectrum-rune-catalog-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&out);
     run(Command::new("design-data")
         .current_dir(root())
-        .args(["catalog", "export", "--out"])
+        .args(["catalog", "export", "--platform", "rune", "--out"])
         .arg(&out))?;
     Ok(out)
 }
@@ -191,7 +221,7 @@ fn scoped_values(
             }
         }
     }
-    let tmp = std::env::temp_dir().join("spectrum-rune-xtask");
+    let tmp = std::env::temp_dir().join(format!("spectrum-rune-xtask-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&tmp);
     std::fs::create_dir_all(&tmp).map_err(|e| e.to_string())?;
     let batch = tmp.join("batch.json");
