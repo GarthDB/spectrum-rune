@@ -187,3 +187,14 @@ actions_case() {
   done
 } | jq -s . > "$actions"
 echo "wrote $actions"
+
+# Overflow case for accordion_actions.rs: a label too long for the minimum item width (M and up are
+# clamped to it and overflow), so only the title-to-actions gap is meaningful. `gap` per size.
+overflow="$(dirname "$out")/accordion_actions_gap.json"
+for size in m l xl; do
+  design-data render accordion --size $size --format scene --label "A much longer accordion title to exceed the minimum width of the item" \
+    --option hasSwitch=true 2>/dev/null | jq -c --arg size "$size" '
+    (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "direct-actions")) as $d
+    | {size: $size, gap: (($d.x - ($t.x + $t.w)) * 100 | round / 100)}'
+done | jq -s . > "$overflow"
+echo "wrote $overflow"

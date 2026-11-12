@@ -276,6 +276,31 @@ fn title_to_actions_gap_matches_oracle_at_natural_width() {
     assert_eq!(seen, 3);
 }
 
+/// The oracle clamps M and up to the minimum width and overflows a long title, so only the gap
+/// (not the wrapping or the right edge) is comparable there; ours is laid out at natural width.
+#[test]
+fn title_to_actions_gap_matches_oracle_in_overflow_case() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/accordion_actions_gap.json")).unwrap();
+    assert_eq!(cases.len(), 3);
+    for c in &cases {
+        let rt = runtime(App {
+            natural: true,
+            switch: true,
+            size: match c["size"].as_str().unwrap() {
+                "m" => Size::M,
+                "l" => Size::L,
+                _ => Size::XL,
+            },
+            ..App::default()
+        });
+        let title = part(&rt, "title").unwrap();
+        let direct = part(&rt, "direct-actions").unwrap();
+        let gap = direct.target[0] - (title.target[0] + title.target[2]);
+        close(gap, num(&c["gap"]), &format!("{} overflow gap", c["size"]));
+    }
+}
+
 #[test]
 fn default_item_has_no_direct_actions() {
     let rt = runtime(App::default());

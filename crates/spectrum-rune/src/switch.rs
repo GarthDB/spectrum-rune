@@ -142,6 +142,11 @@ impl Switch {
     }
 
     pub fn build(self, t: &Tokens) -> El {
+        // Not a catalog constraint (accessible names belong to the accessibility spec).
+        debug_assert!(
+            !self.hide_label || self.label.is_some(),
+            "a switch with a hidden label needs a label (its accessible name)"
+        );
         let d = self.size.dims(t);
         let part = |name: &str| format!("{}/{name}", self.key);
         let interaction = Interaction::of(&self.key);
