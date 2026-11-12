@@ -12,7 +12,7 @@
 mod stories;
 
 use rune::text::measure;
-use rune::{col, row, text, AppSpec, Cx, El, Family, ScrollSpec};
+use rune::{col, row, text, App, AppSpec, Cx, El, Family, FontSmoothing, ScrollSpec};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::font;
 use spectrum_rune::switch::Switch;
@@ -200,10 +200,13 @@ fn build(s: &G, scheme: ColorScheme) -> El {
 
 fn main() {
     eprintln!("spectrum-rune gallery: {}", font_status().describe());
-    rune::run(AppSpec {
+    // Off is CoreText without font smoothing: what `-webkit-font-smoothing: antialiased` draws.
+    App::new(AppSpec {
         scenes: stories::SCENES,
         ..AppSpec::new("Spectrum for Rune", (1100.0, 900.0), init, view)
-    });
+    })
+    .font_smoothing(FontSmoothing::Off)
+    .run();
 }
 
 #[cfg(test)]
