@@ -200,6 +200,22 @@ Rune's default sans to tell whether the family resolved, and says so in its head
 (`Adobe Clean Spectrum VF found` or `... NOT found: showing the fallback`). The same check runs as
 the ignored tests in `src/font.rs`: `cargo test -p spectrum-rune -- --ignored`.
 
+### Text smoothing
+
+On macOS, Rune defaults to `FontSmoothing::On` (CoreText with font smoothing's outline dilation),
+which draws heavier and less crisp than Spectrum on the web. `FontSmoothing::Off` is what
+`-webkit-font-smoothing: antialiased` draws in macOS browsers, and is the closer match. Smoothing is
+a window setting in Rune, so components can't set it: **the app does**.
+
+```rust,ignore
+use rune::{App, FontSmoothing};
+
+App::new(spec).font_smoothing(FontSmoothing::Off).run();
+// or WindowSpec::font_smoothing(..), or Tx::set_font_smoothing(..) while running
+```
+
+The gallery does this. Linux and the web already default to `Off`.
+
 ## The generator
 
 Values are not written by hand. `crates/spectrum-rune/src/{tokens,icons,constraints}/generated.rs`
