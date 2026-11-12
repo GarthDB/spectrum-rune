@@ -5,6 +5,8 @@ git_tag_name = "v{{ version }}"
 git_release_name = "spectrum-rune {{ version }}"
 # Tag and release only when the release PR is merged, not on every push to main.
 release_always = false
+# Pre-1.0: a `feat:` bumps the minor (0.2.0), a `fix:` the patch.
+features_always_increment_minor = true
 
 [[package]]
 name = "xtask"
