@@ -1,6 +1,7 @@
 //! Checks the StatusLight against the `design-data render status-light --format scene` oracle: the `status-light`
 //! recipe in platforms/rune/extensions/visuals. Regenerate the fixture with `tests/fixtures/regen-status-light.sh`.
-//! Label wrapping is in `wrap.rs`. Not asserted: the font family (not observable).
+//! Label wrapping is in `wrap.rs`. Not asserted: the font family (not observable) and the container width (it is the
+//! label's measured width plus the dot and gap, so it follows the installed font; CI has a narrower or wider fallback).
 
 use rune::{col, Cx, El, ElementInfo, Env, Runtime};
 use serde_json::Value;
@@ -112,11 +113,6 @@ fn matches_oracle_scene() {
             rt.frame(0.05);
         }
         let k = part(&rt, "container");
-        close(
-            k.target[2],
-            &c["container"]["w"],
-            &format!("{what}: container w"),
-        );
         close(
             k.target[3],
             &c["container"]["h"],
