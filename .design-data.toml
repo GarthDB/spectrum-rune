@@ -6,7 +6,7 @@ default_platform = "rune"
 [source]
 type = "github"
 repo = "adobe/spectrum-design-data"
-tag = "@adobe/spectrum-design-data@3.10.0"
+tag = "@adobe/spectrum-design-data@3.12.0"
 
 [platforms]
 rune = "platforms/rune/manifest.json"

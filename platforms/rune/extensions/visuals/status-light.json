@@ -1,0 +1,124 @@
+{
+  "$schema": "https://opensource.adobe.com/spectrum-design-data/schemas/v0/component-visual.schema.json",
+  "specVersion": "1.0.0-draft",
+  "component": "status-light",
+  "root": "container",
+  "sizeScale": {
+    "s": 75,
+    "m": 100,
+    "l": 200,
+    "xl": 300
+  },
+  "derived": [],
+  "parts": {
+    "container": {
+      "kind": "box",
+      "children": [
+        "dot",
+        "label"
+      ],
+      "props": {
+        "direction": {
+          "value": "row"
+        },
+        "align": {
+          "value": "center"
+        },
+        "gap": {
+          "relationship": {
+            "property": "space-between",
+            "context": "Spacing (dot to label)"
+          }
+        },
+        "paddingBlockStart": {
+          "value": 0
+        },
+        "paddingBlockEnd": {
+          "value": 0
+        },
+        "justify": {
+          "value": "start"
+        }
+      }
+    },
+    "dot": {
+      "kind": "box",
+      "props": {
+        "width": {
+          "relationship": {
+            "property": "size",
+            "context": "Dot size"
+          }
+        },
+        "height": {
+          "relationship": {
+            "property": "size",
+            "context": "Dot size"
+          }
+        },
+        "cornerRadius": {
+          "value": 0.5,
+          "relativeTo": "height"
+        },
+        "fill": [
+          {
+            "relationship": {
+              "property": "color",
+              "context": "Non-semantic (Dot)"
+            }
+          },
+          {
+            "when": {
+              "options": {
+                "variant": [
+                  "informative",
+                  "accent",
+                  "neutral",
+                  "positive",
+                  "notice",
+                  "negative"
+                ]
+              }
+            },
+            "relationship": {
+              "property": "color",
+              "context": "Semantic (Dot)"
+            }
+          }
+        ]
+      }
+    },
+    "label": {
+      "kind": "text",
+      "props": {
+        "overflow": {
+          "value": "wrap"
+        },
+        "fontSize": {
+          "relationship": {
+            "property": "font-size-{sizeIndex}",
+            "context": "Label"
+          }
+        },
+        "lineHeight": {
+          "relationship": {
+            "property": "line-height-100",
+            "context": "Label"
+          }
+        },
+        "fontWeight": {
+          "relationship": {
+            "property": "font-weight",
+            "context": "Label"
+          }
+        },
+        "color": {
+          "relationship": {
+            "property": "content-color",
+            "context": "Label"
+          }
+        }
+      }
+    }
+  }
+}

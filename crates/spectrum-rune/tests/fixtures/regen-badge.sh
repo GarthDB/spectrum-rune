@@ -10,8 +10,8 @@
 # Matrix (the full cross product is far too big; each block answers one question):
 #   A. colour table: all 25 variants x 3 styles x the four scheme+scale corners at size M, with a
 #      label and an icon (300 cases)
-#   B. sizes S..XL x fixed (none, top, right, bottom, left) x neutral bold / accent outline /
-#      informative subtle, light desktop and dark mobile, label only
+#   B. sizes S..XL x neutral bold / accent outline / informative subtle, light desktop and dark mobile,
+#      label only
 #   C. sizes x four corners, neutral bold, label only and with an icon (padding, height, type)
 #   D. icon-only (no label) at every size, two corners, bold and outline
 #   E. label width: a one-letter and a long label at S and XL
@@ -28,18 +28,18 @@ oracle_cd
 CORNERS=("light desktop" "light mobile" "dark desktop" "dark mobile")
 VARIANTS="neutral informative positive negative indigo yellow magenta fuchsia purple seafoam accent notice gray red orange chartreuse celery green cyan blue pink turquoise brown cinnamon silver"
 
-# render variant style fixed size scheme scale label(or -) icon(true|false)
+# render variant style size scheme scale label(or -) icon(true|false)
 render() {
-  local v=$1 s=$2 f=$3 size=$4 scheme=$5 scale=$6 label=$7 icon=$8
-  local opts="{\"variant\":\"$v\",\"style\":\"$s\",\"fixed\":\"$f\",\"size\":\"$size\",\"icon\":$icon"
+  local v=$1 s=$2 size=$3 scheme=$4 scale=$5 label=$6 icon=$7
+  local opts="{\"variant\":\"$v\",\"style\":\"$s\",\"size\":\"$size\",\"icon\":$icon"
   [ "$label" != - ] && opts+=",\"label\":true"
   excluded badge "$opts}" && return 0
   local args=(--size "$size" --color-scheme "$scheme" --scale "$scale" --format scene
-    --option "variant=\"$v\"" --option "style=\"$s\"" --option "fixed=\"$f\"")
+    --option "variant=\"$v\"" --option "style=\"$s\"")
   [ "$icon" = true ] && args+=(--option icon=true)
   if [ "$label" = - ]; then args+=(--option label=false); else args+=(--label "$label"); fi
   design-data render badge "${args[@]}" | jq -c \
-    --arg v "$v" --arg s "$s" --arg f "$f" --arg size "$size" --arg scheme "$scheme" --arg scale "$scale" \
+    --arg v "$v" --arg s "$s" --arg size "$size" --arg scheme "$scheme" --arg scale "$scale" \
     --arg label "$label" '
     (.nodes[] | select(.part == "container")) as $c
     | def r: if type == "number" then (. * 100 | round / 100) else . end;
@@ -51,7 +51,7 @@ render() {
                    | with_entries(select(.value != null and .value != "transparent" and (.key | IN($keys[])))))
                ) | map_values(r) | (if .fill then .fill |= col else . end)
                | (if .stroke then .stroke |= col else . end) | (if .color then .color |= col else . end) end;
-    {scheme: $scheme, scale: $scale, size: $size, variant: $v, style: $s, fixed: $f,
+    {scheme: $scheme, scale: $scale, size: $size, variant: $v, style: $s,
      label: (if $label == "-" then null else $label end),
      container: part("container"; ["w","h","radius","radii","fill","stroke"]),
      icon: part("icon"; ["x","y","w","h","color"]),
@@ -64,39 +64,39 @@ render() {
   # A
   for corner in "${CORNERS[@]}"; do set -- $corner
     for s in bold subtle outline; do for v in $VARIANTS; do
-      render $v $s none m $1 $2 Label true
+      render $v $s m $1 $2 Label true
     done; done
   done
 
   # B
   for corner in "light desktop" "dark mobile"; do set -- $corner
-    for size in s m l xl; do for f in none top right bottom left; do
-      render neutral bold $f $size $1 $2 Label false
-      render accent outline $f $size $1 $2 Label false
-      render informative subtle $f $size $1 $2 Label false
-    done; done
+    for size in s m l xl; do
+      render neutral bold $size $1 $2 Label false
+      render accent outline $size $1 $2 Label false
+      render informative subtle $size $1 $2 Label false
+    done
   done
 
   # C
   for corner in "${CORNERS[@]}"; do set -- $corner
     for size in s m l xl; do
-      render neutral bold none $size $1 $2 Label false
-      render neutral bold none $size $1 $2 Label true
+      render neutral bold $size $1 $2 Label false
+      render neutral bold $size $1 $2 Label true
     done
   done
 
   # D
   for corner in "light desktop" "dark mobile"; do set -- $corner
     for size in s m l xl; do
-      render neutral bold none $size $1 $2 - true
-      render accent outline none $size $1 $2 - true
+      render neutral bold $size $1 $2 - true
+      render accent outline $size $1 $2 - true
     done
   done
 
   # E
   for size in s xl; do
-    render neutral bold none $size light desktop A true
-    render neutral bold none $size light desktop "A much longer badge label here" true
+    render neutral bold $size light desktop A true
+    render neutral bold $size light desktop "A much longer badge label here" true
   done
 } | jq -sc '.' > "$out"
 echo "wrote $out"

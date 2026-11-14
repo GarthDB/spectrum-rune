@@ -1,5 +1,5 @@
 //! Label wrapping at a request width, for the five recipes that wrap since spectrum-design-data
-//! #1700 to #1704 (Switch, Checkbox, Radio button, Button, Badge). The fixtures are
+//! #1700 to #1704 (Switch, Checkbox, Radio button, Button, Badge) and Status light (a manifest recipe). The fixtures are
 //! `<component>_wrap.json` (`design-data render <c> --width W`, see `fixtures/wrap.sh`).
 //!
 //! Compared per case: the root's width, height (so the number of lines) and, for Button, radius
@@ -18,6 +18,7 @@ use spectrum_rune::button::Button;
 use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::icons::ADD_100;
 use spectrum_rune::radio_button::RadioButton;
+use spectrum_rune::status_light::StatusLight;
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
 use spectrum_rune::Size;
@@ -66,6 +67,7 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
             .size(s)
             .width(w)
             .build(t),
+        "status_light" => StatusLight::new("k", label).size(s).width(w).build(t),
         _ => Badge::new("k").label(label).size(s).width(w).build(t),
     })
 }
@@ -179,6 +181,15 @@ fn radio_button_wraps_like_the_oracle() {
 }
 
 #[test]
+fn status_light_wraps_like_the_oracle() {
+    check(
+        "status_light",
+        include_str!("fixtures/status_light_wrap.json"),
+        "dot",
+    );
+}
+
+#[test]
 fn button_wraps_like_the_oracle() {
     check("button", include_str!("fixtures/button_wrap.json"), "icon");
 }
@@ -218,4 +229,10 @@ fn line_counts_match_the_oracle_with_the_spectrum_font() {
         true,
     );
     check_with("badge", include_str!("fixtures/badge_wrap.json"), "-", true);
+    check_with(
+        "status_light",
+        include_str!("fixtures/status_light_wrap.json"),
+        "dot",
+        true,
+    );
 }
