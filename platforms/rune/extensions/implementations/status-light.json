@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opensource.adobe.com/spectrum-design-data/schemas/v0/implementation-mapping.schema.json",
+  "component": "status-light",
+  "implementations": [
+    {
+      "platform": "desktop",
+      "componentName": "StatusLight",
+      "package": "spectrum-rune",
+      "importPath": "spectrum_rune::status_light::StatusLight"
+    }
+  ]
+}

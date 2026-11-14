@@ -13,6 +13,7 @@ pub mod interaction;
 pub mod radio_button;
 pub mod radio_group;
 pub mod size;
+pub mod status_light;
 pub mod switch;
 pub mod tokens;
 mod wrap;

@@ -9,7 +9,7 @@
 
 use rune::{col, Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
-use spectrum_rune::badge::{Badge, Fixed, Style, Variant};
+use spectrum_rune::badge::{Badge, Style, Variant};
 use spectrum_rune::constraints::check;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
@@ -22,7 +22,6 @@ struct App {
     size: Option<Size>,
     variant: Variant,
     style: Style,
-    fixed: Fixed,
     label: Option<String>,
     icon: bool,
 }
@@ -40,10 +39,7 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
             Scale::Desktop
         },
     );
-    let mut b = Badge::new("bd")
-        .variant(a.variant)
-        .style(a.style)
-        .fixed(a.fixed);
+    let mut b = Badge::new("bd").variant(a.variant).style(a.style);
     if let Some(s) = a.size {
         b = b.size(s);
     }
@@ -72,7 +68,6 @@ fn base() -> App {
         size: None,
         variant: Variant::Neutral,
         style: Style::Bold,
-        fixed: Fixed::None,
         label: Some("Label".into()),
         icon: false,
     }
@@ -131,10 +126,6 @@ fn app_for(c: &Value) -> App {
             .iter()
             .find(|v| v.as_str() == c["style"])
             .unwrap(),
-        fixed: *Fixed::ALL
-            .iter()
-            .find(|v| v.as_str() == c["fixed"])
-            .unwrap(),
         label: c["label"].as_str().map(Into::into),
         icon: c["icon"].is_object(),
     }
@@ -144,7 +135,7 @@ fn app_for(c: &Value) -> App {
 fn matches_oracle_scene() {
     let cases: Vec<Value> =
         serde_json::from_str(include_str!("fixtures/badge_scene.json")).unwrap();
-    assert_eq!(cases.len(), 472);
+    assert_eq!(cases.len(), 376);
     for c in &cases {
         let what = c.to_string();
         let what = &what[..what.len().min(200)];
@@ -229,7 +220,7 @@ fn matches_oracle_scene() {
 fn defaults_follow_the_catalog() {
     let b = Badge::new("bd");
     assert_eq!(
-        b.options()[..4],
+        b.options()[..3],
         [
             (
                 "variant",
@@ -238,10 +229,6 @@ fn defaults_follow_the_catalog() {
             (
                 "style",
                 spectrum_rune::constraints::OptionValue::Str("bold")
-            ),
-            (
-                "fixed",
-                spectrum_rune::constraints::OptionValue::Str("none")
             ),
             ("size", spectrum_rune::constraints::OptionValue::Str("s")),
         ]
@@ -279,7 +266,6 @@ fn badge_has_no_catalog_constraints_today() {
     let o = [
         ("variant", Str("accent")),
         ("style", Str("outline")),
-        ("fixed", Str("top")),
         ("size", Str("xl")),
     ];
     assert!(check("badge", &o).is_empty());
@@ -293,8 +279,8 @@ fn an_empty_label_is_icon_only() {
     a.label = Some(String::new());
     let rt = runtime(a);
     assert!(part(&rt, "label").is_none());
-    // Icon-only oracle layout: 7 + 20 + 7 wide.
-    assert_eq!(part(&rt, "container").unwrap().target[2], 34.0);
+    // Icon-only oracle layout: 7 + 18 + 7 wide.
+    assert_eq!(part(&rt, "container").unwrap().target[2], 32.0);
     assert!(!Badge::new("b")
         .label("")
         .options()

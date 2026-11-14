@@ -466,13 +466,6 @@ fn badge(_: &G, t: &'static Tokens) -> El {
         };
         sections.push(section(t, &format!("{}{note}", st.as_str()), r));
     }
-    let fixed = flow().children(badge::Fixed::ALL.iter().map(|f| {
-        Badge::new(format!("badge/fixed-{}", f.as_str()))
-            .label(f.as_str())
-            .variant(badge::Variant::Informative)
-            .fixed(*f)
-            .build(t)
-    }));
     let icon = flow().children(badge::Variant::ALL.iter().take(6).map(|v| {
         Badge::new(format!("badge/icon-{}", v.as_str()))
             .label(v.as_str())
@@ -487,11 +480,6 @@ fn badge(_: &G, t: &'static Tokens) -> El {
             .size(z)
             .build(t)
     }));
-    sections.push(section(
-        t,
-        "Fixed edges (that edge's corners are square)",
-        fixed,
-    ));
     sections.push(section(t, "With icon", icon));
     sections.push(section(t, "Sizes", sizes));
     sections.push(section(

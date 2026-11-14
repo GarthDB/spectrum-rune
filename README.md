@@ -17,6 +17,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Button | `button` | none (`pending` and `disabled` are inputs) |
 | Action button | `action_button` | `selected` for a toggle |
 | Badge | `badge` | none (static) |
+| Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
 | Radio group | `radio_group` | `value` |
 | Accordion item (one item) | `accordion` | `open` |
 | Accordion (a group of items; single or multiple) | `accordion_group` | the open set |

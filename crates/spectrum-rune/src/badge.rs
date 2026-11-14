@@ -12,8 +12,8 @@
 //!   empty, but those 19 outline badges are not outlines (spectrum-design-data #1693).
 //! - Bold labels are static white, except on yellow, notice, orange, chartreuse and celery, where
 //!   they are static black. Subtle and outline labels are `gray_1000`.
-//! - `fixed` squares the corners of that edge (top: both top corners), keeping the size radius on
-//!   the others. The radius is the same on both scales; the height, padding and type grow on mobile.
+//! - The radius is the same on both scales; the height, padding and type grow on mobile. The Spectrum 1 `fixed`
+//!   option (square corners on one edge) is gone from the catalog (spectrum-design-data #1721), so it is gone here.
 //! - Padding is the scene's `base-padding-horizontal-*` (not the recipe's `component-edge-to-text-*`),
 //!   and `base-padding-vertical-*` for an icon-only badge, as for Action-button.
 
@@ -86,31 +86,6 @@ pub enum Style {
 }
 
 names!(Style { Bold => "bold", Subtle => "subtle", Outline => "outline" });
-
-/// The edge a badge is attached to: its two corners on that edge are square.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum Fixed {
-    #[default]
-    None,
-    Top,
-    Right,
-    Bottom,
-    Left,
-}
-
-names!(Fixed { None => "none", Top => "top", Right => "right", Bottom => "bottom", Left => "left" });
-
-/// Corner radii `[top-left, top-right, bottom-right, bottom-left]`.
-pub(crate) fn corner_radii(r: f32, fixed: Fixed) -> [f32; 4] {
-    let square = match fixed {
-        Fixed::None => [false; 4],
-        Fixed::Top => [true, true, false, false],
-        Fixed::Right => [false, true, true, false],
-        Fixed::Bottom => [false, false, true, true],
-        Fixed::Left => [true, false, false, true],
-    };
-    square.map(|s| if s { 0.0 } else { r })
-}
 
 /// Container fill, stroke (`None`: no border) and the icon/label colour.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -299,7 +274,7 @@ impl Size {
             Size::S => Dims {
                 height: t.component_height_75,
                 gap: t.base_gap_small,
-                icon: t.workflow_icon_size_75,
+                icon: t.workflow_icon_small,
                 pad: t.base_padding_horizontal_small,
                 pad_icon_only: t.base_padding_vertical_small,
                 radius: t.corner_radius_medium_size_small,
@@ -307,7 +282,7 @@ impl Size {
             Size::M => Dims {
                 height: t.component_height_100,
                 gap: t.base_gap_medium,
-                icon: t.workflow_icon_size_100,
+                icon: t.workflow_icon_medium,
                 pad: t.base_padding_horizontal_medium,
                 pad_icon_only: t.base_padding_vertical_medium,
                 radius: t.corner_radius_medium_size_medium,
@@ -315,7 +290,7 @@ impl Size {
             Size::L => Dims {
                 height: t.component_height_200,
                 gap: t.base_gap_large,
-                icon: t.workflow_icon_size_200,
+                icon: t.workflow_icon_large,
                 pad: t.base_padding_horizontal_large,
                 pad_icon_only: t.base_padding_vertical_large,
                 radius: t.corner_radius_medium_size_large,
@@ -323,7 +298,7 @@ impl Size {
             Size::XL => Dims {
                 height: t.component_height_300,
                 gap: t.base_gap_extra_large,
-                icon: t.workflow_icon_size_300,
+                icon: t.workflow_icon_extra_large,
                 pad: t.base_padding_horizontal_extra_large,
                 pad_icon_only: t.base_padding_vertical_extra_large,
                 radius: t.corner_radius_medium_size_extra_large,
@@ -337,7 +312,6 @@ pub struct Badge {
     label: Option<String>,
     variant: Variant,
     style: Style,
-    fixed: Fixed,
     size: Size,
     icon: Option<&'static Icon>,
     width: Option<f32>,
@@ -351,7 +325,6 @@ impl Badge {
             label: None,
             variant: Variant::default(),
             style: Style::default(),
-            fixed: Fixed::default(),
             // The catalog's default (the oracle CLI renders `m` unless told otherwise).
             size: Size::S,
             icon: None,
@@ -380,10 +353,6 @@ impl Badge {
         self.style = s;
         self
     }
-    pub fn fixed(mut self, f: Fixed) -> Self {
-        self.fixed = f;
-        self
-    }
     pub fn size(mut self, s: Size) -> Self {
         self.size = s;
         self
@@ -399,7 +368,6 @@ impl Badge {
         let mut o = vec![
             ("variant", OptionValue::Str(self.variant.as_str())),
             ("style", OptionValue::Str(self.style.as_str())),
-            ("fixed", OptionValue::Str(self.fixed.as_str())),
             (
                 "size",
                 OptionValue::Str(match self.size {
@@ -457,7 +425,7 @@ impl Badge {
             .h(fit.height)
             .px(pad)
             .gap(d.gap)
-            .corners(corner_radii(d.radius, self.fixed))
+            .radius(d.radius)
             .fill(look.fill);
         if let Some(stroke) = look.stroke {
             root = root.border(t.border_width_200, stroke);
@@ -520,8 +488,8 @@ mod tests {
         );
     }
 
-    /// Every oracle case against the colour table (fill, stroke, icon and label colour) and the
-    /// corner radii, in every scheme and scale. The stroke is not on `ElementInfo`, so this is where
+    /// Every oracle case against the colour table (fill, stroke, icon and label colour) and that
+    /// the corners are plain, in every scheme and scale. The stroke is not on `ElementInfo`, so this is where
     /// it is checked; `tests/badge_pixels.rs` reads it from pixels as well.
     #[test]
     fn look_table_and_corners_match_oracle() {
@@ -544,7 +512,6 @@ mod tests {
             let what = &what[..what.len().min(160)];
             let v = pick(c, "variant", Variant::ALL, Variant::as_str);
             let s = pick(c, "style", Style::ALL, Style::as_str);
-            let f = pick(c, "fixed", Fixed::ALL, Fixed::as_str);
             let l = look(t, v, s);
             assert_color(l.fill, &c["container"]["fill"], what);
             match (&c["container"]["stroke"], l.stroke) {
@@ -557,13 +524,11 @@ mod tests {
                     assert_color(l.content, &c[part]["color"], what);
                 }
             }
-            let r = c["container"]["radius"].as_f64().unwrap() as f32;
-            let want: Vec<f32> = match c["container"]["radii"].as_array() {
-                Some(a) => a.iter().map(|x| x.as_f64().unwrap() as f32).collect(),
-                None => vec![r; 4],
-            };
-            assert_eq!(corner_radii(r, f).to_vec(), want, "{what}");
-            if c["size"] == "m" && c["fixed"] == "none" && c["icon"].is_object() {
+            assert!(
+                c["container"]["radii"].is_null(),
+                "{what}: the oracle has per-corner radii again"
+            );
+            if c["size"] == "m" && c["icon"].is_object() {
                 table.insert((
                     c["variant"].to_string(),
                     c["style"].to_string(),
@@ -580,7 +545,6 @@ mod tests {
     fn all_values_are_listed() {
         assert_eq!(Variant::ALL.len(), 25);
         assert_eq!(Style::ALL.len(), 3);
-        assert_eq!(Fixed::ALL.len(), 5);
     }
 
     #[test]

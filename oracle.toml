@@ -1,15 +1,20 @@
 # The oracle every committed generated file and fixture was made from: the RELEASED design-data
-# CLI 0.32.0 (tag design-data-cli@0.32.0, Homebrew `design-data`) and the dataset at the pinned release.
+# CLI 0.33.0 (tag design-data-cli@0.33.0; Homebrew now ships a newer one, so take the release binary) and the dataset at the pinned release.
 # Read by `cargo xtask gen` and by the tests/fixtures/regen-*.sh scripts; change it only together
 # with a regeneration of all of them (see README, "The generator").
 #
 # cli_min / cli_max: accepted `design-data` versions, cli_min <= version < cli_max.
+#   0.33.0 is the CLI released with data 3.12.0 (both on 2026-11-13). 0.34.0 and later contain the solver change
+#   #1781 (a row centres its content in free space; checkbox, radio-button and switch pin `justify: start` in the
+#   recipes of a LATER data release), so 0.34.x against 3.12.0 moves their wrapped labels: do not raise cli_max
+#   without a data release that carries those pins. 0.32.1 fixed relationship overrides in `validate-manifest` and
+#   `catalog export` (#1762).
 #   0.32.0 is the first whose `catalog export` writes recipes (`visuals/`, #1749/#1750), so `cargo xtask gen` needs no
 #   checkout. 0.31.0 was the first whose `github` [source] fetches the render inputs (spectrum-design-data #1732/#1734)
 #   and whose `catalog export` writes icon sets (#1733/#1735). Every fixture and generated file came out
 #   identical to the 0.27.1 ones (the Button recipe's `minWidth` multiplier, #1704, landed in 0.27.1).
-# dataset: spectrum-design-data commit the committed files were made from: @adobe/spectrum-design-data@3.10.0,
+# dataset: spectrum-design-data commit the committed files were made from: @adobe/spectrum-design-data@3.12.0,
 #   the release platforms/rune/manifest.json and .design-data.toml pin.
-cli_min = "0.32.0"
-cli_max = "0.33.0"
-dataset = "a0934e02"
+cli_min = "0.33.0"
+cli_max = "0.34.0"
+dataset = "938bc1ae"
