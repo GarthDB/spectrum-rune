@@ -30,12 +30,6 @@
             "context": "Spacing (dot to label)"
           }
         },
-        "paddingBlockStart": {
-          "value": 0
-        },
-        "paddingBlockEnd": {
-          "value": 0
-        },
         "justify": {
           "value": "start"
         }

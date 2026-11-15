@@ -7,7 +7,8 @@
 //!   #1704, and this crate's builder followed that); `builder_defaults_are_the_catalog_defaults`
 //!   keeps the two equal.
 //! - The root is at least 2.25 x its height wide unless the label is hidden, and the content
-//!   (icon, label, spinner) sits at the start padding, not centred, as the oracle draws it.
+//!   (icon, label, spinner) is centred in any free width (the minimum width or a request width),
+//!   as the oracle draws it since design-data 0.34 (#1781).
 //! - Accent and negative have no outline look: that combination is an `error` constraint in the
 //!   catalog, so `build` panics in debug builds. Release builds render what the oracle does: white
 //!   text on no fill and no border.
@@ -33,7 +34,7 @@ use crate::size::Size;
 use crate::tokens::Tokens;
 use crate::wrap::Fit;
 use rune::tok::motion::SNAPPY;
-use rune::{icon, row, text, Color, El, Icon};
+use rune::{icon, row, text, text::measure, Color, El, Icon};
 use rune_kit::{Kit, Loader};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -480,8 +481,11 @@ impl Button {
             label_w,
         );
 
+        // Since design-data 0.34 (#1781) a row centres its content in free width (a `minWidth` or a request width wider
+        // than the content), as the recipe's default `justify: center` says.
         let mut root = fit
             .root(row())
+            .justify_center()
             .key(part("container"))
             .h(fit.height)
             .min_w(min_w)
@@ -547,8 +551,11 @@ impl Button {
                     .color(look.content)
                     .a11y_hidden()
                     .font(font::text_style(&label_type));
-                if outer.is_some() {
-                    label = label.wrap().shrink();
+                if let Some(avail) = label_w {
+                    // The label is as wide as its widest wrapped line, so the row can centre it in the free width.
+                    let block =
+                        measure(l, &[], font::text_style(&label_type), Some(avail.max(0.0))).0;
+                    label = label.wrap().shrink().w(block);
                 }
                 root = root.child(fit.part(label, label_type.line_height));
             }
