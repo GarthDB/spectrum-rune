@@ -1,0 +1,24 @@
+name: ferrograph
+# Advisory: reports newly dead functions and blast radius as a sticky PR comment. Not a required check.
+on:
+  pull_request:
+    paths:
+      - '**/*.rs'
+      - '**/Cargo.toml'
+      - Cargo.lock
+      - .github/workflows/ferrograph.yml
+permissions:
+  contents: read
+  pull-requests: write
+concurrency:
+  group: ferrograph-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the base ref and merge base must exist
+      - uses: GarthDB/ferrograph-action@v2
