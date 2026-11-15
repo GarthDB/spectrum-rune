@@ -148,6 +148,17 @@ fn check_with(component: &'static str, json: &str, control: &str, strict: bool) 
         if !case["control"].is_null() {
             let c = find(&rt, part).unwrap();
             first = first.min(c.target[0]);
+            if centred {
+                // The icon-to-label gap does not follow the font, so it is the oracle's.
+                let want_gap = lines[0]["x"].as_f64().unwrap()
+                    - case["control"]["x"].as_f64().unwrap()
+                    - case["control"]["w"].as_f64().unwrap();
+                close(
+                    label.target[0] - (c.target[0] + c.target[2]),
+                    &want_gap.into(),
+                    &format!("{what}: icon to label gap"),
+                );
+            }
             for (k, n) in ["x", "y", "w", "h"].iter().enumerate() {
                 if centred && k == 0 {
                     continue;

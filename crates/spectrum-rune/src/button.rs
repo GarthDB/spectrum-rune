@@ -7,7 +7,8 @@
 //!   #1704, and this crate's builder followed that); `builder_defaults_are_the_catalog_defaults`
 //!   keeps the two equal.
 //! - The root is at least 2.25 x its height wide unless the label is hidden, and the content
-//!   (icon, label, spinner) sits at the start padding, not centred, as the oracle draws it.
+//!   (icon, label, spinner) is centred in any free width (the minimum width or a request width),
+//!   as the oracle draws it since design-data 0.34 (#1781).
 //! - Accent and negative have no outline look: that combination is an `error` constraint in the
 //!   catalog, so `build` panics in debug builds. Release builds render what the oracle does: white
 //!   text on no fill and no border.

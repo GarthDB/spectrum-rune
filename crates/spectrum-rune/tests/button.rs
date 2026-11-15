@@ -285,6 +285,18 @@ fn matches_oracle_scene() {
                 &format!("{what} label"),
             );
             if centred_here {
+                if let Some(i) = icon.as_ref() {
+                    // The icon-to-label gap does not follow the font, so it is the oracle's.
+                    let want_gap = c["label_part"]["x"].as_f64().unwrap()
+                        - c["icon"]["x"].as_f64().unwrap()
+                        - c["icon"]["w"].as_f64().unwrap();
+                    close(
+                        l.target[0] - (i.target[0] + i.target[2]),
+                        &want_gap.into(),
+                        1.0,
+                        &format!("{what} icon to label gap"),
+                    );
+                }
                 let first = icon.as_ref().map_or(l.target[0], |i| i.target[0]);
                 let (left, right) = (
                     first - origin[0],
@@ -313,8 +325,8 @@ fn matches_oracle_scene() {
             // The oracle's progress carries no colour in the fixture: Loader draws its own ring.
             let (w, h) = (p.target[2], p.target[3]);
             assert!(w == h && w > 0.0 && w < want["w"].as_f64().unwrap() as f32);
-            // At the start, not centred: with the minimum width the oracle's progress sits at the
-            // padding (x 12 in a 72px button), as the icon and label do.
+            // Centred in the free width: with the minimum width the oracle's progress sits at x 27 in a
+            // 72px button, as the icon and label are centred too. Its size is fixed, so x is exact.
             close(
                 p.target[0] - origin[0],
                 &c["progress"]["x"],

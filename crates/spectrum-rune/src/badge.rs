@@ -404,20 +404,21 @@ impl Badge {
         } else {
             d.pad_icon_only
         };
+        let label_w = self.width.map(|w| {
+            w - 2.0 * pad
+                - if self.icon.is_some() {
+                    d.icon + d.gap
+                } else {
+                    0.0
+                }
+        });
         let fit = Fit::new(
             self.label.as_deref(),
             font::text_style(&label_type),
             label_type.line_height,
             if self.icon.is_some() { d.icon } else { 0.0 },
             d.height,
-            self.width.map(|w| {
-                w - 2.0 * pad
-                    - if self.icon.is_some() {
-                        d.icon + d.gap
-                    } else {
-                        0.0
-                    }
-            }),
+            label_w,
         );
         // Since design-data 0.34 (#1781) a row centres its content in free width (a request width wider than the
         // content), as the recipe's default `justify: center` says.
@@ -446,27 +447,15 @@ impl Badge {
         }
         // The text is the accessible name; the container has no role of its own.
         if let Some(l) = self.label {
-            let l_text = l.clone();
+            // The label is as wide as its widest wrapped line, so the row can centre it in the free width.
+            let block = label_w.map(|avail| {
+                measure(&l, &[], font::text_style(&label_type), Some(avail.max(0.0))).0
+            });
             let mut label = text(l)
                 .key(part("label"))
                 .color(look.content)
                 .font(font::text_style(&label_type));
-            if let Some(w) = self.width {
-                // The label is as wide as its widest wrapped line, so the row can centre it in the free width.
-                let avail = w
-                    - 2.0 * pad
-                    - if self.icon.is_some() {
-                        d.icon + d.gap
-                    } else {
-                        0.0
-                    };
-                let block = measure(
-                    &l_text,
-                    &[],
-                    font::text_style(&label_type),
-                    Some(avail.max(0.0)),
-                )
-                .0;
+            if let Some(block) = block {
                 label = label.wrap().shrink().w(block);
             }
             root = root.child(fit.part(label, label_type.line_height));
