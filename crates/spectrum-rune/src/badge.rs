@@ -22,7 +22,7 @@ use crate::font;
 use crate::size::Size;
 use crate::tokens::Tokens;
 use crate::wrap::Fit;
-use rune::{icon, row, text, Color, El, Icon};
+use rune::{icon, row, text, text::measure, Color, El, Icon};
 
 macro_rules! names {
     ($ty:ident { $($v:ident => $s:literal),* $(,)? }) => {
@@ -419,8 +419,11 @@ impl Badge {
                     }
             }),
         );
+        // Since design-data 0.34 (#1781) a row centres its content in free width (a request width wider than the
+        // content), as the recipe's default `justify: center` says.
         let mut root = fit
             .root(row())
+            .justify_center()
             .key(part("container"))
             .h(fit.height)
             .px(pad)
@@ -443,12 +446,28 @@ impl Badge {
         }
         // The text is the accessible name; the container has no role of its own.
         if let Some(l) = self.label {
+            let l_text = l.clone();
             let mut label = text(l)
                 .key(part("label"))
                 .color(look.content)
                 .font(font::text_style(&label_type));
-            if self.width.is_some() {
-                label = label.wrap().shrink();
+            if let Some(w) = self.width {
+                // The label is as wide as its widest wrapped line, so the row can centre it in the free width.
+                let avail = w
+                    - 2.0 * pad
+                    - if self.icon.is_some() {
+                        d.icon + d.gap
+                    } else {
+                        0.0
+                    };
+                let block = measure(
+                    &l_text,
+                    &[],
+                    font::text_style(&label_type),
+                    Some(avail.max(0.0)),
+                )
+                .0;
+                label = label.wrap().shrink().w(block);
             }
             root = root.child(fit.part(label, label_type.line_height));
         }

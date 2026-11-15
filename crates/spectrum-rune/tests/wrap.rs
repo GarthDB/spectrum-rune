@@ -140,14 +140,34 @@ fn check_with(component: &'static str, json: &str, control: &str, strict: bool) 
         } else {
             control
         };
+        // Badge and Button centre their content in free width (design-data 0.34, #1781). Where that puts the content
+        // follows the measured line width, which is the installed font's, so those two check that the content is
+        // centred (equal margins) instead of the oracle's x.
+        let centred = matches!(component, "badge" | "button");
+        let mut first = label.target[0];
         if !case["control"].is_null() {
             let c = find(&rt, part).unwrap();
+            first = first.min(c.target[0]);
             for (k, n) in ["x", "y", "w", "h"].iter().enumerate() {
+                if centred && k == 0 {
+                    continue;
+                }
                 let got = if k < 2 { rel(&c, k) } else { c.target[k] };
                 close(got, &case["control"][n], &format!("{what}: {part} {n}"));
             }
         }
-        close(rel(&label, 0), &lines[0]["x"], &format!("{what}: label x"));
+        if centred {
+            let (left, right) = (
+                first - b[0],
+                b[0] + b[2] - (label.target[0] + label.target[2]),
+            );
+            assert!(
+                (left - right).abs() <= 1.0,
+                "{what}: content not centred, margins {left} and {right}"
+            );
+        } else {
+            close(rel(&label, 0), &lines[0]["x"], &format!("{what}: label x"));
+        }
         close(rel(&label, 1), &lines[0]["y"], &format!("{what}: label y"));
         wrapped += (lines.len() > 1) as usize;
     }

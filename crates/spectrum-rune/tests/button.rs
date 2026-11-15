@@ -257,8 +257,15 @@ fn matches_oracle_scene() {
         // A part the oracle omits must be absent here too, and the other way round.
         let icon = part(&rt, "icon");
         assert_eq!(icon.is_some(), !c["icon"].is_null(), "{what}: icon present");
-        if let Some(i) = icon {
-            assert_rect(i.target, origin, &c["icon"], &format!("{what} icon"));
+        // Where the minimum width leaves free space the content is centred (design-data 0.34, #1781), so its x
+        // follows the label's measured width, which is the installed font's: check the centring instead of x.
+        let centred_here = bound_here && c["pending"] != true;
+        if let Some(i) = icon.as_ref() {
+            let mut want_icon = c["icon"].clone();
+            if centred_here {
+                want_icon["x"] = Value::Null;
+            }
+            assert_rect(i.target, origin, &want_icon, &format!("{what} icon"));
             assert_color(
                 i.text_color.unwrap(),
                 &c["icon"]["color"],
@@ -277,12 +284,24 @@ fn matches_oracle_scene() {
                 &c["label_part"]["color"],
                 &format!("{what} label"),
             );
-            close(
-                l.target[0] - origin[0],
-                &c["label_part"]["x"],
-                1.0,
-                &format!("{what} label x"),
-            );
+            if centred_here {
+                let first = icon.as_ref().map_or(l.target[0], |i| i.target[0]);
+                let (left, right) = (
+                    first - origin[0],
+                    origin[0] + b.target[2] - (l.target[0] + l.target[2]),
+                );
+                assert!(
+                    (left - right).abs() <= 1.0,
+                    "{what}: content not centred, margins {left} and {right}"
+                );
+            } else {
+                close(
+                    l.target[0] - origin[0],
+                    &c["label_part"]["x"],
+                    1.0,
+                    &format!("{what} label x"),
+                );
+            }
         }
         let progress = part(&rt, "progress");
         assert_eq!(
@@ -454,7 +473,9 @@ fn hidden_label_is_a_square_icon_button_with_an_accessible_name() {
 }
 
 /// Not in the oracle, which always draws the icon: a label-only button has no icon part and
-/// takes the half-height `component-pill-edge-to-text` padding.
+/// takes at least the half-height `component-pill-edge-to-text` padding, with the label
+/// centred in the minimum width (design-data 0.34 centres a row's content in free width; the
+/// extra space depends on the label's measured width, so it is the centring that is asserted).
 #[test]
 fn label_only_button_has_no_icon() {
     let rt = runtime(App {
@@ -464,7 +485,13 @@ fn label_only_button_has_no_icon() {
     let c = part(&rt, "container").unwrap();
     let l = part(&rt, "label").unwrap();
     assert!(part(&rt, "icon").is_none());
-    assert_eq!(l.target[0] - c.target[0], 16.0, "M text padding");
+    let left = l.target[0] - c.target[0];
+    let right = c.target[0] + c.target[2] - (l.target[0] + l.target[2]);
+    assert!(left >= 16.0 - 0.01, "M text padding, got {left}");
+    assert!(
+        (left - right).abs() <= 1.0,
+        "label centred: {left} vs {right}"
+    );
 }
 
 fn errors(b: &Button) -> Vec<&'static str> {
