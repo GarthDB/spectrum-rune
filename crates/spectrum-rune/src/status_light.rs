@@ -35,13 +35,41 @@ pub enum Variant {
     Cinnamon,
     Brown,
     Silver,
-    Cyan,
     Gray,
     Red,
     Orange,
     Green,
+    Cyan,
     Blue,
 }
+
+names!(Variant {
+    Informative => "informative",
+    Accent => "accent",
+    Neutral => "neutral",
+    Positive => "positive",
+    Notice => "notice",
+    Negative => "negative",
+    Indigo => "indigo",
+    Celery => "celery",
+    Chartreuse => "chartreuse",
+    Yellow => "yellow",
+    Magenta => "magenta",
+    Fuchsia => "fuchsia",
+    Purple => "purple",
+    Seafoam => "seafoam",
+    Pink => "pink",
+    Turquoise => "turquoise",
+    Cinnamon => "cinnamon",
+    Brown => "brown",
+    Silver => "silver",
+    Gray => "gray",
+    Red => "red",
+    Orange => "orange",
+    Green => "green",
+    Cyan => "cyan",
+    Blue => "blue",
+});
 
 impl Variant {
     fn dot(self, t: &Tokens) -> Color {

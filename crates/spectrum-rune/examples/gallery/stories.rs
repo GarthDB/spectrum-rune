@@ -13,6 +13,7 @@ use spectrum_rune::constraints::{check, OptionValue, Severity};
 use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
 use spectrum_rune::radio_button::RadioButton;
+use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::Tokens;
 use spectrum_rune::{ActionButtonSize, Size};
@@ -44,6 +45,7 @@ stories! {
     "button" => "Button", button;
     "action-button" => "Action button", action_button;
     "badge" => "Badge", badge;
+    "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
 }
@@ -495,6 +497,36 @@ fn badge(_: &G, t: &'static Tokens) -> El {
         })),
     ));
     page(sections)
+}
+
+fn status_light(_: &G, t: &'static Tokens) -> El {
+    let variants = flow().children(status_light::Variant::ALL.iter().map(|v| {
+        StatusLight::new(format!("status-light/v-{}", v.as_str()), v.as_str())
+            .variant(*v)
+            .build(t)
+    }));
+    let sizes = line(SIZES.map(|(z, n)| {
+        StatusLight::new(format!("status-light/size-{n}"), n)
+            .variant(status_light::Variant::Positive)
+            .size(z)
+            .build(t)
+    }));
+    // The dot stays on the first line; React Spectrum's `LongLabel` story is this text at 128px.
+    let wrapped = flow().children(SIZES.map(|(z, n)| {
+        StatusLight::new(
+            format!("status-light/wrap-{n}"),
+            "StatusLight with very long label so we can see wrapping",
+        )
+        .variant(status_light::Variant::Positive)
+        .size(z)
+        .width(128.0)
+        .build(t)
+    }));
+    page(vec![
+        section(t, "Variants", variants),
+        section(t, "Sizes", sizes),
+        section(t, "Wrapped label (width 128)", wrapped),
+    ])
 }
 
 fn accordion(s: &G, t: &'static Tokens) -> El {

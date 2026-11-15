@@ -24,19 +24,6 @@ use crate::tokens::Tokens;
 use crate::wrap::Fit;
 use rune::{icon, row, text, text::measure, Color, El, Icon};
 
-macro_rules! names {
-    ($ty:ident { $($v:ident => $s:literal),* $(,)? }) => {
-        impl $ty {
-            /// The catalog's option value.
-            pub fn as_str(self) -> &'static str {
-                match self { $($ty::$v => $s),* }
-            }
-            /// Every value, in catalog order.
-            pub const ALL: &'static [$ty] = &[$($ty::$v),*];
-        }
-    };
-}
-
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Variant {
     #[default]
