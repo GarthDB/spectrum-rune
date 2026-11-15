@@ -1,5 +1,19 @@
 #![doc = include_str!("../../../README.md")]
 
+/// `as_str` (the catalog's option value) and `ALL` (every value, in catalog order) for an option enum.
+macro_rules! names {
+    ($ty:ident { $($v:ident => $s:literal),* $(,)? }) => {
+        impl $ty {
+            /// The catalog's option value.
+            pub fn as_str(self) -> &'static str {
+                match self { $($ty::$v => $s),* }
+            }
+            /// Every value, in catalog order.
+            pub const ALL: &'static [$ty] = &[$($ty::$v),*];
+        }
+    };
+}
+
 pub mod accordion;
 pub mod accordion_group;
 pub mod action_button;

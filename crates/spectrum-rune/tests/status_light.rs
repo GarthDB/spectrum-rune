@@ -12,34 +12,6 @@ use spectrum_rune::Size;
 #[derive(Clone)]
 struct App(Value);
 
-const VARIANTS: [(&str, Variant); 25] = [
-    ("informative", Variant::Informative),
-    ("accent", Variant::Accent),
-    ("neutral", Variant::Neutral),
-    ("positive", Variant::Positive),
-    ("notice", Variant::Notice),
-    ("negative", Variant::Negative),
-    ("indigo", Variant::Indigo),
-    ("celery", Variant::Celery),
-    ("chartreuse", Variant::Chartreuse),
-    ("yellow", Variant::Yellow),
-    ("magenta", Variant::Magenta),
-    ("fuchsia", Variant::Fuchsia),
-    ("purple", Variant::Purple),
-    ("seafoam", Variant::Seafoam),
-    ("pink", Variant::Pink),
-    ("turquoise", Variant::Turquoise),
-    ("cinnamon", Variant::Cinnamon),
-    ("brown", Variant::Brown),
-    ("silver", Variant::Silver),
-    ("gray", Variant::Gray),
-    ("red", Variant::Red),
-    ("orange", Variant::Orange),
-    ("green", Variant::Green),
-    ("cyan", Variant::Cyan),
-    ("blue", Variant::Blue),
-];
-
 fn view(a: &App, _: &mut Cx<App>) -> El {
     let c = &a.0;
     let t = tokens(
@@ -60,7 +32,10 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
         "l" => Size::L,
         _ => Size::XL,
     };
-    let variant = VARIANTS.iter().find(|(n, _)| c["variant"] == *n).unwrap().1;
+    let variant = *Variant::ALL
+        .iter()
+        .find(|v| c["variant"] == v.as_str())
+        .unwrap();
     col().child(
         StatusLight::new("k", "Label")
             .variant(variant)
@@ -98,6 +73,7 @@ fn matches_oracle_scene() {
     let cases: Vec<Value> =
         serde_json::from_str(include_str!("fixtures/status_light_scene.json")).unwrap();
     assert_eq!(cases.len(), 124);
+    assert_eq!(Variant::ALL.len(), 25);
     for c in cases {
         let what = format!(
             "{} {} {} {}",
