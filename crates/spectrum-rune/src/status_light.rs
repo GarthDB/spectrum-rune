@@ -35,11 +35,11 @@ pub enum Variant {
     Cinnamon,
     Brown,
     Silver,
-    Cyan,
     Gray,
     Red,
     Orange,
     Green,
+    Cyan,
     Blue,
 }
 
