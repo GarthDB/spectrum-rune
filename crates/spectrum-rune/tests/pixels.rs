@@ -5,7 +5,7 @@
 #[path = "support/pixels.rs"]
 mod pixels;
 
-use pixels::{closest, composite, differs, near_within, Pixels};
+use pixels::{closest, composite, differs, near_within, Pixels, Ring, SIDES};
 use rune::{col, Cx, El, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
 use spectrum_rune::action_button::ActionButton;
@@ -184,6 +184,7 @@ struct F {
     stat: Option<StaticColor>,
     disabled: bool,
     pending: bool,
+    backdrop: bool,
 }
 
 fn fview(a: &F, _: &mut Cx<F>) -> El {
@@ -211,13 +212,13 @@ fn fview(a: &F, _: &mut Cx<F>) -> El {
     if let Some(c) = a.stat {
         b = b.static_color(c);
     }
-    col()
-        .w(FSIZE.0 as f32)
-        .h(FSIZE.1 as f32)
-        .px(FPAD)
-        .py(FPAD)
-        .fill(rune::color::hex(BACKDROP).unwrap())
-        .child(b.build(t))
+    let page = col().w(FSIZE.0 as f32).h(FSIZE.1 as f32).px(FPAD).py(FPAD);
+    let page = if a.backdrop {
+        page.fill(rune::color::hex(BACKDROP).unwrap())
+    } else {
+        page
+    };
+    page.child(b.build(t))
 }
 
 fn fsettle(rt: &mut Runtime<F>) {
@@ -248,6 +249,7 @@ fn fapp(c: &Value) -> F {
         },
         disabled: b("disabled"),
         pending: b("pending"),
+        backdrop: true,
     }
 }
 
@@ -272,6 +274,27 @@ fn fcontainer(rt: &Runtime<F>) -> rune::ElementInfo {
 
 fn fnum(v: &Value) -> f32 {
     v.as_f64().unwrap() as f32
+}
+
+/// The keyboard-focus ring of every size, scale and scheme: 2px at a 2px gap, in the focus colour,
+/// and white or black for a static colour (`action_button_rings.json`).
+#[test]
+fn focus_ring_matches_oracle() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/action_button_rings.json")).unwrap();
+    assert_eq!(cases.len(), 36);
+    for c in &cases {
+        let what = c.to_string();
+        let mut rt = frt(F {
+            backdrop: false,
+            ..fapp(c)
+        });
+        rt.key(KeyEvent::from(Key::Tab));
+        fsettle(&mut rt);
+        let b = fcontainer(&rt);
+        assert!(b.focus_visible, "{what}: focus is visible");
+        Ring::of(c).assert_around(&Pixels::of(&rt, FSIZE), b.target, &SIDES, &what);
+    }
 }
 
 /// Keyboard focus (Tab) gives the oracle's keyboard-focus look, `action_button_focus.json`: the
@@ -370,11 +393,13 @@ fn keyboard_focus_fill_matches_oracle() {
             );
             clipped += 1;
         }
-        // The ring is as before (the colours of the existing ring test), absent when disabled.
-        let ring = if c["scheme"] == "dark" {
-            [64.0, 105.0, 253.0]
-        } else {
-            [75.0, 117.0, 255.0]
+        // The ring is the focus colour (see the ring test), white or black for a static colour,
+        // absent when disabled.
+        let ring = match (c["static"].as_str(), c["scheme"] == "dark") {
+            (Some("white"), _) => [255.0; 3],
+            (Some(_), _) => [0.0; 3],
+            (None, true) => [64.0, 105.0, 253.0],
+            (None, false) => [75.0, 117.0, 255.0],
         };
         if disabled {
             assert_eq!(

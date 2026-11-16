@@ -171,3 +171,16 @@ focus="$(dirname "$out")/action_button_focus.json"
       .container |= map_values(c) | (.icon, .label_part) |= (if . then map_values(c) else . end)) | .[]' \
   | jq -sc '.[]' | sed '1s/^/[/; $!s/$/,/; $s/$/]/' > "$focus"
 echo "wrote $focus"
+
+# I. focus ring (--state keyboard-focus): colour, thickness, gap and rect around the container, read by
+#    tests/pixels.rs (ring.jq): static none/white/black (a14.42: the oracle's ring is white or black
+#    for a static colour) x scheme x scale x sizes XS/M/XL.
+rings="$(dirname "$out")/action_button_rings.json"
+for scheme in light dark; do for scale in desktop mobile; do for size in xs m xl; do for stat in none white black; do
+  args=(--size "$size" --label Label --color-scheme "$scheme" --scale "$scale" --state keyboard-focus --format scene)
+  [ "$stat" != none ] && args+=(--option "staticColor=\"$stat\"")
+  design-data render action-button "${args[@]}" | jq -c --arg target container \
+    --argjson meta "{\"scheme\":\"$scheme\",\"scale\":\"$scale\",\"size\":\"$size\",\"static\":$([ "$stat" = none ] && echo null || echo "\"$stat\"")}" \
+    -f "$(dirname "$out")/ring.jq"
+done; done; done; done | jq -s . > "$rings"
+echo "wrote $rings"
