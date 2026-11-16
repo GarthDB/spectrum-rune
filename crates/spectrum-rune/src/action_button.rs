@@ -17,7 +17,7 @@
 //!   grey pill on a coloured backdrop. Button's recipe has translucent static + disabled rules
 //!   and this one does not; this is kept as rendered, not borrowed from Button (a14.23, see
 //!   `disabled_ignores_the_static_colour`).
-//! - The focus ring is `focus_indicator_color` for every static colour.
+//! - The focus ring is `focus_indicator_color`, or the static white or black one for a static colour.
 //! - Keyboard focus takes the hover fill of a selected button besides the ring (`El::focus_fill`:
 //!   opaque, under the content, clipped to the pill, never from pointer focus; neutral 41 to 19,
 //!   emphasized accent 59,99,251 to 39,77,234, quiet or not; a14.35). Unselected buttons and static
@@ -434,7 +434,11 @@ impl ActionButton {
             .focus_ring(
                 t.focus_indicator_thickness,
                 t.focus_ring_gap,
-                t.focus_indicator_color,
+                match self.static_color {
+                    Some(StaticColor::White) => t.static_white_focus_indicator_color,
+                    Some(StaticColor::Black) => t.static_black_focus_indicator_color,
+                    None => t.focus_indicator_color,
+                },
             );
         // Keyboard focus takes the hover fill of a selected button (the oracle's keyboard-focus
         // state), laid over its fill by Rune. Unselected buttons and static colours keep theirs
