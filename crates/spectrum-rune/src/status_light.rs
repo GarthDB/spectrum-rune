@@ -2,7 +2,7 @@
 //! (the foundation has none yet; see the manifest README): container > dot, label. The dot is aligned with the top
 //! of the label's first line, both starting at the block padding. Every size, colour and type value comes from [`Tokens`].
 //!
-//! Variants: the five semantic ones and the named colours, as in the Figma Web POC.
+//! Variants: the six semantic ones and the named colours, as in the Figma Web POC.
 //!
 //! Verification: geometry, dot fill and label colour against the oracle (`tests/status_light.rs`), and label
 //! wrapping (`tests/wrap.rs`). The font family is not asserted (not observable).
