@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: adobe/spectrum-design-data/.github/actions/validate@2836616b37bef88268cba27e57d9a4df7270dc4c # main on 2026-11-11
+      - uses: adobe/spectrum-design-data/.github/actions/validate@6ae966d623508ee4d7031c6bafe93785a8c29468 # main on 2026-11-11
         with:
           cli-version: 0.36.5
           manifest: platforms/rune/manifest.json
