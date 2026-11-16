@@ -500,11 +500,26 @@ fn badge(_: &G, t: &'static Tokens) -> El {
 }
 
 fn status_light(_: &G, t: &'static Tokens) -> El {
-    let variants = flow().children(status_light::Variant::ALL.iter().map(|v| {
-        StatusLight::new(format!("status-light/v-{}", v.as_str()), v.as_str())
-            .variant(*v)
-            .build(t)
-    }));
+    // The recipe's `Semantic (Dot)` variants; every other one is a named colour (`Non-semantic (Dot)`).
+    use status_light::Variant as V;
+    let semantic = |v: &V| {
+        matches!(
+            v,
+            V::Informative | V::Accent | V::Neutral | V::Positive | V::Notice | V::Negative
+        )
+    };
+    let variants = |want: bool| {
+        flow().children(
+            status_light::Variant::ALL
+                .iter()
+                .filter(|v| semantic(v) == want)
+                .map(|v| {
+                    StatusLight::new(format!("status-light/v-{}", v.as_str()), v.as_str())
+                        .variant(*v)
+                        .build(t)
+                }),
+        )
+    };
     let sizes = line(SIZES.map(|(z, n)| {
         StatusLight::new(format!("status-light/size-{n}"), n)
             .variant(status_light::Variant::Positive)
@@ -523,7 +538,8 @@ fn status_light(_: &G, t: &'static Tokens) -> El {
         .build(t)
     }));
     page(vec![
-        section(t, "Variants", variants),
+        section(t, "Semantic variants", variants(true)),
+        section(t, "Non-semantic variants", variants(false)),
         section(t, "Sizes", sizes),
         section(t, "Wrapped label (width 128)", wrapped),
     ])
