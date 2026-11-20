@@ -1,7 +1,8 @@
 //! The Playground story: a control per catalog option, a live preview, the options the builder reports,
 //! and the catalog's constraint rules. Values come from the generated catalog (`constraints::component`);
 //! a value whose choice would break an `error` rule is greyed out and the reason is listed. Each component
-//! needs only an adapter (`preview`) from the chosen values to its builder. Dev-only: no token panel yet.
+//! needs only an adapter (`preview`) from the chosen values to its builder. Dev-only: the token panel runs
+//! the oracle CLI (`oracle.rs`) on demand.
 
 use crate::G;
 use rune::{col, el, row, text, El};
@@ -12,7 +13,7 @@ use spectrum_rune::constraints::{check, component, Lit, OptionDef, OptionValue, 
 use spectrum_rune::font;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::status_light::{self, StatusLight};
-use spectrum_rune::tokens::Tokens;
+use spectrum_rune::tokens::{tokens, ColorScheme, Scale, Tokens};
 use spectrum_rune::Size;
 
 type Opts = Vec<(&'static str, OptionValue<'static>)>;
@@ -209,6 +210,57 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
     }
 }
 
+/// The `design-data render` arguments for the chosen values (the catalog option names, `--size`, scheme, scale).
+fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
+    let mut a: Vec<String> = vec![
+        "--color-scheme".into(),
+        if dark { "dark" } else { "light" }.into(),
+        "--scale".into(),
+        if s.scale == Scale::Mobile {
+            "mobile"
+        } else {
+            "desktop"
+        }
+        .into(),
+    ];
+    let mut opt = |kv: String| a.extend(["--option".to_owned(), kv]);
+    let mut size = None;
+    let mut icon = false;
+    let mut label = false;
+    for (n, v) in options(s, comp, None) {
+        match (n, v) {
+            ("size", OptionValue::Str(x)) => size = Some(x),
+            ("icon", _) => icon = true,
+            ("label", _) => label = true,
+            (n, OptionValue::Str(x)) => opt(format!("{n}=\"{x}\"")),
+            (n, OptionValue::Bool(b)) => opt(format!("{n}={b}")),
+            (n, OptionValue::Num(x)) => opt(format!("{n}={x}")),
+            (_, OptionValue::Present) => {}
+        }
+    }
+    if icon {
+        opt("icon=true".into());
+    }
+    if !label && comp == "badge" {
+        opt("label=false".into());
+    }
+    if let Some(x) = size {
+        a.extend(["--size".to_owned(), x.to_owned()]);
+    }
+    if label || comp != "badge" {
+        let text = if extra(s, comp, "label") == "long" {
+            WRAPPED
+        } else {
+            "Label"
+        };
+        a.extend(["--label".to_owned(), text.to_owned()]);
+    }
+    if let Ok(w) = extra(s, comp, "width").parse::<f32>() {
+        a.extend(["--width".to_owned(), w.to_string()]);
+    }
+    a
+}
+
 fn fmt(v: &OptionValue) -> String {
     match v {
         OptionValue::Str(s) => (*s).to_owned(),
@@ -340,13 +392,42 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             format!("{:?}: {}", r.severity, r.description.unwrap_or("")),
         ));
     }
+    let dark = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
+    let args = oracle_args(s, comp, dark);
+    let mut oracle = col().gap(2.0).child(
+        ActionButton::new("playground/oracle/run")
+            .label("Run oracle (design-data CLI)")
+            .on_press({
+                let args = args.clone();
+                move |g: &mut G| {
+                    let r = crate::oracle::run(comp, &args);
+                    g.oracle = Some((args.clone(), r));
+                }
+            })
+            .build(t),
+    );
+    oracle = match &s.oracle {
+        None => oracle.child(caption(
+            t,
+            "tokens each part reads, from the oracle: not run yet",
+        )),
+        Some((ran, _)) if *ran != args => oracle.child(caption(
+            t,
+            "the options changed since the last run: run it again",
+        )),
+        Some((_, Ok(lines))) => lines
+            .iter()
+            .fold(oracle, |c, l| c.child(caption(t, l.clone()))),
+        Some((_, Err(e))) => oracle.child(caption(t, format!("oracle failed: {e}"))),
+    };
     col().w_full().gap(24.0).child(picker).child(
         row().gap(32.0).flex_wrap().child(controls.w(520.0)).child(
             col()
                 .gap(24.0)
                 .child(el().padding(16.0).child(shown))
                 .child(panel)
-                .child(rules),
+                .child(rules)
+                .child(oracle),
         ),
     )
 }
@@ -499,6 +580,39 @@ mod tests {
         rt.pointer_up(x, y);
         rt.frame(0.05);
         assert!(!rt.state.play.contains_key("button/style"));
+    }
+
+    /// Needs the oracle CLI in the oracle.toml range (`DESIGN_DATA=... cargo test -- --ignored`).
+    #[test]
+    #[ignore]
+    fn oracle_runs_every_component_at_its_defaults() {
+        for (comp, _) in COMPONENTS {
+            let s = crate::init();
+            let lines = crate::oracle::run(comp, &oracle_args(&s, comp, false)).expect(comp);
+            assert!(
+                lines.iter().any(|l| l.starts_with("container")),
+                "{comp}: {lines:?}"
+            );
+            assert!(lines.iter().any(|l| l.contains(" = ")), "{comp}: no tokens");
+        }
+    }
+
+    /// Pressing Run lists the oracle's tokens in the UI (needs the CLI, like the test above).
+    #[test]
+    #[ignore]
+    fn run_button_lists_the_oracle_tokens() {
+        use rune::{Env, Runtime};
+        let mut s = crate::init();
+        s.story = "playground";
+        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+        rt.frame(0.05);
+        let (x, y) = rt.find("playground/oracle/run/container").unwrap();
+        rt.pointer_move(x, y);
+        rt.pointer_down(x, y);
+        rt.pointer_up(x, y);
+        rt.frame(0.05);
+        let tree = rt.accessibility_json().to_string();
+        assert!(tree.contains("    height = component-height-"), "{tree}");
     }
 
     #[test]
