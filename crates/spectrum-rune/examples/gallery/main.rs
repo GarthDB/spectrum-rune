@@ -9,6 +9,7 @@
 //! The page is Spectrum's `background_base_color`. The licensed Adobe Clean Spectrum font is read
 //! from the system, never bundled; the header and the startup output say whether it was found.
 
+mod oracle;
 mod playground;
 mod stories;
 
@@ -20,6 +21,9 @@ use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
+
+/// The CLI arguments an oracle run used, and its token lines or error.
+pub type OracleRun = (Vec<String>, Result<Vec<String>, String>);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStatus {
@@ -76,6 +80,8 @@ pub struct G {
     pub open: HashMap<String, Vec<String>>,
     /// The Playground's chosen values, keyed `component/option`.
     pub play: HashMap<String, String>,
+    /// The last oracle run (dev-only): the CLI arguments it ran with, and its token lines or error.
+    pub oracle: Option<OracleRun>,
 }
 
 impl G {
@@ -99,6 +105,7 @@ fn init() -> G {
         picked: HashMap::new(),
         open: HashMap::new(),
         play: HashMap::new(),
+        oracle: None,
     }
 }
 
