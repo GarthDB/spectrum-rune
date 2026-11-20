@@ -126,7 +126,13 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
         "long" => WRAPPED,
         _ => "",
     };
-    let v = |opt, default: &str| pick(s, comp, opt, default).to_owned();
+    // One source of truth: the catalog values (and defaults) `options` derives, not defaults repeated here.
+    let derived = options(s, comp, None);
+    let v = |opt: &str| match derived.iter().find(|(n, _)| *n == opt) {
+        Some((_, OptionValue::Str(x))) => (*x).to_owned(),
+        Some((_, OptionValue::Bool(b))) => b.to_string(),
+        _ => String::new(),
+    };
     match comp {
         "badge" => {
             let mut b = Badge::new("playground/preview")
@@ -134,16 +140,16 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
                 .variant(
                     *badge::Variant::ALL
                         .iter()
-                        .find(|x| x.as_str() == v("variant", "neutral"))
-                        .unwrap(),
+                        .find(|x| x.as_str() == v("variant"))
+                        .expect("catalog variant missing from badge::Variant::ALL"),
                 )
                 .style(
                     *badge::Style::ALL
                         .iter()
-                        .find(|x| x.as_str() == v("style", "bold"))
-                        .unwrap(),
+                        .find(|x| x.as_str() == v("style"))
+                        .expect("catalog style missing from badge::Style::ALL"),
                 )
-                .size(size_of(&v("size", "s")));
+                .size(size_of(&v("size")));
             if extra(s, comp, "icon") == "check" {
                 b = b.icon(&CHECKMARK_100);
             }
@@ -153,24 +159,24 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
             (b.options(), b.build(t))
         }
         "button" => {
-            let on = |opt: &'static str| v(opt, "false") == "true";
+            let on = |opt: &str| v(opt) == "true";
             let mut b = Button::new("playground/preview")
                 .label(label)
-                .variant(match v("variant", "primary").as_str() {
+                .variant(match v("variant").as_str() {
                     "accent" => button::Variant::Accent,
                     "negative" => button::Variant::Negative,
                     "secondary" => button::Variant::Secondary,
                     _ => button::Variant::Primary,
                 })
-                .style(match v("style", "fill").as_str() {
+                .style(match v("style").as_str() {
                     "outline" => button::Style::Outline,
                     _ => button::Style::Fill,
                 })
-                .size(size_of(&v("size", "m")))
+                .size(size_of(&v("size")))
                 .label_hidden(on("isLabelHidden"))
                 .disabled(on("isDisabled"))
                 .pending(on("isPending"));
-            match v("staticColor", "none").as_str() {
+            match v("staticColor").as_str() {
                 "white" => b = b.static_color(button::StaticColor::White),
                 "black" => b = b.static_color(button::StaticColor::Black),
                 _ => {}
@@ -188,10 +194,10 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
                 .variant(
                     *status_light::Variant::ALL
                         .iter()
-                        .find(|x| x.as_str() == v("variant", "informative"))
-                        .unwrap(),
+                        .find(|x| x.as_str() == v("variant"))
+                        .expect("catalog variant missing from status_light::Variant::ALL"),
                 )
-                .size(size_of(&v("size", "m")));
+                .size(size_of(&v("size")));
             if let Some(w) = width {
                 b = b.width(w);
             }
@@ -372,6 +378,33 @@ mod tests {
                         // A builder may leave out options with no visual effect (Button's size, isDisabled).
                         derived.retain(|(n, _)| reported.iter().any(|(r, _)| r == n));
                         assert_eq!(derived, reported, "{comp} {} = {}", def.name, lit_str(l));
+                    }
+                }
+            }
+        }
+    }
+
+    /// The label and icon presets (not catalog values) must reach the builder too.
+    #[test]
+    fn extras_match_builder_options() {
+        let t = tokens(ColorScheme::Light, Scale::Desktop);
+        for (comp, _) in COMPONENTS {
+            for (opt, presets) in extras(comp) {
+                for (id, _) in presets {
+                    let mut s = crate::init();
+                    s.play.insert(format!("{comp}/{opt}"), id.to_owned());
+                    let derived = options(&s, comp, None);
+                    if !errors(comp, &derived).is_empty() {
+                        continue;
+                    }
+                    let reported = preview(&s, comp, t).0;
+                    for name in ["label", "icon"] {
+                        let has = |o: &Opts| o.iter().any(|(n, _)| *n == name);
+                        // Button's builder does not report its label (no visual option of its own).
+                        if comp == "button" && name == "label" {
+                            continue;
+                        }
+                        assert_eq!(has(&derived), has(&reported), "{comp} {opt} = {id}: {name}");
                     }
                 }
             }
