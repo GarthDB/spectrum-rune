@@ -18,6 +18,15 @@ pub enum Size {
 }
 
 impl Size {
+    /// The catalog's `size` value.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Size::S => "s",
+            Size::M => "m",
+            Size::L => "l",
+            Size::XL => "xl",
+        }
+    }
     /// Scale-aware label type: `font_size_*` grow on mobile, `component_*_regular` do not.
     pub(crate) fn label_type(self, t: &Tokens) -> Typography {
         let (size, line_height) = match self {

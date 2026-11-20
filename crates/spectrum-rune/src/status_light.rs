@@ -7,6 +7,7 @@
 //! Verification: geometry, dot fill and label colour against the oracle (`tests/status_light.rs`), and label
 //! wrapping (`tests/wrap.rs`). The font family is not asserted (not observable).
 
+use crate::constraints::{self, OptionValue};
 use crate::font;
 use crate::size::Size;
 use crate::tokens::Tokens;
@@ -137,8 +138,18 @@ impl StatusLight {
         self
     }
 
+    /// The builder state under the catalog's option names.
+    pub fn options(&self) -> Vec<(&'static str, OptionValue<'static>)> {
+        vec![
+            ("variant", OptionValue::Str(self.variant.as_str())),
+            ("size", OptionValue::Str(self.size.as_str())),
+            ("label", OptionValue::Present),
+        ]
+    }
+
     /// The root comes back inside a plain `row()` wrapper (see `crate::hug`), so it hugs its content in a column.
     pub fn build(self, t: &Tokens) -> El {
+        constraints::assert_valid("status-light", &self.options());
         let (gap, dot) = match self.size {
             Size::S => (t.base_gap_small, t.status_dot_size_small),
             Size::M => (t.base_gap_medium, t.status_dot_size_medium),

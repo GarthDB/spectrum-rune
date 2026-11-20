@@ -9,6 +9,7 @@
 //! The page is Spectrum's `background_base_color`. The licensed Adobe Clean Spectrum font is read
 //! from the system, never bundled; the header and the startup output say whether it was found.
 
+mod playground;
 mod stories;
 
 use rune::text::measure;
@@ -73,6 +74,8 @@ pub struct G {
     pub picked: HashMap<String, String>,
     /// The open items per accordion group.
     pub open: HashMap<String, Vec<String>>,
+    /// The Playground's chosen values, keyed `component/option`.
+    pub play: HashMap<String, String>,
 }
 
 impl G {
@@ -95,6 +98,7 @@ fn init() -> G {
         flipped: HashSet::new(),
         picked: HashMap::new(),
         open: HashMap::new(),
+        play: HashMap::new(),
     }
 }
 

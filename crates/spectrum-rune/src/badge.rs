@@ -355,15 +355,7 @@ impl Badge {
         let mut o = vec![
             ("variant", OptionValue::Str(self.variant.as_str())),
             ("style", OptionValue::Str(self.style.as_str())),
-            (
-                "size",
-                OptionValue::Str(match self.size {
-                    Size::S => "s",
-                    Size::M => "m",
-                    Size::L => "l",
-                    Size::XL => "xl",
-                }),
-            ),
+            ("size", OptionValue::Str(self.size.as_str())),
         ];
         if self.label.is_some() {
             o.push(("label", OptionValue::Present));

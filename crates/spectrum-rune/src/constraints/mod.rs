@@ -79,11 +79,21 @@ pub struct Rule {
     pub description: Option<&'static str>,
 }
 
+/// An option the catalog declares: its values (empty when free-form, like a label or an icon) and default.
+#[derive(Debug)]
+pub struct OptionDef {
+    pub name: &'static str,
+    pub values: &'static [Lit],
+    pub default: Option<Lit>,
+}
+
 #[derive(Debug)]
 pub struct ComponentConstraints {
     pub name: &'static str,
     /// Catalog defaults of the options the rules mention (a `null` default is left out).
     pub defaults: &'static [(&'static str, Lit)],
+    /// Every option in the catalog, sorted by name (the values keep catalog order).
+    pub options: &'static [OptionDef],
     pub rules: &'static [Rule],
 }
 
@@ -158,6 +168,7 @@ mod tests {
     static C: ComponentConstraints = ComponentConstraints {
         name: "t",
         defaults: &[("kind", Str("a")), ("on", Bool(false))],
+        options: &[],
         rules: &[
             // literal when, array require
             Rule {
