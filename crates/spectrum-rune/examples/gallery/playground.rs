@@ -7,7 +7,8 @@ use crate::G;
 use rune::{col, el, row, text, El};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::badge::{self, Badge};
-use spectrum_rune::constraints::{check, component, Lit, OptionValue, Severity};
+use spectrum_rune::button::{self, Button};
+use spectrum_rune::constraints::{check, component, Lit, OptionDef, OptionValue, Severity};
 use spectrum_rune::font;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::status_light::{self, StatusLight};
@@ -16,7 +17,11 @@ use spectrum_rune::Size;
 
 type Opts = Vec<(&'static str, OptionValue<'static>)>;
 
-const COMPONENTS: [(&str, &str); 2] = [("badge", "Badge"), ("status-light", "Status light")];
+const COMPONENTS: [(&str, &str); 3] = [
+    ("badge", "Badge"),
+    ("button", "Button"),
+    ("status-light", "Status light"),
+];
 
 const WRAPPED: &str = "Wrapped label text goes here";
 
@@ -30,6 +35,11 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
             ("icon", vec![("none", "none"), ("check", "checkmark")]),
             ("width", width),
         ],
+        "button" => vec![
+            ("label", label),
+            ("icon", vec![("none", "none"), ("check", "checkmark")]),
+            ("width", width),
+        ],
         _ => vec![("label", label), ("width", width)],
     }
 }
@@ -39,6 +49,11 @@ fn lit_str(l: &Lit) -> String {
         Lit::Str(s) => (*s).to_owned(),
         Lit::Bool(b) => b.to_string(),
     }
+}
+
+/// An option the catalog gives no default is unset until chosen: the choice `none`.
+fn default_of(def: &OptionDef) -> String {
+    def.default.as_ref().map_or("none".to_owned(), lit_str)
 }
 
 fn pick<'a>(s: &'a G, comp: &str, opt: &str, default: &'a str) -> &'a str {
@@ -62,10 +77,9 @@ fn options(s: &G, comp: &str, over: Option<(&str, &str)>) -> Opts {
         .iter()
         .filter(|d| !d.values.is_empty())
     {
-        let default = def.default.as_ref().unwrap_or(&def.values[0]);
         let chosen = match over {
             Some((n, v)) if n == def.name => v.to_owned(),
-            _ => pick(s, comp, def.name, &lit_str(default)).to_owned(),
+            _ => pick(s, comp, def.name, &default_of(def)).to_owned(),
         };
         if let Some(l) = def.values.iter().find(|l| lit_str(l) == chosen) {
             o.push((def.name, l.into()));
@@ -130,6 +144,37 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
                         .unwrap(),
                 )
                 .size(size_of(&v("size", "s")));
+            if extra(s, comp, "icon") == "check" {
+                b = b.icon(&CHECKMARK_100);
+            }
+            if let Some(w) = width {
+                b = b.width(w);
+            }
+            (b.options(), b.build(t))
+        }
+        "button" => {
+            let on = |opt: &'static str| v(opt, "false") == "true";
+            let mut b = Button::new("playground/preview")
+                .label(label)
+                .variant(match v("variant", "primary").as_str() {
+                    "accent" => button::Variant::Accent,
+                    "negative" => button::Variant::Negative,
+                    "secondary" => button::Variant::Secondary,
+                    _ => button::Variant::Primary,
+                })
+                .style(match v("style", "fill").as_str() {
+                    "outline" => button::Style::Outline,
+                    _ => button::Style::Fill,
+                })
+                .size(size_of(&v("size", "m")))
+                .label_hidden(on("isLabelHidden"))
+                .disabled(on("isDisabled"))
+                .pending(on("isPending"));
+            match v("staticColor", "none").as_str() {
+                "white" => b = b.static_color(button::StaticColor::White),
+                "black" => b = b.static_color(button::StaticColor::Black),
+                _ => {}
+            }
             if extra(s, comp, "icon") == "check" {
                 b = b.icon(&CHECKMARK_100);
             }
@@ -226,12 +271,14 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         .iter()
         .filter(|d| !d.values.is_empty())
     {
-        let default = def.default.as_ref().unwrap_or(&def.values[0]);
-        let current = pick(s, comp, def.name, &lit_str(default)).to_owned();
-        let values = def
-            .values
-            .iter()
-            .map(|l| (lit_str(l), lit_str(l)))
+        let current = pick(s, comp, def.name, &default_of(def)).to_owned();
+        let unset = def
+            .default
+            .is_none()
+            .then(|| ("none".to_owned(), "none".to_owned()));
+        let values = unset
+            .into_iter()
+            .chain(def.values.iter().map(|l| (lit_str(l), lit_str(l))))
             .collect();
         controls = controls.child(control(t, comp, def.name, values, &current, |v| {
             errors(comp, &options(s, comp, Some((def.name, v))))
@@ -319,19 +366,34 @@ mod tests {
                         o.sort_by_key(|(n, _)| *n);
                         o
                     };
-                    let derived = sorted(options(&s, comp, None));
+                    let mut derived = sorted(options(&s, comp, None));
                     if errors(comp, &derived).is_empty() {
-                        assert_eq!(
-                            derived,
-                            sorted(preview(&s, comp, t).0),
-                            "{comp} {} = {}",
-                            def.name,
-                            lit_str(l)
-                        );
+                        let reported = sorted(preview(&s, comp, t).0);
+                        // A builder may leave out options with no visual effect (Button's size, isDisabled).
+                        derived.retain(|(n, _)| reported.iter().any(|(r, _)| r == n));
+                        assert_eq!(derived, reported, "{comp} {} = {}", def.name, lit_str(l));
                     }
                 }
             }
         }
+    }
+
+    #[test]
+    fn outline_is_greyed_out_for_accent_button() {
+        let mut s = crate::init();
+        s.play.insert("button/variant".into(), "accent".into());
+        let why = errors("button", &options(&s, "button", Some(("style", "outline"))));
+        assert_eq!(
+            why,
+            ["Outline style is only defined for primary and secondary."]
+        );
+        assert!(errors("button", &options(&s, "button", Some(("style", "fill")))).is_empty());
+        // An icon-only button needs an icon: hiding the label is excluded until one is chosen.
+        let why = errors(
+            "button",
+            &options(&s, "button", Some(("isLabelHidden", "true"))),
+        );
+        assert_eq!(why, ["An icon-only button needs an icon."]);
     }
 
     #[test]
