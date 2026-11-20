@@ -791,18 +791,22 @@ fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
         }
         let mut options_rs = Vec::new();
         for (opt, decl) in catalog["options"].as_object().into_iter().flatten() {
-            let values: Vec<String> = match decl["values"].as_array() {
-                Some(vs) => vs
-                    .iter()
-                    .filter_map(|d| lit(&d["value"], "").ok())
-                    .collect(),
+            // An option whose values or default are not strings or booleans (a numeric size) has no `Lit`:
+            // leave it out rather than list it as free-form.
+            let values: Res<Vec<String>> = match decl["values"].as_array() {
+                Some(vs) => vs.iter().map(|d| lit(&d["value"], opt)).collect(),
                 None if decl["type"] == "boolean" => {
-                    vec!["Lit::Bool(false)".into(), "Lit::Bool(true)".into()]
+                    Ok(vec!["Lit::Bool(false)".into(), "Lit::Bool(true)".into()])
                 }
-                None => Vec::new(),
+                None => Ok(Vec::new()),
             };
-            let default =
-                lit(&decl["default"], "").map_or("None".to_string(), |l| format!("Some({l})"));
+            let default = match &decl["default"] {
+                Value::Null => Ok("None".to_string()),
+                d => lit(d, opt).map(|l| format!("Some({l})")),
+            };
+            let (Ok(values), Ok(default)) = (values, default) else {
+                continue;
+            };
             options_rs.push(format!(
                 "OptionDef {{ name: {opt:?}, values: &[{}], default: {default} }}",
                 values.join(", ")
