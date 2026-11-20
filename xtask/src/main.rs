@@ -792,11 +792,17 @@ fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
         let mut options_rs = Vec::new();
         for (opt, decl) in catalog["options"].as_object().into_iter().flatten() {
             let values: Vec<String> = match decl["values"].as_array() {
-                Some(vs) => vs.iter().filter_map(|d| lit(&d["value"], "").ok()).collect(),
-                None if decl["type"] == "boolean" => vec!["Lit::Bool(false)".into(), "Lit::Bool(true)".into()],
+                Some(vs) => vs
+                    .iter()
+                    .filter_map(|d| lit(&d["value"], "").ok())
+                    .collect(),
+                None if decl["type"] == "boolean" => {
+                    vec!["Lit::Bool(false)".into(), "Lit::Bool(true)".into()]
+                }
                 None => Vec::new(),
             };
-            let default = lit(&decl["default"], "").map_or("None".to_string(), |l| format!("Some({l})"));
+            let default =
+                lit(&decl["default"], "").map_or("None".to_string(), |l| format!("Some({l})"));
             options_rs.push(format!(
                 "OptionDef {{ name: {opt:?}, values: &[{}], default: {default} }}",
                 values.join(", ")
