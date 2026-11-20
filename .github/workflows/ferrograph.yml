@@ -21,3 +21,5 @@ jobs:
         with:
           fetch-depth: 0 # the base ref and merge base must exist
       - uses: GarthDB/ferrograph-action@v2
+        with:
+          version: v8.0.2 # pinned so reports from different releases stay comparable; bump deliberately
