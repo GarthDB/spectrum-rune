@@ -40,6 +40,16 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
             ("label", label),
             ("icon", vec![("none", "none"), ("check", "checkmark")]),
             ("width", width),
+            // Oracle only: the preview itself answers to the real pointer and keyboard.
+            (
+                "state",
+                vec![
+                    ("rest", "rest"),
+                    ("hover", "hover"),
+                    ("down", "down"),
+                    ("keyboard-focus", "keyboard focus"),
+                ],
+            ),
         ],
         _ => vec![("label", label), ("width", width)],
     }
@@ -255,10 +265,92 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
         };
         a.extend(["--label".to_owned(), text.to_owned()]);
     }
+    if comp == "button" {
+        let state = extra(s, comp, "state");
+        if state != "rest" {
+            a.extend(["--state".to_owned(), state]);
+        }
+    }
     if let Ok(w) = extra(s, comp, "width").parse::<f32>() {
         a.extend(["--width".to_owned(), w.to_string()]);
     }
     a
+}
+
+struct Preview {
+    s: G,
+    comp: &'static str,
+    dark: bool,
+}
+
+fn preview_view(p: &Preview, _: &mut rune::Cx<Preview>) -> El {
+    col().child(preview(&p.s, p.comp, tokens(scheme(p.dark), p.s.scale)).1)
+}
+
+fn scheme(dark: bool) -> ColorScheme {
+    if dark {
+        ColorScheme::Dark
+    } else {
+        ColorScheme::Light
+    }
+}
+
+/// Rune's own geometry for the current selection: the preview built in a throwaway runtime, each part's
+/// box relative to the container (the view of the real page cannot read element rects).
+fn rune_parts(s: &G, comp: &'static str, dark: bool) -> Vec<(String, [f32; 4])> {
+    use rune::{Env, Runtime};
+    let state = Preview {
+        s: s.clone(),
+        comp,
+        dark,
+    };
+    let mut rt = Runtime::new(state, preview_view, (800.0, 400.0), Env::new(dark, 1.0));
+    for _ in 0..40 {
+        rt.frame(0.05);
+    }
+    let prefix = "playground/preview/";
+    let all: Vec<_> = rt
+        .elements()
+        .into_iter()
+        .filter_map(|e| Some((e.key?.strip_prefix(prefix)?.to_owned(), e.rect)))
+        .collect();
+    let c = all
+        .iter()
+        .find(|(n, _)| n == "container")
+        .map_or([0.0; 4], |(_, r)| *r);
+    all.into_iter()
+        .map(|(n, r)| (n, [r[0] - c[0], r[1] - c[1], r[2], r[3]]))
+        .collect()
+}
+
+/// Oracle vs Rune for the current selection, as panel lines: each oracle part's box in both, flagged
+/// when they differ by more than 1px, then the tokens the part reads.
+fn compare(s: &G, comp: &'static str, dark: bool, args: &[String]) -> Result<Vec<String>, String> {
+    if let Some(why) = errors(comp, &options(s, comp, None)).first() {
+        return Err(format!("not defined: {why}"));
+    }
+    let (v, parts) = crate::oracle::run(comp, args)?;
+    let rune = rune_parts(s, comp, dark);
+    let c = parts
+        .iter()
+        .find(|p| p.name == "container")
+        .map_or([0.0; 4], |p| p.rect);
+    let r1 = |x: f32| (x * 10.0).round() / 10.0;
+    let mut lines = vec![format!(
+        "oracle {v} vs Rune, box x y w h relative to the container"
+    )];
+    for p in &parts {
+        let o = [p.rect[0] - c[0], p.rect[1] - c[1], p.rect[2], p.rect[3]];
+        let got = rune.iter().find(|(n, _)| *n == p.name).map(|(_, r)| *r);
+        let verdict = match got {
+            Some(r) if r.iter().zip(o).all(|(a, b)| (a - b).abs() <= 1.0) => "same".to_owned(),
+            Some(r) => format!("DIFFERS, Rune {:?}", r.map(r1)),
+            None => "no such part in Rune".to_owned(),
+        };
+        lines.push(format!("{}: oracle {:?}, {verdict}", p.name, o.map(r1)));
+        lines.extend(p.tokens.iter().map(|t| format!("    {t}")));
+    }
+    Ok(lines)
 }
 
 fn fmt(v: &OptionValue) -> String {
@@ -353,7 +445,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .map(|(id, shown)| (id.to_string(), shown.to_string()))
             .collect();
         controls = controls.child(control(t, comp, opt, values, &current, |v| {
-            if opt == "width" {
+            if opt == "width" || opt == "state" {
                 Vec::new()
             } else {
                 errors(comp, &options(s, comp, Some((opt, v))))
@@ -400,7 +492,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .on_press({
                 let args = args.clone();
                 move |g: &mut G| {
-                    let r = crate::oracle::run(comp, &args);
+                    let r = compare(g, comp, dark, &args);
                     g.oracle = Some((args.clone(), r));
                 }
             })
@@ -587,14 +679,36 @@ mod tests {
     #[ignore]
     fn oracle_runs_every_component_at_its_defaults() {
         for (comp, _) in COMPONENTS {
-            let s = crate::init();
-            let lines = crate::oracle::run(comp, &oracle_args(&s, comp, false)).expect(comp);
+            let mut s = crate::init();
+            // The Button recipe always draws its icon, so compare with one.
+            s.play.insert(format!("{comp}/icon"), "check".into());
+            let args = oracle_args(&s, comp, false);
+            let lines = compare(&s, comp, false, &args).expect(comp);
             assert!(
                 lines.iter().any(|l| l.starts_with("container")),
                 "{comp}: {lines:?}"
             );
             assert!(lines.iter().any(|l| l.contains(" = ")), "{comp}: no tokens");
+            assert!(
+                !lines.iter().any(|l| l.contains("DIFFERS")),
+                "{comp}: {lines:?}"
+            );
         }
+    }
+
+    /// The state control reaches the oracle: a hovered Button reads different tokens than one at rest.
+    #[test]
+    #[ignore]
+    fn oracle_state_changes_the_tokens() {
+        let tokens_at = |state: &str| {
+            let mut s = crate::init();
+            s.play.insert("/component".into(), "button".into());
+            s.play.insert("button/icon".into(), "check".into());
+            s.play.insert("button/state".into(), state.into());
+            let args = oracle_args(&s, "button", false);
+            compare(&s, "button", false, &args).expect(state)
+        };
+        assert_ne!(tokens_at("rest"), tokens_at("hover"));
     }
 
     /// Pressing Run lists the oracle's tokens in the UI (needs the CLI, like the test above).
