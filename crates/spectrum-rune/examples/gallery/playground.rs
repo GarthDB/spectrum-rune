@@ -112,7 +112,8 @@ fn size_of(v: &str) -> Size {
         "s" => Size::S,
         "l" => Size::L,
         "xl" => Size::XL,
-        _ => Size::M,
+        "m" => Size::M,
+        other => panic!("catalog size `{other}` is not a Size"),
     }
 }
 
@@ -311,8 +312,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
     let now = options(s, comp, None);
     let broken = errors(comp, &now);
     let (reported, shown) = if broken.is_empty() {
-        let (o, e) = preview(s, comp, t);
-        (o, e)
+        preview(s, comp, t)
     } else {
         (
             Vec::new(),
@@ -411,6 +411,47 @@ mod tests {
                     }
                 }
             }
+        }
+    }
+
+    /// Every combination the controls can reach builds without a panic: the catalog options and the
+    /// presets, skipping what `errors()` excludes (the UI shows a message for those instead).
+    #[test]
+    fn every_reachable_combination_builds() {
+        let t = tokens(ColorScheme::Light, Scale::Desktop);
+        for (comp, _) in COMPONENTS {
+            let mut controls: Vec<(String, Vec<String>)> = Vec::new();
+            for def in component(comp)
+                .unwrap()
+                .options
+                .iter()
+                .filter(|d| !d.values.is_empty())
+            {
+                let unset = def.default.is_none().then(|| "none".to_owned());
+                let all = unset.into_iter().chain(def.values.iter().map(lit_str));
+                controls.push((def.name.to_owned(), all.collect()));
+            }
+            for (opt, presets) in extras(comp) {
+                controls.push((
+                    opt.to_owned(),
+                    presets.iter().map(|(id, _)| id.to_string()).collect(),
+                ));
+            }
+            let total: usize = controls.iter().map(|(_, v)| v.len()).product();
+            let mut built = 0;
+            for mut n in 0..total {
+                let mut s = crate::init();
+                for (opt, values) in &controls {
+                    s.play
+                        .insert(format!("{comp}/{opt}"), values[n % values.len()].clone());
+                    n /= values.len();
+                }
+                if errors(comp, &options(&s, comp, None)).is_empty() {
+                    preview(&s, comp, t);
+                    built += 1;
+                }
+            }
+            assert!(built > 0, "{comp}: no combination is valid");
         }
     }
 
