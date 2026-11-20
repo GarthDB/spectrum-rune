@@ -254,6 +254,10 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
     if !label && comp == "badge" {
         opt("label=false".into());
     }
+    // The Button's icon is not an option: the request's `--icon` field hides it.
+    if comp == "button" && !icon {
+        a.extend(["--icon".to_owned(), "none".to_owned()]);
+    }
     if let Some(x) = size {
         a.extend(["--size".to_owned(), x.to_owned()]);
     }
@@ -679,9 +683,7 @@ mod tests {
     #[ignore]
     fn oracle_runs_every_component_at_its_defaults() {
         for (comp, _) in COMPONENTS {
-            let mut s = crate::init();
-            // The Button recipe always draws its icon, so compare with one.
-            s.play.insert(format!("{comp}/icon"), "check".into());
+            let s = crate::init();
             let args = oracle_args(&s, comp, false);
             let lines = compare(&s, comp, false, &args).expect(comp);
             assert!(
