@@ -67,6 +67,7 @@ fn font_status() -> FontStatus {
     *S.get_or_init(detect_font)
 }
 
+#[derive(Clone)]
 pub struct G {
     pub story: &'static str,
     /// `None` follows the system (`--theme`) until the header switch is used.
