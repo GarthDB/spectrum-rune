@@ -473,6 +473,34 @@ mod tests {
         assert_eq!(why, ["An icon-only button needs an icon."]);
     }
 
+    /// A value that would break an error rule is rendered disabled, pressing it changes nothing, and
+    /// the reason is listed in the UI (the test above checks `errors()`, this checks what is rendered).
+    #[test]
+    fn excluded_value_is_rendered_disabled_with_its_reason() {
+        use rune::{Env, Runtime};
+        let mut s = crate::init();
+        s.story = "playground";
+        s.play.insert("/component".into(), "button".into());
+        s.play.insert("button/variant".into(), "accent".into());
+        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+        rt.frame(0.05);
+        let tree = rt.accessibility_json().to_string();
+        assert!(
+            tree.contains(
+                "greyed out, outline: Outline style is only defined for primary and secondary."
+            ),
+            "{tree}"
+        );
+        let (x, y) = rt
+            .find("playground/button/style/outline/container")
+            .unwrap();
+        rt.pointer_move(x, y);
+        rt.pointer_down(x, y);
+        rt.pointer_up(x, y);
+        rt.frame(0.05);
+        assert!(!rt.state.play.contains_key("button/style"));
+    }
+
     #[test]
     fn pressing_a_value_selects_it() {
         use rune::{Env, Runtime};
