@@ -40,6 +40,16 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
             ("label", label),
             ("icon", vec![("none", "none"), ("check", "checkmark")]),
             ("width", width),
+            // Oracle only: the preview itself answers to the real pointer and keyboard.
+            (
+                "state",
+                vec![
+                    ("rest", "rest"),
+                    ("hover", "hover"),
+                    ("down", "down"),
+                    ("keyboard-focus", "keyboard focus"),
+                ],
+            ),
         ],
         _ => vec![("label", label), ("width", width)],
     }
@@ -255,6 +265,12 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
         };
         a.extend(["--label".to_owned(), text.to_owned()]);
     }
+    if comp == "button" {
+        let state = extra(s, comp, "state");
+        if state != "rest" {
+            a.extend(["--state".to_owned(), state]);
+        }
+    }
     if let Ok(w) = extra(s, comp, "width").parse::<f32>() {
         a.extend(["--width".to_owned(), w.to_string()]);
     }
@@ -429,7 +445,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .map(|(id, shown)| (id.to_string(), shown.to_string()))
             .collect();
         controls = controls.child(control(t, comp, opt, values, &current, |v| {
-            if opt == "width" {
+            if opt == "width" || opt == "state" {
                 Vec::new()
             } else {
                 errors(comp, &options(s, comp, Some((opt, v))))
@@ -678,6 +694,21 @@ mod tests {
                 "{comp}: {lines:?}"
             );
         }
+    }
+
+    /// The state control reaches the oracle: a hovered Button reads different tokens than one at rest.
+    #[test]
+    #[ignore]
+    fn oracle_state_changes_the_tokens() {
+        let tokens_at = |state: &str| {
+            let mut s = crate::init();
+            s.play.insert("/component".into(), "button".into());
+            s.play.insert("button/icon".into(), "check".into());
+            s.play.insert("button/state".into(), state.into());
+            let args = oracle_args(&s, "button", false);
+            compare(&s, "button", false, &args).expect(state)
+        };
+        assert_ne!(tokens_at("rest"), tokens_at("hover"));
     }
 
     /// Pressing Run lists the oracle's tokens in the UI (needs the CLI, like the test above).
