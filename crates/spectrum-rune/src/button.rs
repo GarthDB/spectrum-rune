@@ -616,10 +616,7 @@ mod tests {
         let opts = Button::new("b").options();
         for (name, lit) in catalog {
             let got = opts.iter().find(|(n, _)| n == name).unwrap().1;
-            let want = match lit {
-                crate::constraints::Lit::Str(s) => OptionValue::Str(s),
-                crate::constraints::Lit::Bool(b) => OptionValue::Bool(*b),
-            };
+            let want = OptionValue::from(lit);
             assert_eq!(got, want, "default of {name}");
         }
         assert_eq!(Button::new("b").variant, Variant::Primary);

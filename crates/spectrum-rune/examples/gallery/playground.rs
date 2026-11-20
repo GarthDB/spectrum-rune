@@ -48,6 +48,7 @@ fn lit_str(l: &Lit) -> String {
     match l {
         Lit::Str(s) => (*s).to_owned(),
         Lit::Bool(b) => b.to_string(),
+        Lit::Num(n) => n.to_string(),
     }
 }
 
@@ -131,6 +132,7 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
     let v = |opt: &str| match derived.iter().find(|(n, _)| *n == opt) {
         Some((_, OptionValue::Str(x))) => (*x).to_owned(),
         Some((_, OptionValue::Bool(b))) => b.to_string(),
+        Some((_, OptionValue::Num(n))) => n.to_string(),
         _ => String::new(),
     };
     match comp {
@@ -210,6 +212,7 @@ fn fmt(v: &OptionValue) -> String {
     match v {
         OptionValue::Str(s) => (*s).to_owned(),
         OptionValue::Bool(b) => b.to_string(),
+        OptionValue::Num(n) => n.to_string(),
         OptionValue::Present => "(set)".to_owned(),
     }
 }

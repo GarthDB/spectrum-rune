@@ -22,6 +22,8 @@ pub use generated::{component, COMPONENTS};
 pub enum Lit {
     Str(&'static str),
     Bool(bool),
+    /// A numeric option value (a size such as 100).
+    Num(i64),
 }
 
 /// A value for an option passed to [`check`].
@@ -29,6 +31,7 @@ pub enum Lit {
 pub enum OptionValue<'a> {
     Str(&'a str),
     Bool(bool),
+    Num(i64),
     /// An option with a free-form value (an icon, say) that is set. Leave it out when unset. A rule can only say
     /// `Require::Present` about such an option: `Present` equals no literal, and `cargo xtask gen` rejects a catalog
     /// rule that compares a free-form option with one (`when` cannot name it, `require` takes `{"present": true}`).
@@ -40,6 +43,7 @@ impl OptionValue<'_> {
         match (self, lit) {
             (OptionValue::Str(a), Lit::Str(b)) => a == b,
             (OptionValue::Bool(a), Lit::Bool(b)) => a == b,
+            (OptionValue::Num(a), Lit::Num(b)) => a == b,
             _ => false,
         }
     }
@@ -50,6 +54,7 @@ impl From<&Lit> for OptionValue<'static> {
         match *l {
             Lit::Str(s) => OptionValue::Str(s),
             Lit::Bool(b) => OptionValue::Bool(b),
+            Lit::Num(n) => OptionValue::Num(n),
         }
     }
 }
@@ -209,6 +214,14 @@ mod tests {
             .iter()
             .map(|v| (v.severity, v.description))
             .collect()
+    }
+
+    #[test]
+    fn numeric_values_compare_by_value() {
+        assert!(OptionValue::Num(100).is(&Lit::Num(100)));
+        assert!(!OptionValue::Num(100).is(&Lit::Num(200)));
+        assert!(!OptionValue::Num(1).is(&Lit::Bool(true)));
+        assert_eq!(OptionValue::from(&Lit::Num(75)), OptionValue::Num(75));
     }
 
     #[test]

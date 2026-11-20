@@ -622,8 +622,9 @@ fn lit(v: &Value, ctx: &str) -> Res<String> {
     match v {
         Value::String(s) => Ok(format!("Lit::Str({s:?})")),
         Value::Bool(b) => Ok(format!("Lit::Bool({b})")),
+        Value::Number(n) if n.as_i64().is_some() => Ok(format!("Lit::Num({n})")),
         _ => Err(format!(
-            "{ctx}: literal is neither a string nor a boolean: {v}"
+            "{ctx}: literal is not a string, boolean or integer: {v}"
         )),
     }
 }
@@ -791,8 +792,7 @@ fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
         }
         let mut options_rs = Vec::new();
         for (opt, decl) in catalog["options"].as_object().into_iter().flatten() {
-            // An option whose values or default are not strings or booleans (a numeric size) has no `Lit`:
-            // leave it out rather than list it as free-form.
+            // A value or default that is no `Lit` (a float, an object) fails generation rather than being listed as free-form.
             let values: Res<Vec<String>> = match decl["values"].as_array() {
                 Some(vs) => vs.iter().map(|d| lit(&d["value"], opt)).collect(),
                 None if decl["type"] == "boolean" => {
@@ -804,9 +804,7 @@ fn generate_constraints(dir: &Path, version: &str, commit: &str) -> Res<()> {
                 Value::Null => Ok("None".to_string()),
                 d => lit(d, opt).map(|l| format!("Some({l})")),
             };
-            let (Ok(values), Ok(default)) = (values, default) else {
-                continue;
-            };
+            let (values, default) = (values?, default?);
             options_rs.push(format!(
                 "OptionDef {{ name: {opt:?}, values: &[{}], default: {default} }}",
                 values.join(", ")
