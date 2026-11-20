@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0](https://github.com/GarthDB/spectrum-rune/compare/v0.5.0...v0.6.0) - 2026-11-20
+
+### Added
+
+- *(gallery)* Playground oracle panel diffs Rune's geometry against the oracle (a14.43) ([#64](https://github.com/GarthDB/spectrum-rune/pull/64))
+- *(gallery)* Playground token panel from the oracle CLI, dev-only (a14.43) ([#63](https://github.com/GarthDB/spectrum-rune/pull/63))
+- *(gallery)* Playground story with option controls (a14.41 Stage 1) ([#59](https://github.com/GarthDB/spectrum-rune/pull/59))
+
+### Fixed
+
+- *(gallery)* oracle panel hides the Button icon with --icon none (3aj) ([#65](https://github.com/GarthDB/spectrum-rune/pull/65))
+- *(action-button)* static black/white keyboard-focus ring follows the oracle ([#54](https://github.com/GarthDB/spectrum-rune/pull/54))
+
+### Other
+
+- *(gallery)* UI-level test that an excluded Playground value is rendered disabled with its reason (a14.43) ([#62](https://github.com/GarthDB/spectrum-rune/pull/62))
+- *(gallery)* build every reachable Playground combination; size_of panics on unknown sizes ([#61](https://github.com/GarthDB/spectrum-rune/pull/61))
+- *(gallery)* split Status light variants into semantic and non-semantic rows ([#56](https://github.com/GarthDB/spectrum-rune/pull/56))
+
 ## [0.5.0](https://github.com/GarthDB/spectrum-rune/compare/v0.4.0...v0.5.0) - 2026-11-16
 
 ### Added
