@@ -122,6 +122,19 @@ fn errors(comp: &str, o: &Opts) -> Vec<&'static str> {
         .collect()
 }
 
+/// Every rule the options break, errors and advisories, as (severity, description).
+fn reasons(comp: &str, o: &Opts) -> Vec<(Severity, &'static str)> {
+    check(comp, o)
+        .into_iter()
+        .map(|v| {
+            (
+                v.severity,
+                v.description.unwrap_or("excluded option combination"),
+            )
+        })
+        .collect()
+}
+
 fn size_of(v: &str) -> Size {
     match v {
         "s" => Size::S,
@@ -381,20 +394,30 @@ fn caption(t: &Tokens, s: impl Into<String>) -> El {
         .color(t.neutral_subdued_content_color_default)
 }
 
-/// One option: its values as buttons, the chosen one selected, an excluded one disabled.
+/// One option: its values as buttons, the chosen one selected, an excluded one disabled. A value that
+/// would break an error rule says so; one that would only break an advisory stays available and says so.
 fn control(
     t: &'static Tokens,
     comp: &'static str,
     opt: &'static str,
     values: Vec<(String, String)>,
     current: &str,
-    excluded: impl Fn(&str) -> Vec<&'static str>,
+    rules: impl Fn(&str) -> Vec<(Severity, &'static str)>,
 ) -> El {
     let mut notes = Vec::new();
     let buttons = values.into_iter().map(|(id, shown)| {
-        let why = excluded(&id);
-        if !why.is_empty() {
-            notes.push(format!("{shown}: {}", why.join("; ")));
+        let why = rules(&id);
+        let blocked = why.iter().any(|(sev, _)| *sev == Severity::Error);
+        for (sev, rule) in why {
+            notes.push(match sev {
+                Severity::Error => text(format!("{shown}: not available, Error · {rule}"))
+                    .font(font::text_style(&t.component_s_regular))
+                    .color(t.negative_content_color_default),
+                Severity::Advisory => text(format!("{shown}: Advisory · {rule}"))
+                    .font(font::text_style(&t.component_s_regular))
+                    // shortcut: Spectrum has no notice text colour; neutral stands in, see a14.56
+                    .color(t.neutral_content_color_default),
+            });
         }
         let key = format!("{comp}/{opt}");
         let id2 = id.clone();
@@ -402,18 +425,18 @@ fn control(
             .label(shown)
             .quiet(true)
             .selected(id == current)
-            .disabled(!why.is_empty())
+            .disabled(blocked)
             .on_press(move |g: &mut G| {
                 g.play.insert(key.clone(), id2.clone());
             })
             .build(t)
     });
     let row_ = row().gap(4.0).flex_wrap().children(buttons);
-    let mut c = col().gap(4.0).child(caption(t, opt)).child(row_);
-    for n in notes {
-        c = c.child(caption(t, format!("greyed out, {n}")));
-    }
-    c
+    col()
+        .gap(4.0)
+        .child(caption(t, opt))
+        .child(row_)
+        .children(notes)
 }
 
 fn selected(s: &G) -> &'static str {
@@ -521,7 +544,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .chain(def.values.iter().map(|l| (lit_str(l), lit_str(l))))
             .collect();
         controls = controls.child(control(t, comp, def.name, values, &current, |v| {
-            errors(comp, &options(s, comp, Some((def.name, v))))
+            reasons(comp, &options(s, comp, Some((def.name, v))))
         }));
     }
     let mut state_control = None;
@@ -535,7 +558,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             if opt == "width" || opt == "state" {
                 Vec::new()
             } else {
-                errors(comp, &options(s, comp, Some((opt, v))))
+                reasons(comp, &options(s, comp, Some((opt, v))))
             }
         });
         if opt == "state" {
@@ -579,11 +602,27 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             "none: the catalog has no rules for this component",
         ));
     }
-    for r in c.rules {
-        rules = rules.child(caption(
-            t,
-            format!("{:?}: {}", r.severity, r.description.unwrap_or("")),
-        ));
+    let broken_now = check(comp, &now);
+    for (i, r) in c.rules.iter().enumerate() {
+        let hit = broken_now.iter().any(|v| std::ptr::eq(v.rule, r));
+        let (variant, state) = match (hit, r.severity) {
+            (true, Severity::Error) => (status_light::Variant::Negative, "active"),
+            (true, Severity::Advisory) => (status_light::Variant::Notice, "advisory"),
+            _ => (status_light::Variant::Neutral, "inactive"),
+        };
+        rules = rules.child(
+            StatusLight::new(
+                format!("playground/rule/{i}"),
+                format!(
+                    "{state} · {:?} · {}",
+                    r.severity,
+                    r.description.unwrap_or("")
+                ),
+            )
+            .variant(variant)
+            .size(Size::S)
+            .build(t),
+        );
     }
     let oracle = if !previewed(comp) {
         col().child(caption(
@@ -789,7 +828,7 @@ mod tests {
         let tree = rt.accessibility_json().to_string();
         assert!(
             tree.contains(
-                "greyed out, outline: Outline style is only defined for primary and secondary."
+                "outline: not available, Error · Outline style is only defined for primary and secondary."
             ),
             "{tree}"
         );
@@ -801,6 +840,24 @@ mod tests {
         rt.pointer_up(x, y);
         rt.frame(0.05);
         assert!(!rt.state.play.contains_key("button/style"));
+    }
+
+    /// A rule the current options break is listed as active, the others as inactive.
+    #[test]
+    fn catalog_rules_show_their_live_state() {
+        use rune::{Env, Runtime};
+        let text_for = |variant: &str| {
+            let mut s = crate::init();
+            s.story = "playground";
+            s.play.insert("/component".into(), "button".into());
+            s.play.insert("button/variant".into(), variant.into());
+            s.play.insert("button/style".into(), "outline".into());
+            let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+            rt.frame(0.05);
+            rt.accessibility_json().to_string()
+        };
+        assert!(text_for("accent").contains("active · Error · Outline style"));
+        assert!(text_for("primary").contains("inactive · Error · Outline style"));
     }
 
     /// Needs the oracle CLI in the oracle.toml range (`DESIGN_DATA=... cargo test -- --ignored`).
