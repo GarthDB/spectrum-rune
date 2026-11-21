@@ -407,11 +407,53 @@ fn control(
     c
 }
 
-pub fn playground(s: &G, t: &'static Tokens) -> El {
-    let comp = COMPONENTS
+fn selected(s: &G) -> &'static str {
+    COMPONENTS
         .iter()
         .find(|(id, _)| *id == pick(s, "", "component", "badge"))
-        .map_or("badge", |c| c.0);
+        .map_or("badge", |c| c.0)
+}
+
+/// How long the options must stay unchanged before the oracle runs by itself.
+const ORACLE_DELAY: f64 = 0.3;
+
+/// Runs the oracle once the options have been still for `ORACLE_DELAY`. It blocks the UI for the CLI's
+/// run (about 0.15 s warm, 2 s cold). shortcut: no background thread; move it to one if that is felt.
+pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
+    if s.story != "playground" {
+        return false;
+    }
+    let dark = s
+        .scheme
+        .map_or(s.system_dark.get(), |c| c == ColorScheme::Dark);
+    let comp = selected(s);
+    let args = oracle_args(s, comp, dark);
+    if s.oracle.as_ref().is_some_and(|(a, _)| *a == args) {
+        s.oracle_due = None;
+        return false;
+    }
+    let delay = std::time::Duration::from_secs_f64(ORACLE_DELAY);
+    match &s.oracle_due {
+        Some((a, due)) if *a == args && t >= *due => {
+            let r = compare(s, comp, dark, &args);
+            s.oracle = Some((args, r));
+            s.oracle_due = None;
+            true
+        }
+        Some((a, due)) if *a == args => {
+            tx.wake_after(std::time::Duration::from_secs_f64(due - t));
+            false
+        }
+        _ => {
+            s.oracle_due = Some((args, t + ORACLE_DELAY));
+            tx.wake_after(delay);
+            false
+        }
+    }
+}
+
+pub fn playground(s: &G, t: &'static Tokens) -> El {
+    let comp = selected(s);
     let picker = row().gap(4.0).children(COMPONENTS.iter().map(|(id, name)| {
         let id: &'static str = id;
         ActionButton::new(format!("playground/pick/{id}"))
@@ -492,7 +534,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
     let args = oracle_args(s, comp, dark);
     let mut oracle = col().gap(2.0).child(
         ActionButton::new("playground/oracle/run")
-            .label("Run oracle (design-data CLI)")
+            .label("Retry oracle (design-data CLI)")
             .on_press({
                 let args = args.clone();
                 move |g: &mut G| {
@@ -505,11 +547,11 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
     oracle = match &s.oracle {
         None => oracle.child(caption(
             t,
-            "tokens each part reads, from the oracle: not run yet",
+            "tokens each part reads, from the oracle: runs when the options stop changing",
         )),
         Some((ran, _)) if *ran != args => oracle.child(caption(
             t,
-            "the options changed since the last run: run it again",
+            "the options changed: the oracle runs when they stop changing",
         )),
         Some((_, Ok(lines))) => lines
             .iter()
@@ -729,6 +771,23 @@ mod tests {
         rt.frame(0.05);
         let tree = rt.accessibility_json().to_string();
         assert!(tree.contains("    height = component-height-"), "{tree}");
+    }
+
+    /// The oracle runs by itself once the options have been still for the delay, and not before.
+    /// It needs no CLI: a missing or out-of-range one is an error result, still a run.
+    #[test]
+    fn oracle_runs_after_the_options_settle() {
+        use rune::{Env, Runtime};
+        let mut s = crate::init();
+        s.story = "playground";
+        let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
+        rt.poll = Some(poll);
+        rt.frame(0.05);
+        assert!(rt.state.oracle.is_none(), "ran before the delay");
+        for _ in 0..4 {
+            rt.frame(0.1);
+        }
+        assert!(rt.state.oracle.is_some(), "did not run after the delay");
     }
 
     #[test]
