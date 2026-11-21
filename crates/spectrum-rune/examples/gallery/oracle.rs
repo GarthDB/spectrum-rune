@@ -28,11 +28,22 @@ fn root() -> &'static str {
     concat!(env!("CARGO_MANIFEST_DIR"), "/../..")
 }
 
-/// One part of the oracle's scene: its box and the tokens it reads (`prop = token (value)`).
+/// A token a part reads: the property, the token name, and its resolved value.
+#[derive(Clone, Debug)]
+pub struct Tok {
+    pub prop: String,
+    pub token: String,
+    pub value: String,
+}
+
+/// One part of the oracle's scene: its box, resolved fill, corner radius and text colour (as the CLI
+/// prints them, e.g. `rgb(59, 99, 251)`), and the tokens it reads.
+#[derive(Clone, Debug)]
 pub struct Part {
     pub name: String,
     pub rect: [f32; 4],
-    pub tokens: Vec<String>,
+    pub radius: f32,
+    pub tokens: Vec<Tok>,
 }
 
 /// Runs `design-data render <component> <args> --format scene`: the CLI version and the scene's parts.
@@ -67,17 +78,18 @@ pub fn run(component: &str, args: &[String]) -> Result<(String, Vec<Part>), Stri
         .map(|n| Part {
             name: n["part"].as_str().unwrap_or("?").to_owned(),
             rect: [f(n, "x"), f(n, "y"), f(n, "w"), f(n, "h")],
+            radius: f(n, "radius"),
             tokens: n["tokens"]
                 .as_array()
                 .into_iter()
                 .flatten()
                 .map(|t| {
-                    format!(
-                        "{} = {} ({})",
-                        t["prop"].as_str().unwrap_or("?"),
-                        t["token"].as_str().unwrap_or("?"),
-                        t["value"].as_str().unwrap_or("?")
-                    )
+                    let s = |k: &str| t[k].as_str().unwrap_or("?").to_owned();
+                    Tok {
+                        prop: s("prop"),
+                        token: s("token"),
+                        value: s("value"),
+                    }
                 })
                 .collect(),
         })

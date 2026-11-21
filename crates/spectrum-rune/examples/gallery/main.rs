@@ -22,8 +22,8 @@ use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
-/// The CLI arguments an oracle run used, and its token lines or error.
-pub type OracleRun = (Vec<String>, Result<Vec<String>, String>);
+/// The CLI arguments an oracle run used, and its report or error.
+pub type OracleRun = (Vec<String>, Result<crate::playground::Report, String>);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStatus {
@@ -81,7 +81,7 @@ pub struct G {
     pub open: HashMap<String, Vec<String>>,
     /// The Playground's chosen values, keyed `component/option`.
     pub play: HashMap<String, String>,
-    /// The last oracle run (dev-only): the CLI arguments it ran with, and its token lines or error.
+    /// The last oracle run (dev-only): the CLI arguments it ran with, and its report or error.
     pub oracle: Option<OracleRun>,
     /// The args an auto-run is waiting to run with, and when (poll's clock): the debounce.
     pub oracle_due: Option<(Vec<String>, f64)>,

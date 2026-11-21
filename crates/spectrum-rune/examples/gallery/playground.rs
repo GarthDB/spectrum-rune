@@ -321,9 +321,18 @@ fn scheme(dark: bool) -> ColorScheme {
     }
 }
 
-/// Rune's own geometry for the current selection: the preview built in a throwaway runtime, each part's
-/// box relative to the container (the view of the real page cannot read element rects).
-fn rune_parts(s: &G, comp: &'static str, dark: bool) -> Vec<(String, [f32; 4])> {
+/// What Rune drew for one part: its box relative to the container, fill (sRGB hex, alpha), corner radius
+/// and text colour. `ElementInfo` has no stroke or font size.
+struct RuneEl {
+    rect: [f32; 4],
+    fill: (String, f32),
+    radius: f32,
+    text: Option<String>,
+}
+
+/// Rune's own rendering of the current selection: the preview built in a throwaway runtime (the view of
+/// the real page cannot read element rects).
+fn rune_parts(s: &G, comp: &'static str, dark: bool) -> Vec<(String, RuneEl)> {
     use rune::{Env, Runtime};
     let state = Preview {
         s: s.clone(),
@@ -335,48 +344,226 @@ fn rune_parts(s: &G, comp: &'static str, dark: bool) -> Vec<(String, [f32; 4])> 
         rt.frame(0.05);
     }
     let prefix = "playground/preview/";
-    let all: Vec<_> = rt
+    let mut all: Vec<_> = rt
         .elements()
         .into_iter()
-        .filter_map(|e| Some((e.key?.strip_prefix(prefix)?.to_owned(), e.rect)))
+        .filter_map(|e| {
+            let name = e.key.as_deref()?.strip_prefix(prefix)?.to_owned();
+            Some((
+                name,
+                RuneEl {
+                    rect: e.rect,
+                    fill: (e.fill.hex(), e.fill.a),
+                    radius: e.radius,
+                    text: e.text_color.map(|c| c.hex()),
+                },
+            ))
+        })
         .collect();
     let c = all
         .iter()
         .find(|(n, _)| n == "container")
-        .map_or([0.0; 4], |(_, r)| *r);
-    all.into_iter()
-        .map(|(n, r)| (n, [r[0] - c[0], r[1] - c[1], r[2], r[3]]))
-        .collect()
+        .map_or([0.0; 4], |(_, r)| r.rect);
+    for (_, r) in &mut all {
+        r.rect = [r.rect[0] - c[0], r.rect[1] - c[1], r.rect[2], r.rect[3]];
+    }
+    all
 }
 
-/// Oracle vs Rune for the current selection, as panel lines: each oracle part's box in both, flagged
-/// when they differ by more than 1px, then the tokens the part reads.
-fn compare(s: &G, comp: &'static str, dark: bool, args: &[String]) -> Result<Vec<String>, String> {
+/// Whether the oracle's `rgb(..)`/`rgba(..)`/`transparent` is within 3 per channel of Rune's hex.
+fn same_color(oracle: &str, rune: &(String, f32)) -> bool {
+    let n: Vec<f32> = oracle
+        .trim_start_matches("rgba(")
+        .trim_start_matches("rgb(")
+        .trim_end_matches(')')
+        .split(',')
+        .filter_map(|c| c.trim().parse().ok())
+        .collect();
+    if n.len() < 3 {
+        return rune.1 < 0.02;
+    }
+    let a = n.get(3).copied().unwrap_or(1.0);
+    (a - rune.1).abs() < 0.02
+        && (0..3).all(|i| {
+            let g = i32::from_str_radix(&rune.0[1 + 2 * i..3 + 2 * i], 16).unwrap_or(0) as f32;
+            (g - n[i]).abs() <= 3.0
+        })
+}
+
+/// One token row of a part: its property, token and value, and for the properties Rune exposes (fill,
+/// corner radius, text colour) whether Rune drew the same, with Rune's value when not.
+#[derive(Clone, Debug)]
+pub struct Row {
+    pub prop: String,
+    pub token: String,
+    pub value: String,
+    pub rune: Option<Result<(), String>>,
+}
+
+#[derive(Clone, Debug)]
+pub enum Verdict {
+    Matches,
+    Differs,
+    NoPart,
+}
+
+#[derive(Clone, Debug)]
+pub struct PartReport {
+    pub name: String,
+    pub oracle_box: [f32; 4],
+    pub rune_box: Option<[f32; 4]>,
+    pub verdict: Verdict,
+    pub rows: Vec<Row>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Report {
+    pub version: String,
+    pub parts: Vec<PartReport>,
+}
+
+/// Oracle vs Rune for the current selection: each oracle part's box (flagged when it differs by more
+/// than 1px), fill, radius and text colour against Rune's, and the tokens it reads. Parts that differ
+/// come first.
+fn compare(s: &G, comp: &'static str, dark: bool, args: &[String]) -> Result<Report, String> {
     if let Some(why) = errors(comp, &options(s, comp, None)).first() {
         return Err(format!("not defined: {why}"));
     }
-    let (v, parts) = crate::oracle::run(comp, args)?;
+    let (version, parts) = crate::oracle::run(comp, args)?;
     let rune = rune_parts(s, comp, dark);
     let c = parts
         .iter()
         .find(|p| p.name == "container")
         .map_or([0.0; 4], |p| p.rect);
+    let mut out: Vec<PartReport> = parts
+        .iter()
+        .map(|p| {
+            let o = [p.rect[0] - c[0], p.rect[1] - c[1], p.rect[2], p.rect[3]];
+            let got = rune.iter().find(|(n, _)| *n == p.name).map(|(_, r)| r);
+            let rows: Vec<Row> = p
+                .tokens
+                .iter()
+                .map(|t| {
+                    let rune = got.and_then(|g| match t.prop.as_str() {
+                        "fill" => Some(if same_color(&t.value, &g.fill) {
+                            Ok(())
+                        } else {
+                            Err(g.fill.0.clone())
+                        }),
+                        "color" => g.text.as_ref().map(|c| {
+                            if same_color(&t.value, &(c.clone(), 1.0)) {
+                                Ok(())
+                            } else {
+                                Err(c.clone())
+                            }
+                        }),
+                        "cornerRadius" => Some(if (g.radius - p.radius).abs() <= 1.0 {
+                            Ok(())
+                        } else {
+                            Err(format!("{}px", g.radius))
+                        }),
+                        _ => None,
+                    });
+                    Row {
+                        prop: t.prop.clone(),
+                        token: t.token.clone(),
+                        value: t.value.clone(),
+                        rune,
+                    }
+                })
+                .collect();
+            let verdict = match got {
+                None => Verdict::NoPart,
+                Some(g)
+                    if g.rect.iter().zip(o).all(|(a, b)| (a - b).abs() <= 1.0)
+                        && rows.iter().all(|r| !matches!(r.rune, Some(Err(_)))) =>
+                {
+                    Verdict::Matches
+                }
+                Some(_) => Verdict::Differs,
+            };
+            PartReport {
+                name: p.name.clone(),
+                oracle_box: o,
+                rune_box: got.map(|g| g.rect),
+                verdict,
+                rows,
+            }
+        })
+        .collect();
+    let rank = |v: &Verdict| match v {
+        Verdict::Differs => 0,
+        Verdict::NoPart => 1,
+        Verdict::Matches => 2,
+    };
+    out.sort_by_key(|p| rank(&p.verdict));
+    Ok(Report {
+        version,
+        parts: out,
+    })
+}
+
+/// The oracle panel's body: per part a header (Status light: matches / differs / no such part in Rune)
+/// and its token rows in aligned columns.
+fn report_view(t: &'static Tokens, r: &Report) -> El {
     let r1 = |x: f32| (x * 10.0).round() / 10.0;
-    let mut lines = vec![format!(
-        "oracle {v} vs Rune, box x y w h relative to the container"
-    )];
-    for p in &parts {
-        let o = [p.rect[0] - c[0], p.rect[1] - c[1], p.rect[2], p.rect[3]];
-        let got = rune.iter().find(|(n, _)| *n == p.name).map(|(_, r)| *r);
-        let verdict = match got {
-            Some(r) if r.iter().zip(o).all(|(a, b)| (a - b).abs() <= 1.0) => "same".to_owned(),
-            Some(r) => format!("DIFFERS, Rune {:?}", r.map(r1)),
-            None => "no such part in Rune".to_owned(),
+    let boxed = |b: [f32; 4]| {
+        format!(
+            "x {} y {} w {} h {}",
+            r1(b[0]),
+            r1(b[1]),
+            r1(b[2]),
+            r1(b[3])
+        )
+    };
+    let cell = |s: String, w: f32| caption(t, s).w(w);
+    let mut c = col().gap(8.0).child(caption(
+        t,
+        format!(
+            "oracle {} vs Rune; boxes relative to the container",
+            r.version
+        ),
+    ));
+    for (i, p) in r.parts.iter().enumerate() {
+        let (variant, word) = match p.verdict {
+            Verdict::Matches => (status_light::Variant::Positive, "matches"),
+            Verdict::Differs => (status_light::Variant::Negative, "differs"),
+            Verdict::NoPart => (status_light::Variant::Notice, "no such part in Rune"),
         };
-        lines.push(format!("{}: oracle {:?}, {verdict}", p.name, o.map(r1)));
-        lines.extend(p.tokens.iter().map(|t| format!("    {t}")));
+        let mut head = format!("{} · {word} · oracle {}", p.name, boxed(p.oracle_box));
+        if let (Verdict::Differs, Some(b)) = (&p.verdict, p.rune_box) {
+            if b.iter().zip(p.oracle_box).any(|(a, o)| (a - o).abs() > 1.0) {
+                head.push_str(&format!(", Rune {}", boxed(b)));
+            }
+        }
+        let mut part = col().gap(2.0).child(
+            StatusLight::new(format!("playground/oracle/part/{i}"), head)
+                .variant(variant)
+                .size(Size::S)
+                .build(t),
+        );
+        for row_ in &p.rows {
+            let mark = match &row_.rune {
+                None => String::new(),
+                Some(Ok(())) => "Rune: same".to_owned(),
+                Some(Err(v)) => format!("Rune: differs, {v}"),
+            };
+            let mut line = row()
+                .gap(12.0)
+                .child(cell(row_.prop.clone(), 140.0))
+                .child(cell(row_.token.clone(), 300.0))
+                .child(cell(row_.value.clone(), 150.0));
+            line = line.child(match &row_.rune {
+                Some(Err(_)) => text(mark)
+                    .font(font::text_style(&t.component_s_regular))
+                    .color(t.negative_content_color_default),
+                _ => caption(t, mark),
+            });
+            part = part.child(line);
+        }
+        c = c.child(part);
     }
-    Ok(lines)
+    c
 }
 
 fn fmt(v: &OptionValue) -> String {
@@ -660,9 +847,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                 t,
                 "the options changed: the oracle runs when they stop changing",
             )),
-            Some((_, Ok(lines))) => lines
-                .iter()
-                .fold(oracle, |c, l| c.child(caption(t, l.clone()))),
+            Some((_, Ok(report))) => oracle.child(report_view(t, report)),
             Some((_, Err(e))) => oracle.child(caption(t, format!("oracle failed: {e}"))),
         };
         oracle
@@ -842,6 +1027,16 @@ mod tests {
         assert!(!rt.state.play.contains_key("button/style"));
     }
 
+    #[test]
+    fn oracle_colours_compare_within_three_per_channel() {
+        let rune = ("#3b63fb".to_owned(), 1.0);
+        assert!(same_color("rgb(59, 99, 251)", &rune));
+        assert!(same_color("rgb(61, 97, 250)", &rune));
+        assert!(!same_color("rgb(59, 99, 240)", &rune));
+        assert!(same_color("transparent", &("#000000".to_owned(), 0.0)));
+        assert!(!same_color("transparent", &rune));
+    }
+
     /// A rule the current options break is listed as active, the others as inactive.
     #[test]
     fn catalog_rules_show_their_live_state() {
@@ -867,16 +1062,19 @@ mod tests {
         for (comp, _) in COMPONENTS {
             let s = crate::init();
             let args = oracle_args(&s, comp, false);
-            let lines = compare(&s, comp, false, &args).expect(comp);
+            let r = compare(&s, comp, false, &args).expect(comp);
+            assert!(r.parts.iter().any(|p| p.name == "container"), "{comp}");
             assert!(
-                lines.iter().any(|l| l.starts_with("container")),
-                "{comp}: {lines:?}"
+                r.parts.iter().any(|p| !p.rows.is_empty()),
+                "{comp}: no tokens"
             );
-            assert!(lines.iter().any(|l| l.contains(" = ")), "{comp}: no tokens");
-            assert!(
-                !lines.iter().any(|l| l.contains("DIFFERS")),
-                "{comp}: {lines:?}"
-            );
+            let bad: Vec<_> = r
+                .parts
+                .iter()
+                .filter(|p| !matches!(p.verdict, Verdict::Matches))
+                .map(|p| &p.name)
+                .collect();
+            assert!(bad.is_empty(), "{comp}: {bad:?}");
         }
     }
 
@@ -890,7 +1088,11 @@ mod tests {
             s.play.insert("button/icon".into(), "check".into());
             s.play.insert("button/state".into(), state.into());
             let args = oracle_args(&s, "button", false);
-            compare(&s, "button", false, &args).expect(state)
+            let r = compare(&s, "button", false, &args).expect(state);
+            r.parts
+                .iter()
+                .flat_map(|p| p.rows.iter().map(|r| (r.prop.clone(), r.token.clone())))
+                .collect::<Vec<_>>()
         };
         assert_ne!(tokens_at("rest"), tokens_at("hover"));
     }
@@ -910,7 +1112,7 @@ mod tests {
         rt.pointer_up(x, y);
         rt.frame(0.05);
         let tree = rt.accessibility_json().to_string();
-        assert!(tree.contains("    height = component-height-"), "{tree}");
+        assert!(tree.contains("component-height-"), "{tree}");
     }
 
     /// The oracle runs by itself once the options have been still for the delay, and not before.
