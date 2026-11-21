@@ -9,7 +9,9 @@ use rune::{col, row, text, El};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::button::{self, Button};
-use spectrum_rune::constraints::{check, component, Lit, OptionDef, OptionValue, Severity};
+use spectrum_rune::constraints::{
+    check, component, Lit, OptionDef, OptionValue, Severity, COMPONENTS as CATALOG,
+};
 use spectrum_rune::font;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::interaction::State;
@@ -52,7 +54,8 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
                 ],
             ),
         ],
-        _ => vec![("label", label), ("width", width)],
+        "status-light" => vec![("label", label), ("width", width)],
+        _ => Vec::new(),
     }
 }
 
@@ -414,10 +417,15 @@ fn control(
 }
 
 fn selected(s: &G) -> &'static str {
-    COMPONENTS
+    CATALOG
         .iter()
-        .find(|(id, _)| *id == pick(s, "", "component", "badge"))
-        .map_or("badge", |c| c.0)
+        .find(|c| c.name == pick(s, "", "component", "badge"))
+        .map_or("badge", |c| c.name)
+}
+
+/// Whether the playground has a preview adapter for the component (the rest show the catalog only).
+fn previewed(comp: &str) -> bool {
+    COMPONENTS.iter().any(|c| c.0 == comp)
 }
 
 /// How long the options must stay unchanged before the oracle runs by itself.
@@ -433,6 +441,9 @@ pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
         .scheme
         .map_or(s.system_dark.get(), |c| c == ColorScheme::Dark);
     let comp = selected(s);
+    if !previewed(comp) {
+        return false;
+    }
     let args = oracle_args(s, comp, dark);
     if s.oracle.as_ref().is_some_and(|(a, _)| *a == args) {
         s.oracle_due = None;
@@ -460,16 +471,39 @@ pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
 
 pub fn playground(s: &G, t: &'static Tokens) -> El {
     let comp = selected(s);
-    let picker = row().gap(4.0).children(COMPONENTS.iter().map(|(id, name)| {
-        let id: &'static str = id;
+    let pick_button = |id: &'static str, name: &str| {
         ActionButton::new(format!("playground/pick/{id}"))
-            .label(*name)
+            .label(name.to_owned())
+            .quiet(true)
             .selected(id == comp)
             .on_press(move |g: &mut G| {
                 g.play.insert("/component".into(), id.into());
             })
             .build(t)
-    }));
+    };
+    let picker = col()
+        .gap(4.0)
+        .child(caption(t, "Component: previewed here"))
+        .child(
+            row()
+                .gap(4.0)
+                .children(COMPONENTS.iter().map(|(id, name)| pick_button(id, name))),
+        )
+        .child(caption(
+            t,
+            format!(
+                "Component: catalog only, options and rules without a preview ({})",
+                CATALOG.len() - COMPONENTS.len()
+            ),
+        ))
+        .child(
+            row().gap(4.0).flex_wrap().children(
+                CATALOG
+                    .iter()
+                    .filter(|c| !previewed(c.name))
+                    .map(|c| pick_button(c.name, c.name)),
+            ),
+        );
     let mut controls = col().gap(12.0);
     for def in component(comp)
         .unwrap()
@@ -513,7 +547,16 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
 
     let now = options(s, comp, None);
     let broken = errors(comp, &now);
-    let (reported, shown) = if broken.is_empty() {
+    let (reported, shown) = if !previewed(comp) {
+        (
+            Vec::new(),
+            text(format!(
+                "Not previewed: the playground has no adapter for {comp} yet. The options and rules are the catalog's."
+            ))
+            .font(font::text_style(&t.component_s_regular))
+            .color(t.neutral_subdued_content_color_default),
+        )
+    } else if broken.is_empty() {
         preview(s, comp, t)
     } else {
         (
@@ -542,40 +585,48 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             format!("{:?}: {}", r.severity, r.description.unwrap_or("")),
         ));
     }
-    let dark = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
-    let args = oracle_args(s, comp, dark);
-    let mut oracle = col().gap(2.0);
-    if let Some(c) = state_control {
-        oracle = oracle.child(c).child(caption(
+    let oracle = if !previewed(comp) {
+        col().child(caption(
+            t,
+            "oracle: nothing to compare, Rune has no preview of this component here",
+        ))
+    } else {
+        let dark = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
+        let args = oracle_args(s, comp, dark);
+        let mut oracle = col().gap(2.0);
+        if let Some(c) = state_control {
+            oracle = oracle.child(c).child(caption(
             t,
             "rest, hover and down also show in the preview; keyboard focus is oracle only (Rune draws its ring only on real keyboard focus: Tab to the preview)",
         ));
-    }
-    oracle = oracle.child(
-        ActionButton::new("playground/oracle/run")
-            .label("Retry oracle (design-data CLI)")
-            .on_press({
-                let args = args.clone();
-                move |g: &mut G| {
-                    let r = compare(g, comp, dark, &args);
-                    g.oracle = Some((args.clone(), r));
-                }
-            })
-            .build(t),
-    );
-    oracle = match &s.oracle {
-        None => oracle.child(caption(
-            t,
-            "tokens each part reads, from the oracle: runs when the options stop changing",
-        )),
-        Some((ran, _)) if *ran != args => oracle.child(caption(
-            t,
-            "the options changed: the oracle runs when they stop changing",
-        )),
-        Some((_, Ok(lines))) => lines
-            .iter()
-            .fold(oracle, |c, l| c.child(caption(t, l.clone()))),
-        Some((_, Err(e))) => oracle.child(caption(t, format!("oracle failed: {e}"))),
+        }
+        oracle = oracle.child(
+            ActionButton::new("playground/oracle/run")
+                .label("Retry oracle (design-data CLI)")
+                .on_press({
+                    let args = args.clone();
+                    move |g: &mut G| {
+                        let r = compare(g, comp, dark, &args);
+                        g.oracle = Some((args.clone(), r));
+                    }
+                })
+                .build(t),
+        );
+        oracle = match &s.oracle {
+            None => oracle.child(caption(
+                t,
+                "tokens each part reads, from the oracle: runs when the options stop changing",
+            )),
+            Some((ran, _)) if *ran != args => oracle.child(caption(
+                t,
+                "the options changed: the oracle runs when they stop changing",
+            )),
+            Some((_, Ok(lines))) => lines
+                .iter()
+                .fold(oracle, |c, l| c.child(caption(t, l.clone()))),
+            Some((_, Err(e))) => oracle.child(caption(t, format!("oracle failed: {e}"))),
+        };
+        oracle
     };
     let name = COMPONENTS
         .iter()
@@ -837,9 +888,11 @@ mod tests {
                 .unwrap()
                 .rect[1]
         };
-        let (stage, ctl) = (
-            y(&rt, "playground/stage"),
-            y(&rt, "playground/pick/badge/container"),
+        let ctl = y(&rt, "playground/pick/badge/container");
+        let top = y(&rt, "gallery/body");
+        assert!(
+            y(&rt, "playground/stage") > top + 80.0,
+            "the stage starts below the picker"
         );
         for _ in 0..10 {
             rt.wheel(500.0, 300.0, -200.0);
@@ -850,8 +903,8 @@ mod tests {
             "the page did not scroll"
         );
         assert!(
-            (y(&rt, "playground/stage") - stage).abs() < 80.0,
-            "the stage moved with the page"
+            y(&rt, "playground/stage") - top < 80.0,
+            "the stage scrolled away"
         );
     }
 
@@ -877,6 +930,30 @@ mod tests {
         assert_ne!(fill_at("rest"), fill_at("hover"));
         assert_ne!(fill_at("rest"), fill_at("down"));
         assert_eq!(fill_at("keyboard-focus"), fill_at("rest"));
+    }
+
+    /// Every catalog component builds in the playground, previewed or not, without the oracle.
+    #[test]
+    fn every_catalog_component_builds() {
+        use rune::{Env, Runtime};
+        for c in CATALOG {
+            let mut s = crate::init();
+            s.story = "playground";
+            s.play.insert("/component".into(), c.name.into());
+            let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
+            rt.poll = Some(poll);
+            for _ in 0..10 {
+                rt.frame(0.1);
+            }
+            let tree = rt.accessibility_json().to_string();
+            assert!(tree.contains("catalog constraints"), "{}", c.name);
+            assert_eq!(
+                tree.contains("Not previewed"),
+                !previewed(c.name),
+                "{}",
+                c.name
+            );
+        }
     }
 
     #[test]
