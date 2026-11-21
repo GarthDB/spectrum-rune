@@ -558,15 +558,25 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .fold(oracle, |c, l| c.child(caption(t, l.clone()))),
         Some((_, Err(e))) => oracle.child(caption(t, format!("oracle failed: {e}"))),
     };
-    col().w_full().gap(24.0).child(picker).child(
-        row().gap(32.0).flex_wrap().child(controls.w(520.0)).child(
-            col()
-                .gap(24.0)
-                .child(el().padding(16.0).child(shown))
-                .child(panel)
-                .child(rules)
-                .child(oracle),
-        ),
+    let name = COMPONENTS.iter().find(|c| c.0 == comp).map_or(comp, |c| c.1);
+    let summary = now
+        .iter()
+        .fold(name.to_owned(), |a, (n, v)| format!("{a} · {n} {}", fmt(v)));
+    let stage = col()
+        .key("playground/stage")
+        .w_full()
+        .fill(t.background_layer_1_color)
+        .padding(16.0)
+        .gap(8.0)
+        .sticky_top(0.0)
+        .child(caption(t, summary))
+        .child(shown);
+    col().w_full().gap(24.0).child(picker).child(stage).child(
+        row()
+            .gap(32.0)
+            .flex_wrap()
+            .child(controls.w(520.0))
+            .child(col().gap(24.0).child(panel).child(rules).child(oracle)),
     )
 }
 
@@ -788,6 +798,26 @@ mod tests {
             rt.frame(0.1);
         }
         assert!(rt.state.oracle.is_some(), "did not run after the delay");
+    }
+
+    /// The preview stage stays at the top while the page scrolls.
+    #[test]
+    fn the_stage_stays_pinned_when_the_page_scrolls() {
+        use rune::{Env, Runtime};
+        let mut s = crate::init();
+        s.story = "playground";
+        let mut rt = Runtime::new(s, crate::view, (1100.0, 400.0), Env::new(false, 1.0));
+        rt.frame(0.05);
+        let y = |rt: &Runtime<G>, key: &str| {
+            rt.elements().iter().find(|e| e.key.as_deref() == Some(key)).unwrap().rect[1]
+        };
+        let (stage, ctl) = (y(&rt, "playground/stage"), y(&rt, "playground/pick/badge/container"));
+        for _ in 0..10 {
+            rt.wheel(500.0, 300.0, -200.0);
+            rt.frame(0.05);
+        }
+        assert!(y(&rt, "playground/pick/badge/container") < ctl - 100.0, "the page did not scroll");
+        assert!((y(&rt, "playground/stage") - stage).abs() < 80.0, "the stage moved with the page");
     }
 
     #[test]
