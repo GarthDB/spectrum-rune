@@ -1027,6 +1027,57 @@ mod tests {
         assert!(!rt.state.play.contains_key("button/style"));
     }
 
+    /// Writes the playground in a few states to `target/gallery/playground-*.png` (for PRs). Needs the
+    /// oracle CLI (`DESIGN_DATA`) for the oracle panel; run with `--release -- --ignored`.
+    #[test]
+    #[ignore = "slow unoptimised; needs the oracle CLI"]
+    fn render_playground_shots() {
+        use rune::{Env, Runtime};
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
+        std::fs::create_dir_all(&dir).unwrap();
+        let shots: [(&str, &[(&str, &str)]); 4] = [
+            ("badge", &[]),
+            (
+                "button-hover",
+                &[
+                    ("/component", "button"),
+                    ("button/variant", "accent"),
+                    ("button/state", "hover"),
+                    ("button/icon", "check"),
+                ],
+            ),
+            (
+                "button-excluded",
+                &[
+                    ("/component", "button"),
+                    ("button/variant", "accent"),
+                    ("button/style", "outline"),
+                ],
+            ),
+            ("catalog-only", &[("/component", "picker")]),
+        ];
+        for (name, play) in shots {
+            for dark in [false, true] {
+                let mut s = crate::init();
+                s.story = "playground";
+                s.scheme = Some(scheme(dark));
+                for (k, v) in play {
+                    s.play.insert((*k).into(), (*v).into());
+                }
+                let (w, h) = (1100u32, 2500u32);
+                let mut rt =
+                    Runtime::new(s, crate::view, (w as f32, h as f32), Env::new(dark, 1.0));
+                rt.poll = Some(poll);
+                for _ in 0..12 {
+                    rt.frame(0.1);
+                }
+                let tag = if dark { "dark" } else { "light" };
+                crate::pixels::Pixels::of(&rt, (w, h))
+                    .write_png(&dir.join(format!("playground-{name}-{tag}.png")));
+            }
+        }
+    }
+
     #[test]
     fn oracle_colours_compare_within_three_per_channel() {
         let rune = ("#3b63fb".to_owned(), 1.0);
