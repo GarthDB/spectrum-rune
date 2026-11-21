@@ -135,6 +135,16 @@ fn reasons(comp: &str, o: &Opts) -> Vec<(Severity, &'static str)> {
         .collect()
 }
 
+/// `reasons` with whether each one is already broken by the current selection (`now`).
+fn inherit(
+    now: &[(Severity, &'static str)],
+    r: Vec<(Severity, &'static str)>,
+) -> Vec<(Severity, &'static str, bool)> {
+    r.into_iter()
+        .map(|w| (w.0, w.1, now.contains(&w)))
+        .collect()
+}
+
 fn size_of(v: &str) -> Size {
     match v {
         "s" => Size::S,
@@ -517,7 +527,7 @@ fn report_view(t: &'static Tokens, r: &Report) -> El {
         )
     };
     let cell = |s: String, w: f32| caption(t, s).w(w);
-    let mut c = col().gap(8.0).child(caption(
+    let mut c = col().gap(t.spacing_100).child(caption(
         t,
         format!(
             "oracle {} vs Rune; boxes relative to the container",
@@ -536,7 +546,7 @@ fn report_view(t: &'static Tokens, r: &Report) -> El {
                 head.push_str(&format!(", Rune {}", boxed(b)));
             }
         }
-        let mut part = col().gap(2.0).child(
+        let mut part = col().gap(t.spacing_50).child(
             StatusLight::new(format!("playground/oracle/part/{i}"), head)
                 .variant(variant)
                 .size(Size::S)
@@ -549,7 +559,7 @@ fn report_view(t: &'static Tokens, r: &Report) -> El {
                 Some(Err(v)) => format!("Rune: differs, {v}"),
             };
             let mut line = row()
-                .gap(12.0)
+                .gap(t.spacing_200)
                 .child(cell(row_.prop.clone(), 140.0))
                 .child(cell(row_.token.clone(), 300.0))
                 .child(cell(row_.value.clone(), 150.0));
@@ -566,6 +576,18 @@ fn report_view(t: &'static Tokens, r: &Report) -> El {
     c
 }
 
+/// An option's value for the panel: free-form ones (`label`, `icon`) as what the preview shows.
+fn shown_value(s: &G, comp: &str, name: &str, v: &OptionValue) -> String {
+    match (name, v) {
+        ("label", OptionValue::Present) => match extra(s, comp, "label").as_str() {
+            "long" => WRAPPED.to_owned(),
+            _ => "Label".to_owned(),
+        },
+        ("icon", OptionValue::Present) => extra(s, comp, "icon"),
+        _ => fmt(v),
+    }
+}
+
 fn fmt(v: &OptionValue) -> String {
     match v {
         OptionValue::Str(s) => (*s).to_owned(),
@@ -573,6 +595,20 @@ fn fmt(v: &OptionValue) -> String {
         OptionValue::Num(n) => n.to_string(),
         OptionValue::Present => "(set)".to_owned(),
     }
+}
+
+/// A section heading. Spectrum has no heading styles: this composes font-size-300, bold-font-weight and
+/// title-color (gap, a14.56).
+fn heading(t: &Tokens, s: impl Into<String>) -> El {
+    let base = &t.component_s_regular;
+    let style = font::text_style(&spectrum_rune::tokens::Typography {
+        size: t.font_size_300,
+        weight: t.bold_font_weight,
+        line_height: t.line_height_font_size_300,
+        letter_spacing_em: 0.0,
+        ..*base
+    });
+    text(s.into()).font(style).color(t.title_color)
 }
 
 fn caption(t: &Tokens, s: impl Into<String>) -> El {
@@ -589,13 +625,16 @@ fn control(
     opt: &'static str,
     values: Vec<(String, String)>,
     current: &str,
-    rules: impl Fn(&str) -> Vec<(Severity, &'static str)>,
+    default: Option<&str>,
+    rules: impl Fn(&str) -> Vec<(Severity, &'static str, bool)>,
 ) -> El {
     let mut notes = Vec::new();
     let buttons = values.into_iter().map(|(id, shown)| {
         let why = rules(&id);
-        let blocked = why.iter().any(|(sev, _)| *sev == Severity::Error);
-        for (sev, rule) in why {
+        let blocked = why.iter().any(|(sev, ..)| *sev == Severity::Error);
+        // `inherited`: the current selection already breaks that rule, so it is not this value's doing
+        // and the stage says it once.
+        for (sev, rule, _) in why.into_iter().filter(|w| !w.2) {
             notes.push(match sev {
                 Severity::Error => text(format!("{shown}: not available, Error · {rule}"))
                     .font(font::text_style(&t.component_s_regular))
@@ -608,8 +647,13 @@ fn control(
         }
         let key = format!("{comp}/{opt}");
         let id2 = id.clone();
+        let label = if default == Some(id.as_str()) {
+            format!("{shown} (default)")
+        } else {
+            shown
+        };
         ActionButton::new(format!("playground/{comp}/{opt}/{id}"))
-            .label(shown)
+            .label(label)
             .quiet(true)
             .selected(id == current)
             .disabled(blocked)
@@ -618,9 +662,9 @@ fn control(
             })
             .build(t)
     });
-    let row_ = row().gap(4.0).flex_wrap().children(buttons);
+    let row_ = row().gap(t.spacing_75).flex_wrap().children(buttons);
     col()
-        .gap(4.0)
+        .gap(t.spacing_75)
         .child(caption(t, opt))
         .child(row_)
         .children(notes)
@@ -692,29 +736,31 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .build(t)
     };
     let picker = col()
-        .gap(4.0)
-        .child(caption(t, "Component: previewed here"))
+        .gap(t.spacing_75)
+        .child(heading(t, "Component"))
+        .child(caption(t, "previewed here"))
         .child(
             row()
-                .gap(4.0)
+                .gap(t.spacing_75)
                 .children(COMPONENTS.iter().map(|(id, name)| pick_button(id, name))),
         )
         .child(caption(
             t,
             format!(
-                "Component: catalog only, options and rules without a preview ({})",
+                "catalog only, options and rules without a preview ({})",
                 CATALOG.len() - COMPONENTS.len()
             ),
         ))
         .child(
-            row().gap(4.0).flex_wrap().children(
+            row().gap(t.spacing_75).flex_wrap().children(
                 CATALOG
                     .iter()
                     .filter(|c| !previewed(c.name))
                     .map(|c| pick_button(c.name, c.name)),
             ),
         );
-    let mut controls = col().gap(12.0);
+    let now_reasons = reasons(comp, &options(s, comp, None));
+    let mut controls = col().gap(t.spacing_200).child(heading(t, "Options"));
     for def in component(comp)
         .unwrap()
         .options
@@ -725,14 +771,26 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         let unset = def
             .default
             .is_none()
-            .then(|| ("none".to_owned(), "none".to_owned()));
+            .then(|| ("none".to_owned(), "unset".to_owned()));
         let values = unset
             .into_iter()
             .chain(def.values.iter().map(|l| (lit_str(l), lit_str(l))))
             .collect();
-        controls = controls.child(control(t, comp, def.name, values, &current, |v| {
-            reasons(comp, &options(s, comp, Some((def.name, v))))
-        }));
+        let dflt = default_of(def);
+        controls = controls.child(control(
+            t,
+            comp,
+            def.name,
+            values,
+            &current,
+            Some(&dflt),
+            |v| {
+                inherit(
+                    &now_reasons,
+                    reasons(comp, &options(s, comp, Some((def.name, v)))),
+                )
+            },
+        ));
     }
     let mut state_control = None;
     for (opt, presets) in extras(comp) {
@@ -741,11 +799,14 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .iter()
             .map(|(id, shown)| (id.to_string(), shown.to_string()))
             .collect();
-        let c = control(t, comp, opt, values, &current, |v| {
+        let c = control(t, comp, opt, values, &current, None, |v| {
             if opt == "width" || opt == "state" {
                 Vec::new()
             } else {
-                reasons(comp, &options(s, comp, Some((opt, v))))
+                inherit(
+                    &now_reasons,
+                    reasons(comp, &options(s, comp, Some((opt, v)))),
+                )
             }
         });
         if opt == "state" {
@@ -776,12 +837,42 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         )
     };
     let mut panel = col()
-        .gap(2.0)
-        .child(caption(t, "options() reported by the builder"));
-    for (n, v) in &reported {
-        panel = panel.child(caption(t, format!("{n} = {}", fmt(v))));
+        .gap(t.spacing_50)
+        .child(heading(t, "Builder options"))
+        .child(caption(
+            t,
+            "every catalog option, as the builder's options() reports it",
+        ));
+    let mut names: Vec<&str> = component(comp)
+        .unwrap()
+        .options
+        .iter()
+        .map(|d| d.name)
+        .collect();
+    for (n, _) in &now {
+        if !names.contains(n) {
+            names.push(n);
+        }
     }
-    let mut rules = col().gap(2.0).child(caption(t, "catalog constraints"));
+    for name in names {
+        let chosen = now.iter().find(|(n, _)| *n == name);
+        let is_reported = reported.iter().any(|(n, _)| *n == name);
+        let line = match chosen {
+            Some((n, v)) => caption(
+                t,
+                format!(
+                    "{n} = {}{}",
+                    shown_value(s, comp, n, v),
+                    if is_reported { "" } else { " · not reported" }
+                ),
+            ),
+            None => text(format!("{name}: not reported"))
+                .font(font::text_style(&t.component_s_regular))
+                .color(t.disabled_content_color),
+        };
+        panel = panel.child(line);
+    }
+    let mut rules = col().gap(t.spacing_50).child(heading(t, "Catalog rules"));
     let c = component(comp).unwrap();
     if c.rules.is_empty() {
         rules = rules.child(caption(
@@ -819,7 +910,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
     } else {
         let dark = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
         let args = oracle_args(s, comp, dark);
-        let mut oracle = col().gap(2.0);
+        let mut oracle = col().gap(t.spacing_50);
         if let Some(c) = state_control {
             oracle = oracle.child(c).child(caption(
             t,
@@ -863,18 +954,30 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         .key("playground/stage")
         .w_full()
         .fill(t.background_layer_1_color)
-        .padding(16.0)
-        .gap(8.0)
+        .padding(t.spacing_300)
+        .gap(t.spacing_100)
         .sticky_top(0.0)
         .child(caption(t, summary))
         .child(shown);
-    col().w_full().gap(24.0).child(picker).child(stage).child(
-        row()
-            .gap(32.0)
-            .flex_wrap()
-            .child(controls.w(520.0))
-            .child(col().gap(24.0).child(panel).child(rules).child(oracle)),
-    )
+    col()
+        .w_full()
+        .gap(t.spacing_400)
+        .child(picker)
+        .child(stage)
+        .child(
+            row()
+                .gap(t.spacing_500)
+                .flex_wrap()
+                .child(controls.w(520.0))
+                .child(
+                    col().gap(t.spacing_400).child(panel).child(rules).child(
+                        col()
+                            .gap(t.spacing_50)
+                            .child(heading(t, "Oracle"))
+                            .child(oracle),
+                    ),
+                ),
+        )
 }
 
 #[cfg(test)]
@@ -1078,6 +1181,49 @@ mod tests {
         }
     }
 
+    fn tree_of(play: &[(&str, &str)]) -> String {
+        use rune::{Env, Runtime};
+        let mut s = crate::init();
+        s.story = "playground";
+        for (k, v) in play {
+            s.play.insert((*k).into(), (*v).into());
+        }
+        let mut rt = Runtime::new(s, crate::view, (1100.0, 2500.0), Env::new(false, 1.0));
+        rt.frame(0.05);
+        rt.accessibility_json().to_string()
+    }
+
+    /// The catalog default is marked, an option without one reads "unset", and the options panel shows
+    /// the real label text.
+    #[test]
+    fn defaults_are_marked_and_the_panel_shows_real_values() {
+        let tree = tree_of(&[("/component", "button")]);
+        assert!(tree.contains("fill (default)"), "{tree}");
+        assert!(tree.contains("unset (default)"), "{tree}");
+        assert!(tree.contains("label = Label"), "{tree}");
+        assert!(tree.contains("Builder options"), "{tree}");
+    }
+
+    /// When the current selection is itself excluded, the reason is said once (on the stage), not under
+    /// every value of every control.
+    #[test]
+    fn an_excluded_selection_does_not_repeat_its_reason() {
+        let tree = tree_of(&[
+            ("/component", "button"),
+            ("button/variant", "accent"),
+            ("button/style", "outline"),
+        ]);
+        assert_eq!(
+            tree.matches("Not defined: Outline style").count(),
+            1,
+            "{tree}"
+        );
+        assert_eq!(
+            tree.matches("not available, Error · Outline style").count(),
+            0
+        );
+    }
+
     #[test]
     fn oracle_colours_compare_within_three_per_channel() {
         let rune = ("#3b63fb".to_owned(), 1.0);
@@ -1256,7 +1402,7 @@ mod tests {
                 rt.frame(0.1);
             }
             let tree = rt.accessibility_json().to_string();
-            assert!(tree.contains("catalog constraints"), "{}", c.name);
+            assert!(tree.contains("Catalog rules"), "{}", c.name);
             assert_eq!(
                 tree.contains("Not previewed"),
                 !previewed(c.name),
