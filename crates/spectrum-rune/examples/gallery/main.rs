@@ -22,8 +22,8 @@ use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
-/// The CLI arguments an oracle run used, and its token lines or error.
-pub type OracleRun = (Vec<String>, Result<Vec<String>, String>);
+/// The CLI arguments an oracle run used, and its report or error.
+pub type OracleRun = (Vec<String>, Result<crate::playground::Report, String>);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStatus {
@@ -81,8 +81,12 @@ pub struct G {
     pub open: HashMap<String, Vec<String>>,
     /// The Playground's chosen values, keyed `component/option`.
     pub play: HashMap<String, String>,
-    /// The last oracle run (dev-only): the CLI arguments it ran with, and its token lines or error.
+    /// The last oracle run (dev-only): the CLI arguments it ran with, and its report or error.
     pub oracle: Option<OracleRun>,
+    /// The args an auto-run is waiting to run with, and when (poll's clock): the debounce.
+    pub oracle_due: Option<(Vec<String>, f64)>,
+    /// The system scheme as the view last saw it, for `poll` (which has no `Cx`).
+    pub system_dark: std::cell::Cell<bool>,
 }
 
 impl G {
@@ -107,10 +111,13 @@ fn init() -> G {
         open: HashMap::new(),
         play: HashMap::new(),
         oracle: None,
+        oracle_due: None,
+        system_dark: std::cell::Cell::new(false),
     }
 }
 
 fn view(s: &G, cx: &mut Cx<G>) -> El {
+    s.system_dark.set(cx.system_dark());
     let scheme = s.scheme.unwrap_or(if cx.system_dark() {
         ColorScheme::Dark
     } else {
@@ -215,6 +222,7 @@ fn main() {
     // Off is CoreText without font smoothing: what `-webkit-font-smoothing: antialiased` draws.
     App::new(AppSpec {
         scenes: stories::SCENES,
+        poll: Some(playground::poll),
         ..AppSpec::new("Spectrum for Rune", (1100.0, 900.0), init, view)
     })
     .font_smoothing(FontSmoothing::Off)
