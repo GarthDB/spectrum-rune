@@ -400,6 +400,13 @@ fn same_color(oracle: &str, rune: &(String, f32)) -> bool {
         })
 }
 
+/// The alpha of Rune's `#rrggbb` or `#rrggbbaa` colour.
+fn hex_alpha(hex: &str) -> f32 {
+    hex.get(7..9)
+        .and_then(|a| u8::from_str_radix(a, 16).ok())
+        .map_or(1.0, |a| f32::from(a) / 255.0)
+}
+
 /// One token row of a part: its property, token and value, and for the properties Rune exposes (fill,
 /// corner radius, text colour) whether Rune drew the same, with Rune's value when not.
 #[derive(Clone, Debug)]
@@ -461,7 +468,7 @@ fn compare(s: &G, comp: &'static str, dark: bool, args: &[String]) -> Result<Rep
                             Err(g.fill.0.clone())
                         }),
                         "color" => g.text.as_ref().map(|c| {
-                            if same_color(&t.value, &(c.clone(), 1.0)) {
+                            if same_color(&t.value, &(c.clone(), hex_alpha(c))) {
                                 Ok(())
                             } else {
                                 Err(c.clone())
@@ -670,6 +677,31 @@ fn control(
         .children(notes)
 }
 
+/// A static white or black Button is invisible on the stage's own surface, so it sits on a contrasting
+/// one: the darker of the two tokens behind white, the lighter behind black, in either scheme.
+/// shortcut: Spectrum has no backdrop token for static colours; these are stand-ins, see a14.56.
+fn backdrop(s: &G, comp: &str, t: &Tokens, built: El) -> El {
+    let on = match (comp, pick(s, comp, "staticColor", "none")) {
+        ("button", c @ ("white" | "black")) => c,
+        _ => return built,
+    };
+    let dark = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
+    let (dark_surface, light_surface) = if dark {
+        (t.background_layer_2_color, t.neutral_content_color_default)
+    } else {
+        (t.neutral_content_color_default, t.background_layer_2_color)
+    };
+    col()
+        .key("playground/stage/backdrop")
+        .padding(t.spacing_300)
+        .fill(if on == "white" {
+            dark_surface
+        } else {
+            light_surface
+        })
+        .child(built)
+}
+
 fn selected(s: &G) -> &'static str {
     CATALOG
         .iter()
@@ -828,7 +860,8 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .color(t.neutral_subdued_content_color_default),
         )
     } else if broken.is_empty() {
-        preview(s, comp, t)
+        let (reported, built) = preview(s, comp, t);
+        (reported, backdrop(s, comp, t, built))
     } else {
         (
             Vec::new(),
@@ -1138,7 +1171,7 @@ mod tests {
         use rune::{Env, Runtime};
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 4] = [
+        let shots: [(&str, &[(&str, &str)]); 6] = [
             ("badge", &[]),
             (
                 "button-hover",
@@ -1158,6 +1191,14 @@ mod tests {
                 ],
             ),
             ("catalog-only", &[("/component", "picker")]),
+            (
+                "button-static-white",
+                &[("/component", "button"), ("button/staticColor", "white")],
+            ),
+            (
+                "button-static-black",
+                &[("/component", "button"), ("button/staticColor", "black")],
+            ),
         ];
         for (name, play) in shots {
             for dark in [false, true] {
@@ -1230,8 +1271,51 @@ mod tests {
         assert!(same_color("rgb(59, 99, 251)", &rune));
         assert!(same_color("rgb(61, 97, 250)", &rune));
         assert!(!same_color("rgb(59, 99, 240)", &rune));
+        // A translucent text colour: Rune's hex carries the alpha, the oracle's rgba its own.
+        let text = "#000000ed".to_owned();
+        assert!(same_color(
+            "rgba(0, 0, 0, 0.93)",
+            &(text.clone(), hex_alpha(&text))
+        ));
         assert!(same_color("transparent", &("#000000".to_owned(), 0.0)));
         assert!(!same_color("transparent", &rune));
+    }
+
+    /// A static white or black Button is previewed on a surface that contrasts with it.
+    #[test]
+    fn static_colour_buttons_get_a_contrasting_backdrop() {
+        use rune::{Env, Runtime};
+        for (static_color, dark) in [
+            ("white", false),
+            ("white", true),
+            ("black", false),
+            ("black", true),
+        ] {
+            let mut s = crate::init();
+            s.story = "playground";
+            s.scheme = Some(scheme(dark));
+            s.play.insert("/component".into(), "button".into());
+            s.play
+                .insert("button/staticColor".into(), static_color.into());
+            let mut rt = Runtime::new(s, crate::view, (1100.0, 1500.0), Env::new(dark, 1.0));
+            for _ in 0..10 {
+                rt.frame(0.05);
+            }
+            let fill = |key: &str| {
+                rt.elements()
+                    .iter()
+                    .find(|e| e.key.as_deref() == Some(key))
+                    .unwrap()
+                    .fill
+            };
+            let back = fill("playground/stage/backdrop");
+            let lum = |c: rune::Color| c.r + c.g + c.b;
+            if static_color == "white" {
+                assert!(lum(back) < 1.5, "white needs a dark backdrop: {back:?}");
+            } else {
+                assert!(lum(back) > 1.5, "black needs a light backdrop: {back:?}");
+            }
+        }
     }
 
     /// A rule the current options break is listed as active, the others as inactive.
@@ -1272,6 +1356,26 @@ mod tests {
                 .map(|p| &p.name)
                 .collect();
             assert!(bad.is_empty(), "{comp}: {bad:?}");
+        }
+    }
+
+    /// Static white and black Buttons match the oracle too (translucent fills and text colours).
+    #[test]
+    #[ignore]
+    fn oracle_matches_static_colour_buttons() {
+        for c in ["white", "black"] {
+            let mut s = crate::init();
+            s.play.insert("/component".into(), "button".into());
+            s.play.insert("button/staticColor".into(), c.into());
+            let args = oracle_args(&s, "button", false);
+            let r = compare(&s, "button", false, &args).expect(c);
+            let bad: Vec<_> = r
+                .parts
+                .iter()
+                .filter(|p| !matches!(p.verdict, Verdict::Matches))
+                .map(|p| &p.name)
+                .collect();
+            assert!(bad.is_empty(), "{c}: {bad:?}");
         }
     }
 
