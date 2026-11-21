@@ -5,7 +5,7 @@
 //! the oracle CLI (`oracle.rs`) on demand.
 
 use crate::G;
-use rune::{col, el, row, text, El};
+use rune::{col, row, text, El};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::button::{self, Button};
