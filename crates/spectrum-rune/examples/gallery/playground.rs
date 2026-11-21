@@ -16,6 +16,7 @@ use spectrum_rune::font;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::interaction::State;
 use spectrum_rune::status_light::{self, StatusLight};
+use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale, Tokens};
 use spectrum_rune::Size;
 
@@ -157,6 +158,11 @@ fn size_of(v: &str) -> Size {
 
 /// The adapter: chosen values to the builder. Returns the builder's own `options()` and the built element.
 fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
+    preview_keyed(s, comp, t, "playground/preview")
+}
+
+/// `preview` with the key its parts are named under (`<key>/container`, ...): a second copy needs its own.
+fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
     let width = match extra(s, comp, "width").as_str() {
         "auto" => None,
         w => w.parse::<f32>().ok(),
@@ -176,7 +182,7 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
     };
     match comp {
         "badge" => {
-            let mut b = Badge::new("playground/preview")
+            let mut b = Badge::new(key)
                 .label(label)
                 .variant(
                     *badge::Variant::ALL
@@ -201,7 +207,7 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
         }
         "button" => {
             let on = |opt: &str| v(opt) == "true";
-            let mut b = Button::new("playground/preview")
+            let mut b = Button::new(key)
                 .label(label)
                 .variant(match v("variant").as_str() {
                     "accent" => button::Variant::Accent,
@@ -236,7 +242,7 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
             (b.options(), b.build(t))
         }
         _ => {
-            let mut b = StatusLight::new("playground/preview", label)
+            let mut b = StatusLight::new(key, label)
                 .variant(
                     *status_light::Variant::ALL
                         .iter()
@@ -861,7 +867,39 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         )
     } else if broken.is_empty() {
         let (reported, built) = preview(s, comp, t);
-        (reported, backdrop(s, comp, t, built))
+        let built = backdrop(s, comp, t, built);
+        if pick(s, "", "compare", "off") == "on" {
+            let dark_now = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
+            let other = tokens(scheme(!dark_now), s.scale);
+            let (_, alt) = preview_keyed(s, comp, other, "playground/alt");
+            let side = |label: &str, t: &Tokens, e: El| {
+                col()
+                    .gap(t.spacing_75)
+                    .padding(t.spacing_300)
+                    .fill(t.background_layer_1_color)
+                    .child(
+                        text(label.to_owned())
+                            .font(font::text_style(&t.component_s_regular))
+                            .color(t.neutral_subdued_content_color_default),
+                    )
+                    .child(e)
+            };
+            let names = if dark_now {
+                ("dark", "light")
+            } else {
+                ("light", "dark")
+            };
+            (
+                reported,
+                row()
+                    .gap(t.spacing_300)
+                    .flex_wrap()
+                    .child(side(names.0, t, built))
+                    .child(side(names.1, other, backdrop(s, comp, other, alt))),
+            )
+        } else {
+            (reported, built)
+        }
     } else {
         (
             Vec::new(),
@@ -983,6 +1021,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
     let summary = now
         .iter()
         .fold(name.to_owned(), |a, (n, v)| format!("{a} · {n} {}", fmt(v)));
+    let compare = pick(s, "", "compare", "off") == "on";
     let stage = col()
         .key("playground/stage")
         .w_full()
@@ -990,7 +1029,23 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         .padding(t.spacing_300)
         .gap(t.spacing_100)
         .sticky_top(0.0)
-        .child(caption(t, summary))
+        .child(
+            row()
+                .gap(t.spacing_300)
+                .center_y()
+                .flex_wrap()
+                .child(caption(t, summary))
+                .child(
+                    Switch::new("playground/compare")
+                        .label("Compare light and dark")
+                        .selected(compare)
+                        .on_toggle(move |g: &mut G| {
+                            let v = if compare { "off" } else { "on" };
+                            g.play.insert("/compare".into(), v.into());
+                        })
+                        .build(t),
+                ),
+        )
         .child(shown);
     col()
         .w_full()
@@ -1171,7 +1226,7 @@ mod tests {
         use rune::{Env, Runtime};
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 6] = [
+        let shots: [(&str, &[(&str, &str)]); 7] = [
             ("badge", &[]),
             (
                 "button-hover",
@@ -1191,6 +1246,14 @@ mod tests {
                 ],
             ),
             ("catalog-only", &[("/component", "picker")]),
+            (
+                "button-compare",
+                &[
+                    ("/component", "button"),
+                    ("button/variant", "accent"),
+                    ("/compare", "on"),
+                ],
+            ),
             (
                 "button-static-white",
                 &[("/component", "button"), ("button/staticColor", "white")],
@@ -1315,6 +1378,35 @@ mod tests {
             } else {
                 assert!(lum(back) > 1.5, "black needs a light backdrop: {back:?}");
             }
+        }
+    }
+
+    /// "Compare light and dark" shows a second copy under the other scheme's tokens.
+    #[test]
+    fn compare_shows_a_copy_under_the_other_scheme() {
+        use rune::{Env, Runtime};
+        for dark in [false, true] {
+            let mut s = crate::init();
+            s.story = "playground";
+            s.scheme = Some(scheme(dark));
+            s.play.insert("/component".into(), "button".into());
+            s.play.insert("/compare".into(), "on".into());
+            let mut rt = Runtime::new(s, crate::view, (1100.0, 1500.0), Env::new(dark, 1.0));
+            for _ in 0..10 {
+                rt.frame(0.05);
+            }
+            let fill = |key: &str| {
+                rt.elements()
+                    .iter()
+                    .find(|e| e.key.as_deref() == Some(key))
+                    .unwrap()
+                    .fill
+            };
+            let (here, there) = (
+                fill("playground/preview/container"),
+                fill("playground/alt/container"),
+            );
+            assert_ne!(here, there, "dark={dark}: both copies look the same");
         }
     }
 
