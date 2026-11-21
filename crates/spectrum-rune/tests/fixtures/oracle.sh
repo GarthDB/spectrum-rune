@@ -13,6 +13,10 @@ oracle_get() {
 oracle_min=$(oracle_get cli_min)
 oracle_max=$(oracle_get cli_max)
 oracle_dataset=$(oracle_get dataset)
+# Every script runs the CLI as `design-data`; $DESIGN_DATA (a path to the binary) takes its place, as in the
+# gallery's oracle.rs. Exported so scripts run by the regen scripts see it too.
+design-data() { command "${DESIGN_DATA:-design-data}" "$@"; }
+export -f design-data
 cli_version=$(design-data --version)
 v=${cli_version#design-data }
 if [ "$(printf '%s\n%s\n' "$oracle_min" "$v" | sort -V | head -n1)" != "$oracle_min" ] ||

@@ -265,10 +265,11 @@ chmod +x design-data-darwin-arm64
 ```
 
 (Pick the asset for your platform; `gh release view "design-data-cli@0.36.5" -R adobe/spectrum-design-data`
-lists them.) `cargo xtask gen` and the `regen-*.sh` scripts call `design-data` from `PATH` only and ignore
-`$DESIGN_DATA`, so put the binary there as `design-data` (e.g. a symlink in a directory on `PATH`).
-The gallery playground's Run oracle button and the `--ignored` oracle tests read `$DESIGN_DATA`
-(`DESIGN_DATA=~/.cache/spectrum-rune/oracle/design-data-darwin-arm64`), falling back to `design-data` on `PATH`. It needs no checkout: the CLI reads the foundation release
+lists them.) `cargo xtask gen`, the `regen-*.sh` scripts, the gallery playground's Run oracle button and the `--ignored`
+oracle tests all use `$DESIGN_DATA` (a path to the binary, e.g.
+`DESIGN_DATA=~/.cache/spectrum-rune/oracle/design-data-darwin-arm64`), falling back to `design-data` on `PATH`.
+
+The generator needs no checkout: the CLI reads the foundation release
 pinned in `.design-data.toml` (a github source, fetched and cached), and `dataset` is the commit of the release
 pinned in `platforms/rune/manifest.json`. It runs `design-data catalog export` for the components, icons and
 recipes, so it needs a CLI that writes `visuals/` (0.32.0, adobe/spectrum-design-data#1750); the `regen-*.sh`
