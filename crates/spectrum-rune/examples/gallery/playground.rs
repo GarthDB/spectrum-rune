@@ -12,6 +12,7 @@ use spectrum_rune::button::{self, Button};
 use spectrum_rune::constraints::{check, component, Lit, OptionDef, OptionValue, Severity};
 use spectrum_rune::font;
 use spectrum_rune::icons::CHECKMARK_100;
+use spectrum_rune::interaction::State;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale, Tokens};
 use spectrum_rune::Size;
@@ -40,7 +41,7 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
             ("label", label),
             ("icon", vec![("none", "none"), ("check", "checkmark")]),
             ("width", width),
-            // Oracle only: the preview itself answers to the real pointer and keyboard.
+            // Rest, hover and down also drive the preview; keyboard focus is oracle only.
             (
                 "state",
                 vec![
@@ -193,6 +194,11 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
             match v("staticColor").as_str() {
                 "white" => b = b.static_color(button::StaticColor::White),
                 "black" => b = b.static_color(button::StaticColor::Black),
+                _ => {}
+            }
+            match extra(s, comp, "state").as_str() {
+                "hover" => b = b.forced_state(State::Hover),
+                "down" => b = b.forced_state(State::Down),
                 _ => {}
             }
             if extra(s, comp, "icon") == "check" {
@@ -484,19 +490,25 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             errors(comp, &options(s, comp, Some((def.name, v))))
         }));
     }
+    let mut state_control = None;
     for (opt, presets) in extras(comp) {
         let current = extra(s, comp, opt);
         let values = presets
             .iter()
             .map(|(id, shown)| (id.to_string(), shown.to_string()))
             .collect();
-        controls = controls.child(control(t, comp, opt, values, &current, |v| {
+        let c = control(t, comp, opt, values, &current, |v| {
             if opt == "width" || opt == "state" {
                 Vec::new()
             } else {
                 errors(comp, &options(s, comp, Some((opt, v))))
             }
-        }));
+        });
+        if opt == "state" {
+            state_control = Some(c);
+        } else {
+            controls = controls.child(c);
+        }
     }
 
     let now = options(s, comp, None);
@@ -532,7 +544,14 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
     }
     let dark = std::ptr::eq(t, tokens(ColorScheme::Dark, s.scale));
     let args = oracle_args(s, comp, dark);
-    let mut oracle = col().gap(2.0).child(
+    let mut oracle = col().gap(2.0);
+    if let Some(c) = state_control {
+        oracle = oracle.child(c).child(caption(
+            t,
+            "rest, hover and down also show in the preview; keyboard focus is oracle only (Rune draws its ring only on real keyboard focus: Tab to the preview)",
+        ));
+    }
+    oracle = oracle.child(
         ActionButton::new("playground/oracle/run")
             .label("Retry oracle (design-data CLI)")
             .on_press({
@@ -558,7 +577,10 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .fold(oracle, |c, l| c.child(caption(t, l.clone()))),
         Some((_, Err(e))) => oracle.child(caption(t, format!("oracle failed: {e}"))),
     };
-    let name = COMPONENTS.iter().find(|c| c.0 == comp).map_or(comp, |c| c.1);
+    let name = COMPONENTS
+        .iter()
+        .find(|c| c.0 == comp)
+        .map_or(comp, |c| c.1);
     let summary = now
         .iter()
         .fold(name.to_owned(), |a, (n, v)| format!("{a} · {n} {}", fmt(v)));
@@ -809,15 +831,52 @@ mod tests {
         let mut rt = Runtime::new(s, crate::view, (1100.0, 400.0), Env::new(false, 1.0));
         rt.frame(0.05);
         let y = |rt: &Runtime<G>, key: &str| {
-            rt.elements().iter().find(|e| e.key.as_deref() == Some(key)).unwrap().rect[1]
+            rt.elements()
+                .iter()
+                .find(|e| e.key.as_deref() == Some(key))
+                .unwrap()
+                .rect[1]
         };
-        let (stage, ctl) = (y(&rt, "playground/stage"), y(&rt, "playground/pick/badge/container"));
+        let (stage, ctl) = (
+            y(&rt, "playground/stage"),
+            y(&rt, "playground/pick/badge/container"),
+        );
         for _ in 0..10 {
             rt.wheel(500.0, 300.0, -200.0);
             rt.frame(0.05);
         }
-        assert!(y(&rt, "playground/pick/badge/container") < ctl - 100.0, "the page did not scroll");
-        assert!((y(&rt, "playground/stage") - stage).abs() < 80.0, "the stage moved with the page");
+        assert!(
+            y(&rt, "playground/pick/badge/container") < ctl - 100.0,
+            "the page did not scroll"
+        );
+        assert!(
+            (y(&rt, "playground/stage") - stage).abs() < 80.0,
+            "the stage moved with the page"
+        );
+    }
+
+    /// The state control drives the Button preview: hover and down fill differently from rest.
+    #[test]
+    fn the_state_control_drives_the_button_preview() {
+        use rune::{Env, Runtime};
+        let fill_at = |state: &str| {
+            let mut s = crate::init();
+            s.story = "playground";
+            s.play.insert("/component".into(), "button".into());
+            s.play.insert("button/state".into(), state.into());
+            let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
+            for _ in 0..10 {
+                rt.frame(0.05);
+            }
+            let e = rt.elements();
+            e.iter()
+                .find(|e| e.key.as_deref() == Some("playground/preview/container"))
+                .unwrap()
+                .fill
+        };
+        assert_ne!(fill_at("rest"), fill_at("hover"));
+        assert_ne!(fill_at("rest"), fill_at("down"));
+        assert_eq!(fill_at("keyboard-focus"), fill_at("rest"));
     }
 
     #[test]

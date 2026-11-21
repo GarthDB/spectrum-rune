@@ -296,6 +296,7 @@ pub struct Button {
     disabled: bool,
     pending: bool,
     pending_label: String,
+    forced_state: Option<State>,
     static_color: Option<StaticColor>,
     width: Option<f32>,
     press: Option<Press>,
@@ -315,6 +316,7 @@ impl Button {
             label_hidden: false,
             disabled: false,
             pending: false,
+            forced_state: None,
             pending_label: "pending".into(),
             static_color: None,
             width: None,
@@ -374,6 +376,13 @@ impl Button {
     /// English "pending" (S2's `button.pending`); there is no localisation here, so pass the translated word.
     pub fn pending_label(mut self, l: impl Into<String>) -> Self {
         self.pending_label = l.into();
+        self
+    }
+    /// Draws the button as hovered or pressed whatever the pointer does (a disabled one stays at rest).
+    /// For showing a state, e.g. in the gallery playground. Keyboard focus cannot be forced: Rune
+    /// draws its ring only on real keyboard focus.
+    pub fn forced_state(mut self, s: State) -> Self {
+        self.forced_state = Some(s);
         self
     }
     pub fn static_color(mut self, c: StaticColor) -> Self {
@@ -440,7 +449,7 @@ impl Button {
         let state = if self.disabled {
             State::Rest
         } else {
-            interaction.state()
+            self.forced_state.unwrap_or_else(|| interaction.state())
         };
         let look = look(
             t,
