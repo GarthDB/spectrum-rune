@@ -41,6 +41,11 @@ fn json(cmd: &mut Command) -> Res<Value> {
 }
 
 /// The repo root: the CLI runs here so it picks up `.design-data.toml`.
+/// The oracle CLI: `$DESIGN_DATA` (a path to the binary) or `design-data` on the PATH, as the gallery does.
+fn cli() -> String {
+    std::env::var("DESIGN_DATA").unwrap_or_else(|_| "design-data".to_owned())
+}
+
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("..")
 }
@@ -73,7 +78,7 @@ fn semver(v: &str) -> Res<(u32, u32, u32)> {
 }
 
 fn check_inputs() -> Res<(String, String)> {
-    let version = run(Command::new("design-data").arg("--version"))?
+    let version = run(Command::new(cli()).arg("--version"))?
         .trim()
         .to_string();
     let (min, max) = (oracle("cli_min")?, oracle("cli_max")?);
@@ -121,7 +126,7 @@ fn check_inputs() -> Res<(String, String)> {
 fn catalog_export() -> Res<PathBuf> {
     let out = std::env::temp_dir().join(format!("spectrum-rune-catalog-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&out);
-    run(Command::new("design-data")
+    run(Command::new(cli())
         .current_dir(root())
         .args(["catalog", "export", "--platform", "rune", "--out"])
         .arg(&out))?;
@@ -129,19 +134,14 @@ fn catalog_export() -> Res<PathBuf> {
 }
 
 fn export(scheme: &str, scale: &str, contrast: &str) -> Res<Map<String, Value>> {
-    let v = json(
-        Command::new("design-data")
-            .current_dir(root())
-            .arg("export")
-            .args([
-                "--color-scheme",
-                scheme,
-                "--scale",
-                scale,
-                "--contrast",
-                contrast,
-            ]),
-    )?;
+    let v = json(Command::new(cli()).current_dir(root()).arg("export").args([
+        "--color-scheme",
+        scheme,
+        "--scale",
+        scale,
+        "--contrast",
+        contrast,
+    ]))?;
     match v {
         Value::Object(m) => Ok(m),
         _ => Err("export is not an object".into()),
@@ -230,7 +230,7 @@ fn scoped_values(
         serde_json::to_string(&serde_json::json!({ "states": states })).unwrap(),
     )
     .map_err(|e| e.to_string())?;
-    run(Command::new("design-data")
+    run(Command::new(cli())
         .current_dir(root())
         .arg("render")
         .arg("--batch")
