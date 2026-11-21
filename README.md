@@ -253,8 +253,22 @@ cargo xtask gen
 ```
 
 The oracle (CLI version range and dataset commit) is pinned in one file, [`oracle.toml`](oracle.toml).
-The generator needs a `design-data` CLI inside that range on `PATH` (`brew install design-data`; outside the
-`cli_min`/`cli_max` in `oracle.toml` is rejected). It needs no checkout: the CLI reads the foundation release
+The generator needs a `design-data` CLI inside that range on `PATH` (outside the
+`cli_min`/`cli_max` in `oracle.toml` is rejected). `brew install design-data` installs a newer version that
+is out of range. Download the pinned release binary instead:
+
+```sh
+gh release download "design-data-cli@0.36.5" -R adobe/spectrum-design-data \
+  -p 'design-data-darwin-arm64' -p SHA256SUMS -D ~/.cache/spectrum-rune/oracle
+cd ~/.cache/spectrum-rune/oracle && shasum -a 256 -c SHA256SUMS --ignore-missing
+chmod +x design-data-darwin-arm64
+```
+
+(Pick the asset for your platform; `gh release view "design-data-cli@0.36.5" -R adobe/spectrum-design-data`
+lists them.) `cargo xtask gen` and the `regen-*.sh` scripts call `design-data` from `PATH` only and ignore
+`$DESIGN_DATA`, so put the binary there as `design-data` (e.g. a symlink in a directory on `PATH`).
+The gallery playground's Run oracle button and the `--ignored` oracle tests read `$DESIGN_DATA`
+(`DESIGN_DATA=~/.cache/spectrum-rune/oracle/design-data-darwin-arm64`), falling back to `design-data` on `PATH`. It needs no checkout: the CLI reads the foundation release
 pinned in `.design-data.toml` (a github source, fetched and cached), and `dataset` is the commit of the release
 pinned in `platforms/rune/manifest.json`. It runs `design-data catalog export` for the components, icons and
 recipes, so it needs a CLI that writes `visuals/` (0.32.0, adobe/spectrum-design-data#1750); the `regen-*.sh`
