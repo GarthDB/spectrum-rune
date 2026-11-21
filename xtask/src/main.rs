@@ -134,19 +134,14 @@ fn catalog_export() -> Res<PathBuf> {
 }
 
 fn export(scheme: &str, scale: &str, contrast: &str) -> Res<Map<String, Value>> {
-    let v = json(
-        Command::new(cli())
-            .current_dir(root())
-            .arg("export")
-            .args([
-                "--color-scheme",
-                scheme,
-                "--scale",
-                scale,
-                "--contrast",
-                contrast,
-            ]),
-    )?;
+    let v = json(Command::new(cli()).current_dir(root()).arg("export").args([
+        "--color-scheme",
+        scheme,
+        "--scale",
+        scale,
+        "--contrast",
+        contrast,
+    ]))?;
     match v {
         Value::Object(m) => Ok(m),
         _ => Err("export is not an object".into()),
