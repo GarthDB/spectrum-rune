@@ -27,7 +27,8 @@
 //!   ink, as the oracle's `down`. Disabled is not focusable and keeps its colour. Nothing is
 //!   left unmatched here.
 //!
-//! - `hasActionButton` and `hasSwitch` add the recipe's trailing `direct-actions` row: an icon-only
+//! - `hasActionButton` and `hasSwitch` (Rune's own options since data 4.0.0, which has them as fills of the
+//!   recipe's `actions` slot) add the trailing `actions` row: an icon-only
 //!   action button (hold icon always on, the recipe fixes it) and a switch with its label hidden,
 //!   both at the item's size and disabled with it, `spacing_100` apart, ending at the header's
 //!   inline padding. The row is a *sibling* of the header button, not inside it (a control inside

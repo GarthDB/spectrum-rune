@@ -19,19 +19,16 @@
     },
     "item-1": {
       "kind": "component",
-      "component": "radio-button",
       "sizeMap": { "s": "s", "m": "m", "l": "l", "xl": "xl" },
       "with": { "isSelected": true, "isEmphasized": { "option": "isEmphasized" }, "isDisabled": { "option": "isDisabled" } }
     },
     "item-2": {
       "kind": "component",
-      "component": "radio-button",
       "sizeMap": { "s": "s", "m": "m", "l": "l", "xl": "xl" },
       "with": { "isSelected": false, "isEmphasized": { "option": "isEmphasized" }, "isDisabled": { "option": "isDisabled" } }
     },
     "item-3": {
       "kind": "component",
-      "component": "radio-button",
       "sizeMap": { "s": "s", "m": "m", "l": "l", "xl": "xl" },
       "with": { "isSelected": false, "isEmphasized": { "option": "isEmphasized" }, "isDisabled": { "option": "isDisabled" } }
     }
