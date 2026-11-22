@@ -265,15 +265,16 @@ impl Picker {
                 .color(color)
                 .a11y_hidden()
                 .font(font::text_style(&d.value))
-                .grow(1.0)
+                .shrink()
                 .truncate()
         };
         field = match (self.value, self.placeholder) {
             (Some(v), _) => field.child(focus_ink(line("value", v, ink))),
             (None, Some(p)) => field.child(line("placeholder", p, subdued)),
-            _ => field.child(el().grow(1.0)),
+            _ => field,
         };
-        field = field.child(focus_ink(
+        // The text keeps its own width (the oracle's rect); the spacer takes the rest, so the icon sits at the end.
+        field = field.child(el().grow(1.0)).child(focus_ink(
             icon(&CHEVRON_100, DISCLOSURE)
                 .key(part("disclosure-icon"))
                 .color(ink)

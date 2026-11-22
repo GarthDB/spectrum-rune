@@ -260,3 +260,27 @@ fn field_is_a_combobox_named_by_its_label() {
     assert_eq!(f.label.as_deref(), Some("Country"));
     assert_eq!(f.expanded, Some(false));
 }
+
+#[test]
+fn long_value_truncates_before_the_icon() {
+    let mut rt = Runtime::new(
+        App::default(),
+        |_: &App, _: &mut Cx<App>| {
+            let t = tokens(ColorScheme::Light, Scale::Desktop);
+            col().child(
+                Picker::new("pk")
+                    .value("A value far too long for a field this narrow to show in full")
+                    .width(120.0)
+                    .build(t),
+            )
+        },
+        (400.0, 200.0),
+        Env::new(false, 1.0),
+    );
+    settle(&mut rt);
+    let (v, i) = (
+        part(&rt, "value").unwrap().target,
+        part(&rt, "disclosure-icon").unwrap().target,
+    );
+    assert!(v[0] + v[2] <= i[0] + 0.5, "value {v:?} reaches icon {i:?}");
+}

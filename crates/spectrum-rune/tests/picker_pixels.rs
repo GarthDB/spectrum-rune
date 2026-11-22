@@ -114,7 +114,10 @@ fn error_border_matches_oracle() {
         let px = Pixels::of(&rt, SIZE);
         // The middle of the left and right edges is clear of the rounded corners.
         for side in [pixels::Side::Left, pixels::Side::Right] {
-            let (edge, inner) = (probe(&px, field(&rt), side, 0), probe(&px, field(&rt), side, 1));
+            let (edge, inner) = (
+                probe(&px, field(&rt), side, 0),
+                probe(&px, field(&rt), side, 1),
+            );
             let edge_want = match want["stroke"].as_str() {
                 Some(s) => {
                     assert_eq!(want["stroke_width"].as_f64(), Some(1.0));

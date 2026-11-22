@@ -18,6 +18,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Action button | `action_button` | `selected` for a toggle |
 | Badge | `badge` | none (static) |
 | Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
+| Picker (the closed field only; no menu) | `picker` | `value`, `open` (calls `on_open`) |
 | Radio group | `radio_group` | `value` |
 | Accordion item (one item) | `accordion` | `open` |
 | Accordion (a group of items; single or multiple) | `accordion_group` | the open set |
@@ -202,7 +203,7 @@ cargo run -p spectrum-rune --example gallery -- --scene button --theme dark --si
 cargo run -p spectrum-rune --example gallery -- --scene button-mobile --theme light --snap /tmp/button-mobile.png
 ```
 
-Scenes: `switch`, `checkbox`, `radio-button`, `button`, `action-button`, `badge`, `accordion`, `accordion-group`.
+Scenes: `switch`, `checkbox`, `radio-button`, `button`, `action-button`, `badge`, `picker`, `accordion`, `accordion-group`.
 
 CI also renders every scene with Rune's CPU reference renderer (no GPU) and uploads the PNGs as the
 `gallery` artifact; locally: `cargo test --release -p spectrum-rune --example gallery -- --ignored`
@@ -359,6 +360,12 @@ dataset changes nothing.
 - **High contrast.** The tokens exported for high contrast are identical to regular upstream, and
   Windows forced colours are not designed.
 - **RTL** is not handled.
+- **Picker.** The closed field only: the menu and popover are not built (`on_open` is where the app opens its
+  own). The recipe draws no `labelPosition: side` (the label stays on top), no quiet look beyond the end padding
+  (the fill stays), no disabled fill (only the ink dims) and no placeholder hover ink; `description`, `isRequired` and
+  `necessityIndicator` (help-text and the label's asterisk) are not built yet. The disclosure icon's 16 px is neither in
+  the recipe nor in the tokens. A picker without a label omits the label row, which the oracle still reserves
+  (a field-label of 0 width and the full control height).
 - **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
   group's layout (gap 0, each item keeping its divider) has no oracle: only the stacked item heights are
   checked against the item oracle. Per-item `disabled` is a Rune-side convenience; the catalog's
