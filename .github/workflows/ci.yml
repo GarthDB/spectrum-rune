@@ -58,6 +58,6 @@ jobs:
       - uses: actions/checkout@v7
       - uses: adobe/spectrum-design-data/.github/actions/validate@6ae966d623508ee4d7031c6bafe93785a8c29468 # main on 2026-11-11
         with:
-          cli-version: 0.36.5
+          cli-version: 0.62.1
           manifest: platforms/rune/manifest.json
           skip-dataset-validation: true

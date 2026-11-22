@@ -4,7 +4,7 @@ A Layer 2 [platform manifest](https://opensource.adobe.com/spectrum-design-data/
 repo, not incubated in spectrum-design-data. It is the worked example of an implementation managing its own
 manifest.
 
-- `manifest.json`: identity and the foundation pin (`@adobe/spectrum-design-data@3.15.1`, the commit in `oracle.toml`).
+- `manifest.json`: identity and the foundation pin (`@adobe/spectrum-design-data@3.31.1`, the commit in `oracle.toml`).
 - `extensions/implementations/`: the `spectrum_rune::` type behind each component.
 - `extensions/components/status-light.json` and `extensions/visuals/status-light.json`: Status light as Rune defines it
   before the foundation does: the component with its anatomy fixed (`container`, `dot`, `label`; a whole-file copy of the
