@@ -61,6 +61,7 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
             ("label", [label, vec![("none", "none")]].concat()),
             ("value", vec![("none", "none"), ("canada", "Canada")]),
             ("placeholder", vec![("select", "Select"), ("none", "none")]),
+            ("description", vec![("none", "none"), ("help", "Help text")]),
             ("width", width),
         ],
         "status-light" => vec![("label", label), ("width", width)],
@@ -219,7 +220,11 @@ fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
                 .size(size_of(&v("size")))
                 .quiet(v("isQuiet") == "true")
                 .disabled(v("isDisabled") == "true")
-                .error(v("isError") == "true");
+                .error(v("isError") == "true")
+                .required(v("isRequired") == "true");
+            if let Some(x) = picker_text(s, "description") {
+                p = p.description(x);
+            }
             if let Some(x) = picker_text(s, "value") {
                 p = p.value(x);
             }
@@ -289,6 +294,7 @@ fn picker_text(s: &G, opt: &str) -> Option<&'static str> {
     match (opt, extra(s, "picker", opt).as_str()) {
         ("value", "canada") => Some("Canada"),
         ("placeholder", "select") => Some("Select"),
+        ("description", "help") => Some("Help text"),
         _ => None,
     }
 }
@@ -359,7 +365,7 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
         }
     }
     if comp == "picker" {
-        for opt in ["value", "placeholder"] {
+        for opt in ["value", "placeholder", "description"] {
             if let Some(x) = picker_text(s, opt) {
                 a.extend(["--option".to_owned(), format!("{opt}=\"{x}\"")]);
             }
@@ -1307,7 +1313,7 @@ mod tests {
         use rune::{Env, Runtime};
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 11] = [
+        let shots: [(&str, &[(&str, &str)]); 13] = [
             ("badge", &[]),
             (
                 "button-hover",
@@ -1340,6 +1346,22 @@ mod tests {
                 &[("/component", "status-light"), ("status-light/size", "xl")],
             ),
             ("picker", &[("/component", "picker")]),
+            (
+                "picker-help",
+                &[
+                    ("/component", "picker"),
+                    ("picker/isRequired", "true"),
+                    ("picker/description", "help"),
+                ],
+            ),
+            (
+                "picker-error",
+                &[
+                    ("/component", "picker"),
+                    ("picker/isError", "true"),
+                    ("picker/description", "help"),
+                ],
+            ),
             (
                 "button-compare",
                 &[

@@ -7,14 +7,16 @@
 # Matrix: scheme x scale x size x content (value, placeholder) x quiet x error x disabled at rest; hover, down and
 # keyboard-focus at size M, desktop and mobile, enabled (a disabled field ignores the pointer and is not focusable).
 # The recipe has no `labelPosition: side`, no quiet fill, no disabled fill and no placeholder hover look, so none of
-# those are in the matrix; `description`, `isRequired` and `necessityIndicator` are not built (the recipe composes
-# help-text and the field-label asterisk). The ring of keyboard-focus goes to picker_rings.json (ring.jq).
+# those are in the matrix. The ring of keyboard-focus goes to picker_rings.json (ring.jq); the help text, the error icon
+# and the required asterisk go to picker_extras.json (a second matrix: scheme x scale x size x required x description x
+# error, at rest). Not drawn by the oracle, so not in any fixture: `necessityIndicator: text` and `errorMessage`.
 set -euo pipefail
 root="${1:-}"
 source "$(dirname "$0")/constraints.sh"
 source "$(dirname "$0")/oracle.sh"
 out="$(cd "$(dirname "$0")" && pwd)/picker_scene.json"
 ring="$(dirname "$out")/picker_rings.json"
+extras="$(dirname "$out")/picker_extras.json"
 oracle_cd
 
 render() {
@@ -59,3 +61,26 @@ for scheme in light dark; do for scale in desktop mobile; do for size in s m l x
     -f "$(dirname "$out")/ring.jq"
 done; done; done; done | jq -s . > "$ring"
 echo "wrote $ring"
+
+# Help text, the alert icon of an error and the required asterisk: picker_extras.json.
+{
+  for scheme in light dark; do for scale in desktop mobile; do for size in s m l xl; do
+    for req in false true; do for help in false true; do for err in false true; do
+      args=(--size "$size" --color-scheme "$scheme" --scale "$scale" --format scene
+            --option label=Country --option value=Canada --option "isRequired=$req" --option "isError=$err")
+      [ "$help" = true ] && args+=(--option 'description="Help text"')
+      design-data render picker "${args[@]}" | jq -c \
+        --arg scheme "$scheme" --arg scale "$scale" --arg size "$size" \
+        --argjson req "$req" --argjson help "$help" --argjson err "$err" '
+        (.nodes[] | select(.part == "container")) as $c
+        | def part($p): [.nodes[] | select(.part == $p)][0]
+            | if . == null then null else {x: (.x - $c.x), y: (.y - $c.y), w, h, color} end;
+          {scheme: $scheme, scale: $scale, size: $size, required: $req, help: $help, error: $err,
+           container: {w: $c.w, h: $c.h}, label: part("field-label.label"),
+           indicator: part("field-label.necessity-indicator"),
+           help_text: part("help-text.text"), help_icon: part("help-text.icon")}
+        | with_entries(select(.value != null))'
+    done; done; done
+  done; done; done
+} | jq -s . > "$extras"
+echo "wrote $extras"
