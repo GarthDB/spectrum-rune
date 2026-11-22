@@ -211,11 +211,7 @@ fn radio_button_wraps_like_the_oracle() {
     );
 }
 
-// Data 3.31.1's status-light recipe never wraps its label (the label stays one 168 px line in a 40 px
-// container), so the oracle has no wrapped case to compare with; the component still wraps, as the
-// catalog guideline says. Reported: adobe/spectrum-design-data#2047.
 #[test]
-#[ignore = "the 3.31.1 status-light recipe does not wrap its label"]
 fn status_light_wraps_like_the_oracle() {
     check(
         "status_light",
@@ -264,11 +260,6 @@ fn line_counts_match_the_oracle_with_the_spectrum_font() {
         true,
     );
     check_with("badge", include_str!("fixtures/badge_wrap.json"), "-", true);
-}
-
-#[test]
-#[ignore = "the 3.31.1 status-light recipe does not wrap its label"]
-fn status_light_wraps_into_the_oracles_line_count() {
     check_with(
         "status_light",
         include_str!("fixtures/status_light_wrap.json"),

@@ -289,41 +289,8 @@ fn scoped_values(
     Ok(out)
 }
 
-/// Data 3.31.1 binds the Status light dot to `ui-icon-*` on desktop and `status-light-dot-size-*` (normalised to `status-dot-size-*`) on mobile
-/// (adobe/spectrum-design-data issue, see a14.60): the same slot under two names. Fill the missing scale of
-/// the named token from the exported one so the component reads one field. Drop when upstream binds one name.
-const SCALE_ALIASES: &[(&str, &str)] = &[
-    ("status-dot-size-small", "ui-icon-small"),
-    ("status-dot-size-medium", "ui-icon-medium"),
-    ("status-dot-size-large", "ui-icon-large"),
-    ("status-dot-size-extra-large", "ui-icon-extra-large"),
-];
-
-/// Completes scoped tokens that have a value for some scales only: from `SCALE_ALIASES`, else dropped with a
-/// note (the build fails if Rune reads one).
-fn complete_scoped(
-    scoped: &mut BTreeMap<String, BTreeMap<String, f64>>,
-    modes: &[(String, Map<String, Value>)],
-) {
-    for (name, from) in SCALE_ALIASES {
-        let Some(by_scale) = scoped.get_mut(*name) else {
-            continue;
-        };
-        for scale in SCALES {
-            if by_scale.contains_key(scale) {
-                continue;
-            }
-            let mode = format!("LIGHT_{}", scale.to_uppercase());
-            if let Some(v) = modes
-                .iter()
-                .find(|(m, _)| *m == mode)
-                .and_then(|(_, m)| m.get(*from))
-                .and_then(|t| dim(&t["$value"]).ok())
-            {
-                by_scale.insert((*scale).to_owned(), v);
-            }
-        }
-    }
+/// Drops scoped tokens that have a value for some scales only, with a note (the build fails if Rune reads one).
+fn complete_scoped(scoped: &mut BTreeMap<String, BTreeMap<String, f64>>) {
     scoped.retain(|name, by_scale| {
         let all = by_scale.len() == SCALES.len();
         if !all {
@@ -496,7 +463,7 @@ fn generate() -> Res<()> {
         }
     }
     let mut scoped = scoped_values(&dir, &keys)?;
-    complete_scoped(&mut scoped, &modes);
+    complete_scoped(&mut scoped);
     if let Some(clash) = scoped.keys().find(|k| keys.contains(*k)) {
         return Err(format!(
             "scoped token `{clash}` collides with an exported token"
