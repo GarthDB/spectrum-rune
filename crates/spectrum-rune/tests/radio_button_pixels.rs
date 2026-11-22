@@ -190,11 +190,16 @@ fn control_border_and_dot_match_oracle() {
                 ink,
                 &format!("{what}: dot centre"),
             );
-            near(
-                px.at(cx as u32 - 1, cy as u32 - 1),
-                ink,
-                &format!("{what}: dot, near its edge"),
-            );
+            // A dot centred on a half pixel (an odd control on a mobile scale) is half covered at its edge
+            // pixel, so that probe is skipped there.
+            let half = |v: f32| (v.fract() - 0.5).abs() < 1e-3;
+            if !half(cx) && !half(cy) {
+                near(
+                    px.at(cx as u32 - 1, cy as u32 - 1),
+                    ink,
+                    &format!("{what}: dot, near its edge"),
+                );
+            }
             near(
                 px.at(cx as u32 + 3, cy as u32),
                 fill,
