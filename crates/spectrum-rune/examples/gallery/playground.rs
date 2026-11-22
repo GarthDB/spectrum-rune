@@ -815,6 +815,7 @@ pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
 
 pub fn playground(s: &G, t: &'static Tokens) -> El {
     let comp = selected(s);
+    let open = pick(s, "", "picker", "closed") == "open";
     let pick_button = |id: &'static str, name: &str| {
         ActionButton::new(format!("playground/pick/{id}"))
             .label(name.to_owned())
@@ -822,33 +823,61 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .selected(id == comp)
             .on_press(move |g: &mut G| {
                 g.play.insert("/component".into(), id.into());
+                g.play.insert("/picker".into(), "closed".into());
             })
             .build(t)
     };
-    let picker = col()
+    let shown_name = COMPONENTS
+        .iter()
+        .find(|c| c.0 == comp)
+        .map_or(comp, |c| c.1);
+    let mut picker = col()
         .gap(t.spacing_75)
         .child(heading(t, "Component"))
-        .child(caption(t, "previewed here"))
         .child(
-            row()
-                .gap(t.spacing_75)
-                .children(COMPONENTS.iter().map(|(id, name)| pick_button(id, name))),
-        )
-        .child(caption(
-            t,
-            format!(
-                "catalog only, options and rules without a preview ({})",
-                CATALOG.len() - COMPONENTS.len()
-            ),
-        ))
-        .child(
-            row().gap(t.spacing_75).flex_wrap().children(
-                CATALOG
-                    .iter()
-                    .filter(|c| !previewed(c.name))
-                    .map(|c| pick_button(c.name, c.name)),
-            ),
+            Picker::new("playground/pick")
+                .value(shown_name)
+                .placeholder("Select a component")
+                .size(Size::M)
+                .width(280.0)
+                .open(open)
+                .on_open(move |g: &mut G| {
+                    let v = if open { "closed" } else { "open" };
+                    g.play.insert("/picker".into(), v.into());
+                })
+                .build(t),
         );
+    if open {
+        // shortcut: Spectrum has no Menu or Popover recipe yet (a14.56), so the list is composed of quiet Action
+        // buttons on a layer surface, shown in the page flow rather than as an overlay.
+        let list = col()
+            .gap(t.spacing_75)
+            .padding(t.spacing_200)
+            .fill(t.background_layer_1_color)
+            .child(caption(t, "previewed here"))
+            .child(
+                row()
+                    .gap(t.spacing_75)
+                    .flex_wrap()
+                    .children(COMPONENTS.iter().map(|(id, name)| pick_button(id, name))),
+            )
+            .child(caption(
+                t,
+                format!(
+                    "catalog only, options and rules without a preview ({})",
+                    CATALOG.len() - COMPONENTS.len()
+                ),
+            ))
+            .child(
+                row().gap(t.spacing_75).flex_wrap().children(
+                    CATALOG
+                        .iter()
+                        .filter(|c| !previewed(c.name))
+                        .map(|c| pick_button(c.name, c.name)),
+                ),
+            );
+        picker = picker.child(list);
+    }
     let now_reasons = reasons(comp, &options(s, comp, None));
     let mut controls = col().gap(t.spacing_200).child(heading(t, "Options"));
     for def in component(comp)
@@ -1278,7 +1307,7 @@ mod tests {
         use rune::{Env, Runtime};
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 10] = [
+        let shots: [(&str, &[(&str, &str)]); 11] = [
             ("badge", &[]),
             (
                 "button-hover",
@@ -1298,6 +1327,10 @@ mod tests {
                 ],
             ),
             ("catalog-only", &[("/component", "tabs")]),
+            (
+                "selector-open",
+                &[("/component", "button"), ("/picker", "open")],
+            ),
             (
                 "status-light-s",
                 &[("/component", "status-light"), ("status-light/size", "s")],
@@ -1471,6 +1504,41 @@ mod tests {
         }
     }
 
+    fn press(rt: &mut rune::Runtime<G>, key: &str) {
+        let (x, y) = rt.find(key).unwrap();
+        rt.pointer_move(x, y);
+        rt.pointer_down(x, y);
+        rt.pointer_up(x, y);
+        rt.frame(0.05);
+    }
+
+    /// The component Picker opens a list, choosing from it selects the component and closes the list.
+    #[test]
+    fn the_component_picker_opens_and_selects() {
+        use rune::{Env, Runtime};
+        let mut s = crate::init();
+        s.story = "playground";
+        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+        rt.frame(0.05);
+        assert!(
+            rt.find("playground/pick/tabs/container").is_none(),
+            "closed: no list"
+        );
+        press(&mut rt, "playground/pick/field");
+        assert!(
+            rt.find("playground/pick/tabs/container").is_some(),
+            "open: the catalog is listed"
+        );
+        press(&mut rt, "playground/pick/tabs/container");
+        assert_eq!(rt.state.play["/component"], "tabs");
+        assert!(
+            rt.find("playground/pick/tabs/container").is_none(),
+            "closed again"
+        );
+        let tree = rt.accessibility_json().to_string();
+        assert!(tree.contains("Not previewed"), "{tree}");
+    }
+
     /// A rule the current options break is listed as active, the others as inactive.
     #[test]
     fn catalog_rules_show_their_live_state() {
@@ -1601,7 +1669,7 @@ mod tests {
                 .unwrap()
                 .rect[1]
         };
-        let ctl = y(&rt, "playground/pick/badge/container");
+        let ctl = y(&rt, "playground/pick/field");
         let top = y(&rt, "gallery/body");
         assert!(
             y(&rt, "playground/stage") > top + 80.0,
@@ -1612,7 +1680,7 @@ mod tests {
             rt.frame(0.05);
         }
         assert!(
-            y(&rt, "playground/pick/badge/container") < ctl - 100.0,
+            y(&rt, "playground/pick/field") < ctl - 100.0,
             "the page did not scroll"
         );
         assert!(
