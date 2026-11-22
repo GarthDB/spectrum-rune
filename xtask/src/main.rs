@@ -648,7 +648,13 @@ fn generate_icons(dir: &Path, version: &str, commit: &str) -> Res<()> {
             .split(' ')
             .map(|v| v.parse().unwrap_or(f64::NAN))
             .collect();
-        if vb.len() != 4 || vb[0] != 0.0 || vb[1] != 0.0 || vb[2] != vb[3] || !(vb[2] > 0.0) {
+        if vb.len() != 4
+            || vb[0] != 0.0
+            || vb[1] != 0.0
+            || vb[2] != vb[3]
+            || !vb[2].is_finite()
+            || vb[2] <= 0.0
+        {
             skipped.push(format!("{id} (viewBox {})", shape["viewBox"]));
             continue;
         }
