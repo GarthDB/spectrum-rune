@@ -148,8 +148,11 @@ actions_case() {
   local acts=$1 size=$2 density=$3 open=$4 dis=$5 scheme=$6 scale=$7
   local args=(--size "$size" --color-scheme "$scheme" --scale "$scale" --format scene
     --option isOpen=$open --option isDisabled=$dis --option "density=\"$density\"")
-  [ "$acts" != switch ] && args+=(--option hasActionButton=true)
-  [ "$acts" != button ] && args+=(--option hasSwitch=true)
+  # Data 4.0.0 has no hasActionButton / hasSwitch: the `actions` slot is filled instead, button first.
+  local fills=()
+  [ "$acts" != switch ] && fills+=('{"component":"action-button","options":{}}')
+  [ "$acts" != button ] && fills+=('{"component":"switch","options":{}}')
+  args+=(--slots "{\"actions\":[$(IFS=,; echo "${fills[*]}")]}")
   design-data render accordion "${args[@]}" | jq -c \
     --arg acts "$acts" --arg size "$size" --arg density "$density" --arg scheme "$scheme" --arg scale "$scale" \
     --argjson open "$open" --argjson dis "$dis" '
@@ -164,12 +167,17 @@ actions_case() {
                | (if .color then .color |= col else . end)
                | (if .stroke then .stroke |= col else . end) end;
       (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "actions")) as $d
+    | ("actions-1") as $first | (if $acts == "both" then "actions-2" else "actions-1" end) as $sw
     | {scheme: $scheme, scale: $scale, size: $size, density: $density, open: $open, disabled: $dis, actions: $acts,
        item_h: ($i.h | r), header_h: (part("header").h),
        title_gap: (($d.x - ($t.x + $t.w)) | r),
        direct: part("actions"),
-       button: part("action-button"), button_icon: part("action-button.icon"), button_hold: part("action-button.hold-icon"),
-       switch: part("switch"), track: part("switch.track"), handle: part("switch.handle")}
+       button: (if $acts == "switch" then null else part($first) end),
+       button_icon: (if $acts == "switch" then null else part($first + ".icon") end),
+       button_hold: (if $acts == "switch" then null else part($first + ".hold-icon") end),
+       switch: (if $acts == "button" then null else part($sw) end),
+       track: (if $acts == "button" then null else part($sw + ".track") end),
+       handle: (if $acts == "button" then null else part($sw + ".handle") end)}
     | with_entries(select(.value != null))'
 }
 {
@@ -189,7 +197,7 @@ echo "wrote $actions"
 overflow="$(dirname "$out")/accordion_actions_gap.json"
 for size in m l xl; do
   design-data render accordion --size $size --format scene --label "A much longer accordion title to exceed the minimum width of the item" \
-    --option hasSwitch=true 2>/dev/null | jq -c --arg size "$size" '
+    --slots '{"actions":[{"component":"switch","options":{}}]}' 2>/dev/null | jq -c --arg size "$size" '
     (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "actions")) as $d
     | {size: $size, gap: (($d.x - ($t.x + $t.w)) * 100 | round / 100)}'
 done | jq -s . > "$overflow"

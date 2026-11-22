@@ -1,6 +1,6 @@
 //! Checks the AccordionItem's direct actions (`hasActionButton`, `hasSwitch`) against the
 //! `design-data render accordion` oracle; the fixture is `tests/fixtures/accordion_actions.json`
-//! (see `regen-accordion.sh`). Geometry and fill/ink colours with the 1 px / 3-per-channel
+//! (see `regen-accordion.sh`, which fills the recipe's `actions` slot: data 4.0.0 has no `hasActionButton`/`hasSwitch` options). Geometry and fill/ink colours with the 1 px / 3-per-channel
 //! tolerance. Not asserted: the switch track's stroke (`ElementInfo` has no border; the Switch's
 //! own pixel tests cover it) and the states the oracle does not draw for these controls.
 
