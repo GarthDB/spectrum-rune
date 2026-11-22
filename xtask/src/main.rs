@@ -270,7 +270,13 @@ fn scoped_values(
                 if exported.contains(raw) || exported.contains(&norm) {
                     continue;
                 }
-                let value = parse_px(t["value"].as_str().ok_or("token without value")?)?;
+                let raw_value = t["value"].as_str().ok_or("token without value")?;
+                // shortcut: only px values are generated; a colour a recipe binds that `export` omits is skipped
+                // (and listed), see the oracle bump notes
+                let Ok(value) = parse_px(raw_value) else {
+                    eprintln!("skipped scoped non-px token `{raw}` = {raw_value} ({id})");
+                    continue;
+                };
                 let slot = out.entry(norm.clone()).or_default();
                 if let Some(old) = slot.insert(scale.to_string(), value) {
                     if old != value {
@@ -280,14 +286,14 @@ fn scoped_values(
             }
         }
     }
-    for (name, by_scale) in &out {
-        if by_scale.len() != SCALES.len() {
-            return Err(format!(
-                "scoped token `{name}` has values for {:?} only",
-                by_scale.keys()
-            ));
+    // shortcut: a token a recipe binds on one scale only is skipped (and listed); the build fails if Rune needs it
+    out.retain(|name, by_scale| {
+        let all = by_scale.len() == SCALES.len();
+        if !all {
+            eprintln!("skipped scoped token `{name}`: values for {:?} only", by_scale.keys());
         }
-    }
+        all
+    });
     Ok(out)
 }
 

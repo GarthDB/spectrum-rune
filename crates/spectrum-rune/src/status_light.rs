@@ -151,10 +151,10 @@ impl StatusLight {
     pub fn build(self, t: &Tokens) -> El {
         constraints::assert_valid("status-light", &self.options());
         let (gap, dot) = match self.size {
-            Size::S => (t.base_gap_small, t.status_dot_size_small),
-            Size::M => (t.base_gap_medium, t.status_dot_size_medium),
-            Size::L => (t.base_gap_large, t.status_dot_size_large),
-            Size::XL => (t.base_gap_extra_large, t.status_dot_size_extra_large),
+            Size::S => (t.base_gap_small, t.ui_icon_small),
+            Size::M => (t.base_gap_medium, t.ui_icon_medium),
+            Size::L => (t.base_gap_large, t.ui_icon_large),
+            Size::XL => (t.base_gap_extra_large, t.ui_icon_extra_large),
         };
         let part = |name: &str| format!("{}/{name}", self.key);
         // shortcut: the recipe binds the ratio `line-height-100` (1.3 x the font size) because status-light has no

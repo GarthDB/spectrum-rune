@@ -34,22 +34,22 @@ impl Size {
             Size::S => Dims {
                 height: t.component_height_75,
                 gap: t.base_gap_small,
-                control: t.radio_button_control_size_small,
+                control: t.control_size_small,
             },
             Size::M => Dims {
                 height: t.component_height_100,
                 gap: t.base_gap_medium,
-                control: t.radio_button_control_size_medium,
+                control: t.control_size_medium,
             },
             Size::L => Dims {
                 height: t.component_height_200,
                 gap: t.base_gap_large,
-                control: t.radio_button_control_size_large,
+                control: t.control_size_large,
             },
             Size::XL => Dims {
                 height: t.component_height_300,
                 gap: t.base_gap_extra_large,
-                control: t.radio_button_control_size_extra_large,
+                control: t.control_size_extra_large,
             },
         }
     }

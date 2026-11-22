@@ -477,7 +477,7 @@ impl Button {
         let min_w = if self.label_hidden {
             0.0
         } else {
-            t.button_minimum_width_multiplier * d.height
+            t.aspect_ratio_600 * d.height
         };
         let outer = self.width.map(|w| w.max(min_w));
         let label_w = outer.map(|w| w - 2.0 * pad - if show_icon { d.icon + d.gap } else { 0.0 });

@@ -1,6 +1,6 @@
 {
   "specVersion": "1.0.0-draft",
-  "foundationVersion": "@adobe/spectrum-design-data@3.15.1",
+  "foundationVersion": "@adobe/spectrum-design-data@3.31.1",
   "platform": "rune",
   "platformVersion": "spectrum-rune (Rune, Rust)",
   "repository": "https://github.com/GarthDB/spectrum-rune"
