@@ -8,6 +8,15 @@ components has been changed for these yet (a14.62). "Follow upstream" means Rune
 Rune already reads the renamed tokens (`control_size_*`, `aspect_ratio_600`, `status_dot_size_*`), so a failing
 test below is most likely a difference between what Rune computes from them and what the new oracle draws, not a missing token (not yet checked test by test).
 
+## Status after the first part of slice 3
+
+- Rows 2 and 3 (checkbox, switch): the failures were the test probes, not the components. The oracle puts odd-sized mobile L controls at half-pixel positions and `probe` rounded the edge outward; an edge at exactly .5 is now snapped like Rune does. Both pixel tests pass.
+- Row 4 (action button): the recipe binds `base-height-*` for every size now, Rune used `component-height-*`; the two differ only at XS mobile (26 vs 25). Rune now reads `base_height_*`. Test passes.
+- Row 5 (accordion): tests and regen script updated; the open item's content padding (10 + 15) is now pinned in the tests (`CONTENT_PAD`) because the oracle no longer draws it. Tests pass.
+- Row 6 (status light desktop S, 8 to 10): Rune follows the data through the generated token, so its tests pass. Revert if upstream (#2046) decides on 8.
+- Row 7 (wrap): checkbox, switch, radio and the rest pass. Status light has no wrapped case left because the 3.31.1 recipe never wraps its label (reported: adobe/spectrum-design-data#2047); its two wrap tests are `#[ignore]`d with that reason.
+- Row 1 (radio button) is held for a decision: `control_border_and_dot_match_oracle` fails at mobile L (the control is 23 px, odd, in the oracle). Everything else in the suite passes.
+
 ## Summary and proposals
 
 | # | Component | What changed in the oracle | Likely cause | Proposal |
