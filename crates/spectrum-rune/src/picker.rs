@@ -6,8 +6,9 @@
 //! What the recipe does not draw, and so this does not either: `labelPosition: side` (the label
 //! stays on top), `isQuiet` beyond the smaller end padding (the fill stays the field fill), a
 //! disabled fill (only the ink dims), a hover or key-focus ink for the placeholder, and a focus
-//! look beyond the ring and the key-focus ink. `description`, `isRequired` and the necessity
-//! indicator are not built yet (the recipe composes help-text and the field-label asterisk).
+//! look beyond the ring and the key-focus ink, `necessityIndicator: text` and `errorMessage` (nothing is drawn for
+//! them). `description` is the help text under the field (the alert icon and negative colour when `error`), and
+//! `required` the asterisk after the label.
 //!
 //! Press, Space, Enter and Arrow Down call [`Picker::on_open`]; the app opens its own menu and
 //! tells the field through [`Picker::open`] (accessibility `expanded`).
@@ -18,11 +19,13 @@
 use crate::button::press_scale;
 use crate::constraints::{self, OptionValue};
 use crate::font;
-use crate::icons::CHEVRON_100;
+use crate::icons::{
+    ASTERISK_100, ASTERISK_200, ASTERISK_300, CHEVRON_100, WORKFLOW_ALERT_TRIANGLE,
+};
 use crate::interaction::{Interaction, State};
 use crate::tokens::{Tokens, Typography};
 use rune::tok::motion::SNAPPY;
-use rune::{col, el, icon, row, text, El, Key, Mods};
+use rune::{col, el, icon, row, text, El, Icon, Key, Mods};
 use std::f32::consts::FRAC_PI_2;
 use std::rc::Rc;
 
@@ -40,6 +43,9 @@ struct Dims {
     radius: f32,
     value: Typography,
     label: Typography,
+    gap: f32,
+    asterisk: (&'static Icon, f32),
+    alert: f32,
 }
 
 impl Size {
@@ -74,6 +80,28 @@ impl Size {
                 t.component_xl_regular,
             ),
         };
+        let (gap, asterisk, alert) = match self {
+            Size::S => (
+                t.base_gap_small,
+                (&ASTERISK_100, t.asterisk_size_100),
+                t.workflow_icon_small,
+            ),
+            Size::M => (
+                t.base_gap_medium,
+                (&ASTERISK_100, t.asterisk_size_100),
+                t.workflow_icon_medium,
+            ),
+            Size::L => (
+                t.base_gap_large,
+                (&ASTERISK_200, t.asterisk_size_200),
+                t.workflow_icon_large,
+            ),
+            Size::XL => (
+                t.base_gap_extra_large,
+                (&ASTERISK_300, t.asterisk_size_300),
+                t.workflow_icon_extra_large,
+            ),
+        };
         Dims {
             height,
             width,
@@ -86,6 +114,9 @@ impl Size {
                 line_height: t.line_height_100 * value.size,
                 ..value
             },
+            gap,
+            asterisk,
+            alert,
         }
     }
 }
@@ -101,6 +132,8 @@ pub struct Picker {
     quiet: bool,
     disabled: bool,
     error: bool,
+    required: bool,
+    description: Option<String>,
     open: bool,
     width: Option<f32>,
     on_open: Option<Open>,
@@ -120,6 +153,8 @@ impl Picker {
             quiet: false,
             disabled: false,
             error: false,
+            required: false,
+            description: None,
             open: false,
             width: None,
             on_open: None,
@@ -162,6 +197,17 @@ impl Picker {
         self
     }
     /// Field width in points (the oracle's `--width`); the size's `field-width` token without it.
+    /// Shows the required asterisk after the label (`isRequired` with the icon necessity indicator; the oracle does
+    /// not draw the text indicator).
+    pub fn required(mut self, v: bool) -> Self {
+        self.required = v;
+        self
+    }
+    /// Help text under the field. With [`Picker::error`] it is the error text: negative colour and the alert icon.
+    pub fn description(mut self, d: impl Into<String>) -> Self {
+        self.description = Some(d.into());
+        self
+    }
     pub fn width(mut self, w: f32) -> Self {
         self.width = Some(w);
         self
@@ -189,12 +235,17 @@ impl Picker {
 
     /// The builder state under the catalog's option names.
     pub fn options(&self) -> Vec<(&'static str, OptionValue<'static>)> {
-        vec![
+        let mut o = vec![
             ("size", OptionValue::Str(self.size.as_str())),
             ("isQuiet", OptionValue::Bool(self.quiet)),
             ("isDisabled", OptionValue::Bool(self.disabled)),
             ("isError", OptionValue::Bool(self.error)),
-        ]
+            ("isRequired", OptionValue::Bool(self.required)),
+        ];
+        if self.description.is_some() {
+            o.push(("description", OptionValue::Present));
+        }
+        o
     }
 
     pub fn build(self, t: &Tokens) -> El {
@@ -249,6 +300,10 @@ impl Picker {
         if let Some(v) = &self.value {
             field = field.a11y_value(v.clone());
         }
+        // The help text is the field's description for assistive technology (the text node itself is hidden).
+        if let Some(h) = &self.description {
+            field = field.description(h.clone());
+        }
 
         // The key-focus ink is laid over the value and the icon while the field shows keyboard focus.
         let focus_ink = |e: El| {
@@ -296,14 +351,54 @@ impl Picker {
                 .color(subdued)
                 .a11y_hidden()
                 .font(font::text_style(&d.label));
+            // The asterisk sits after the text, top-aligned with it.
+            let mut line = row().gap(d.gap).items_start().child(label);
+            if self.required {
+                line = line.child(
+                    icon(d.asterisk.0, d.asterisk.1)
+                        .key(part("field-label.necessity-indicator"))
+                        .color(subdued)
+                        .a11y_hidden(),
+                );
+            }
             root = root.child(
                 row()
                     .key(part("field-label"))
                     .h(d.height)
                     .center_y()
-                    .child(label),
+                    .child(line),
             );
         }
-        crate::hug(root.child(field))
+        root = root.child(field);
+        if let Some(help) = self.description {
+            let (color, alert) = if self.error {
+                (t.negative_content_color_default, true)
+            } else {
+                (subdued, false)
+            };
+            // The row is one text line high; on a mobile scale the icon is taller and overflows it, as in the oracle.
+            let mut line = row()
+                .key(part("help-text"))
+                .h(d.label.line_height)
+                .gap(d.gap)
+                .items_start();
+            if alert {
+                line = line.child(
+                    icon(&WORKFLOW_ALERT_TRIANGLE, d.alert)
+                        .key(part("help-text.icon"))
+                        .color(color)
+                        .a11y_hidden(),
+                );
+            }
+            root = root.child(
+                line.child(
+                    text(help)
+                        .key(part("help-text.text"))
+                        .color(color)
+                        .font(font::text_style(&d.label)),
+                ),
+            );
+        }
+        crate::hug(root)
     }
 }

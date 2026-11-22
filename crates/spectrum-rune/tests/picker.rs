@@ -18,6 +18,8 @@ struct App {
     quiet: bool,
     error: bool,
     disabled: bool,
+    required: bool,
+    help: bool,
     opens: u32,
 }
 
@@ -34,7 +36,12 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
             Scale::Desktop
         },
     );
-    let p = Picker::new("pk").label("Country");
+    let p = Picker::new("pk").label("Country").required(a.required);
+    let p = if a.help {
+        p.description("Help text")
+    } else {
+        p
+    };
     let p = if a.placeholder {
         p.placeholder("Select")
     } else {
@@ -111,9 +118,9 @@ fn app_for(c: &Value) -> App {
             _ => Size::XL,
         }),
         placeholder: c["content"] == "placeholder",
-        quiet: c["quiet"].as_bool().unwrap(),
+        quiet: c["quiet"].as_bool().unwrap_or(false),
         error: c["error"].as_bool().unwrap(),
-        disabled: c["disabled"].as_bool().unwrap(),
+        disabled: c["disabled"].as_bool().unwrap_or(false),
         ..App::default()
     }
 }
@@ -283,4 +290,78 @@ fn long_value_truncates_before_the_icon() {
         part(&rt, "disclosure-icon").unwrap().target,
     );
     assert!(v[0] + v[2] <= i[0] + 0.5, "value {v:?} reaches icon {i:?}");
+}
+
+/// The help text, the alert icon of an error and the required asterisk against `picker_extras.json`.
+#[test]
+fn help_text_error_icon_and_required_asterisk_match_the_oracle() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/picker_extras.json")).unwrap();
+    assert_eq!(cases.len(), 128);
+    for c in &cases {
+        let what = format!(
+            "{} {} {} req={} help={} err={}",
+            c["scheme"], c["scale"], c["size"], c["required"], c["help"], c["error"]
+        );
+        let mut a = app_for(c);
+        a.required = c["required"].as_bool().unwrap();
+        a.help = c["help"].as_bool().unwrap();
+        let rt = runtime(a);
+        let origin = part(&rt, "container").unwrap().target;
+        near(origin[2], &c["container"]["w"], &format!("{what} w"));
+        near(origin[3], &c["container"]["h"], &format!("{what} h"));
+        let label = part(&rt, "field-label.label").unwrap();
+        assert_pos(&label, origin, &c["label"], &format!("{what} label"));
+        for (key, name) in [
+            ("indicator", "field-label.necessity-indicator"),
+            ("help_text", "help-text.text"),
+            ("help_icon", "help-text.icon"),
+        ] {
+            match part(&rt, name) {
+                None => assert!(c[key].is_null(), "{what}: {name} not drawn"),
+                Some(got) => {
+                    assert!(
+                        !c[key].is_null(),
+                        "{what}: {name} drawn, the oracle has none"
+                    );
+                    if key == "indicator" {
+                        // It follows the label's measured width (the installed font's, not the oracle's): the
+                        // gap after the label and the top are the oracle's.
+                        let gap = |l: &ElementInfo, i: f32| i - (l.target[0] + l.target[2]);
+                        let want = f(&c[key]["x"]) - (f(&c["label"]["x"]) + f(&c["label"]["w"]));
+                        near_abs(
+                            gap(&label, got.target[0] - origin[0]),
+                            want,
+                            &format!("{what} {name} gap"),
+                        );
+                        near(
+                            got.target[1] - origin[1],
+                            &c[key]["y"],
+                            &format!("{what} {name} y"),
+                        );
+                    } else {
+                        assert_pos(&got, origin, &c[key], &format!("{what} {name}"));
+                    }
+                    // A text's width is the installed font's.
+                    if key != "help_text" {
+                        near(got.target[2], &c[key]["w"], &format!("{what} {name} w"));
+                        near(got.target[3], &c[key]["h"], &format!("{what} {name} h"));
+                    }
+                    assert_color(
+                        got.text_color.unwrap(),
+                        c[key]["color"].as_str().unwrap(),
+                        &format!("{what} {name}"),
+                    );
+                }
+            }
+        }
+    }
+}
+
+fn f(v: &Value) -> f32 {
+    v.as_f64().unwrap() as f32
+}
+
+fn near_abs(got: f32, want: f32, what: &str) {
+    assert!((got - want).abs() <= 1.0, "{what}: got {got}, want {want}");
 }

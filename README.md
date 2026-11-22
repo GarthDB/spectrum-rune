@@ -362,8 +362,8 @@ dataset changes nothing.
 - **RTL** is not handled.
 - **Picker.** The closed field only: the menu and popover are not built (`on_open` is where the app opens its
   own). The recipe draws no `labelPosition: side` (the label stays on top), no quiet look beyond the end padding
-  (the fill stays), no disabled fill (only the ink dims) and no placeholder hover ink; `description`, `isRequired` and
-  `necessityIndicator` (help-text and the label's asterisk) are not built yet. The disclosure icon's 16 px is neither in
+  (the fill stays), no disabled fill (only the ink dims) and no placeholder hover ink; `description` (help text, with the alert icon when in error) and `isRequired` (the label's asterisk) are built; the
+  oracle draws nothing for `necessityIndicator: text`, `errorMessage` or `labelPosition: side`, so those are not. The disclosure icon's 16 px is neither in
   the recipe nor in the tokens. A picker without a label omits the label row, which the oracle still reserves
   (a field-label of 0 width and the full control height).
 - **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
