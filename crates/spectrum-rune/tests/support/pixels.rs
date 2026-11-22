@@ -192,15 +192,34 @@ pub fn scaled(r: [f32; 4], k: f32) -> [f32; 4] {
     [r[0] + (r[2] - w) / 2.0, r[1] + (r[3] - h) / 2.0, w, h]
 }
 
+/// An edge at exactly half a pixel (the oracle puts odd-sized controls there on a mobile scale) is
+/// snapped to the nearest pixel, as Rune snaps it; any other fraction rounds outward.
+fn lo(v: f32) -> f32 {
+    if (v.fract() - 0.5).abs() < 1e-3 {
+        v.round()
+    } else {
+        v.floor()
+    }
+}
+
+fn hi(v: f32) -> f32 {
+    if (v.fract() - 0.5).abs() < 1e-3 {
+        v.round()
+    } else {
+        v.ceil()
+    }
+}
+
 /// The pixel `depth` pixels in from the middle of `side` of `r` (0 is the outermost pixel inside
-/// it, -1 the first one outside), at scale 1. An edge at a fraction is rounded outward.
+/// it, -1 the first one outside), at scale 1. An edge at a fraction is rounded outward, except
+/// at exactly half a pixel (see [`lo`]).
 pub fn probe(px: &Pixels, r: [f32; 4], side: Side, depth: i32) -> [u8; 4] {
     let (cx, cy) = ((r[0] + r[2] / 2.0).floor(), (r[1] + r[3] / 2.0).floor());
     let (x, y) = match side {
-        Side::Left => (r[0].floor() + depth as f32, cy),
-        Side::Right => ((r[0] + r[2]).ceil() - 1.0 - depth as f32, cy),
-        Side::Top => (cx, r[1].floor() + depth as f32),
-        Side::Bottom => (cx, (r[1] + r[3]).ceil() - 1.0 - depth as f32),
+        Side::Left => (lo(r[0]) + depth as f32, cy),
+        Side::Right => (hi(r[0] + r[2]) - 1.0 - depth as f32, cy),
+        Side::Top => (cx, lo(r[1]) + depth as f32),
+        Side::Bottom => (cx, hi(r[1] + r[3]) - 1.0 - depth as f32),
     };
     px.at(x as u32, y as u32)
 }

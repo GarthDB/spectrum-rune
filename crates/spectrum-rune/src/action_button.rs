@@ -67,7 +67,7 @@ impl ActionButtonSize {
         use ActionButtonSize::*;
         match self {
             XS => Dims {
-                height: t.component_height_50,
+                height: t.base_height_extra_small,
                 gap: t.base_gap_extra_small,
                 icon: t.workflow_icon_extra_small,
                 pad: t.base_padding_horizontal_extra_small,
@@ -77,7 +77,7 @@ impl ActionButtonSize {
                 hold_glyph: &CORNER_TRIANGLE_75,
             },
             S => Dims {
-                height: t.component_height_75,
+                height: t.base_height_small,
                 gap: t.base_gap_small,
                 icon: t.workflow_icon_small,
                 pad: t.base_padding_horizontal_small,
@@ -87,7 +87,7 @@ impl ActionButtonSize {
                 hold_glyph: &CORNER_TRIANGLE_75,
             },
             M => Dims {
-                height: t.component_height_100,
+                height: t.base_height_medium,
                 gap: t.base_gap_medium,
                 icon: t.workflow_icon_medium,
                 pad: t.base_padding_horizontal_medium,
@@ -97,7 +97,7 @@ impl ActionButtonSize {
                 hold_glyph: &CORNER_TRIANGLE_100,
             },
             L => Dims {
-                height: t.component_height_200,
+                height: t.base_height_large,
                 gap: t.base_gap_large,
                 icon: t.workflow_icon_large,
                 pad: t.base_padding_horizontal_large,
@@ -107,7 +107,7 @@ impl ActionButtonSize {
                 hold_glyph: &CORNER_TRIANGLE_200,
             },
             XL => Dims {
-                height: t.component_height_300,
+                height: t.base_height_extra_large,
                 gap: t.base_gap_extra_large,
                 icon: t.workflow_icon_extra_large,
                 pad: t.base_padding_horizontal_extra_large,

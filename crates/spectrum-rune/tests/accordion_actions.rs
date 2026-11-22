@@ -180,7 +180,7 @@ fn matches_oracle_scene() {
         let header = part(&rt, "header").unwrap();
         close(
             item.target[3],
-            num(&c["item_h"]) + if open { 30.0 } else { 0.0 },
+            num(&c["item_h"]) + if open { 30.0 + 25.0 } else { 0.0 },
             &format!("{what} item h"),
         );
         close(

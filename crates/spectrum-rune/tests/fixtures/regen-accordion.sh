@@ -4,8 +4,7 @@
 # checkout to read instead (at the oracle.toml dataset commit).
 # Coordinates are relative to the `item`; the tests compare with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals, colours written as `r,g,b[,a]`.
-# `content_pad` is the content's own padding (top, bottom) from the scene's measurements: the
-# content's height is the CLI's placeholder, so only its padding and position are compared.
+# Data 3.31.1 draws no content part, so no content padding is recorded (accordion.rs pins it itself).
 #
 # Matrix (each block answers one question; the full cross product is far too big):
 #   A. geometry and colour at rest: sizes x densities x {closed, open} x the four scheme+scale
@@ -53,15 +52,12 @@ render() {
                    | with_entries(select(.value != null and .value != "transparent" and (.key | IN($keys[])))))
                ) | map_values(r) | (if .fill then .fill |= col else . end)
                | (if .color then .color |= col else . end) end;
-      def pad($k): [.measurements[] | select(.part == "content" and .prop == $k)][0].h;
     {scheme: $scheme, scale: $scale, size: $size, density: (if $density == "-" then null else $density end),
      open: $open, quiet: $quiet, disabled: $disabled, state: $state,
      item: part("accordion-item"; ["h", "fill"]),
      header: part("header"; ["h"]),
      icon: part("disclosure-icon"; ["x","y","w","h","color","rotation"]),
      title: part("title"; ["x","y","h","color"]),
-     content: part("content"; ["y","h"]),
-     content_pad: (if $open then [pad("paddingBlockStart"), pad("paddingBlockEnd")] else null end),
      divider: part("divider"; ["y","h","fill"])}
     | del(.item.x, .item.y, .header.x, .header.y, .content.x, .divider.x)
     | with_entries(select(.value != null))'

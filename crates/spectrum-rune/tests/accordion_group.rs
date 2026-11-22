@@ -199,7 +199,7 @@ fn stacked_items_add_up_to_the_item_oracle() {
             },
             ..App::default()
         });
-        let want = c["item"]["h"].as_f64().unwrap() as f32 + if open { BODY } else { 0.0 };
+        let want = c["item"]["h"].as_f64().unwrap() as f32 + if open { BODY + 25.0 } else { 0.0 }; // 25: the content padding the oracle no longer draws, see accordion.rs
         let group = el_of(&rt, "g").unwrap().target;
         let mut y = group[1];
         for i in ["a", "b", "c"] {
