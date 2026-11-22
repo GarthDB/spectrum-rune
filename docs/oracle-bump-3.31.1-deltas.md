@@ -6,7 +6,7 @@ components has been changed for these yet (a14.62). "Follow upstream" means Rune
 `main` against this branch, are the appendix.
 
 Rune already reads the renamed tokens (`control_size_*`, `aspect_ratio_600`, `status_dot_size_*`), so a failing
-test below is a difference between what Rune computes from them and what the new oracle draws, not a missing token.
+test below is most likely a difference between what Rune computes from them and what the new oracle draws, not a missing token (not yet checked test by test).
 
 ## Summary and proposals
 
