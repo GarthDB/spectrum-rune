@@ -400,13 +400,22 @@ fn weight(name: &str) -> Res<u16> {
     })
 }
 
+/// A typography token's line height in px: a dimension, or (data 4.0.0's Title and Body composites) a ratio of
+/// the font size.
+fn line_height(v: &Value) -> Res<f64> {
+    match v["lineHeight"].as_f64() {
+        Some(ratio) => Ok(ratio * dim(&v["fontSize"])?),
+        None => dim(&v["lineHeight"]),
+    }
+}
+
 fn typography(v: &Value) -> Res<String> {
     Ok(format!(
         "Typography {{ family: {:?}, size: {}, weight: {}, line_height: {}, letter_spacing_em: {} }}",
         v["fontFamily"].as_str().ok_or("typography without family")?,
         f(dim(&v["fontSize"])?),
         weight(v["fontWeight"].as_str().ok_or("typography without weight")?)?,
-        f(dim(&v["lineHeight"])?),
+        f(line_height(v)?),
         f(dim(&v["letterSpacing"])?),
     ))
 }

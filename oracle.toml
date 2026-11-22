@@ -12,6 +12,6 @@
 #   checkout; 0.31.0 the first whose `github` [source] fetches the render inputs.
 # dataset: spectrum-design-data commit the committed files were made from: @adobe/spectrum-design-data@3.31.1,
 #   the release platforms/rune/manifest.json and .design-data.toml pin.
-cli_min = "0.62.1"
-cli_max = "0.63.0"
-dataset = "9b5d97d"
+cli_min = "0.63.0"
+cli_max = "0.64.0"
+dataset = "4e33a65"
