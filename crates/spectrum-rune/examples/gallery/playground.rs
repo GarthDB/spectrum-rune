@@ -1278,7 +1278,7 @@ mod tests {
         use rune::{Env, Runtime};
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 7] = [
+        let shots: [(&str, &[(&str, &str)]); 8] = [
             ("badge", &[]),
             (
                 "button-hover",
@@ -1297,7 +1297,8 @@ mod tests {
                     ("button/style", "outline"),
                 ],
             ),
-            ("catalog-only", &[("/component", "picker")]),
+            ("catalog-only", &[("/component", "tabs")]),
+            ("picker", &[("/component", "picker")]),
             (
                 "button-compare",
                 &[
