@@ -366,6 +366,8 @@ dataset changes nothing.
   oracle draws nothing for `necessityIndicator: text`, `errorMessage` or `labelPosition: side`, so those are not. The disclosure icon's 16 px is neither in
   the recipe nor in the tokens. A picker without a label omits the label row, which the oracle still reserves
   (a field-label of 0 width and the full control height).
+  `picker_model::PickerModel` is the list's keyboard and selection behaviour (select-only combobox keys, type-ahead, no
+  drawing), tested without a window; nothing uses it yet (the playground's list is a stand-in).
 - **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
   group's layout (gap 0, each item keeping its divider) has no oracle: only the stacked item heights are
   checked against the item oracle. Per-item `disabled` is a Rune-side convenience; the catalog's
