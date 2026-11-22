@@ -6,11 +6,8 @@ manifest.
 
 - `manifest.json`: identity and the foundation pin (`@adobe/spectrum-design-data@3.31.1`, the commit in `oracle.toml`).
 - `extensions/implementations/`: the `spectrum_rune::` type behind each component.
-- `extensions/components/status-light.json` and `extensions/visuals/status-light.json`: Status light as Rune defines it
-  before the foundation does: the component with its anatomy fixed (`container`, `dot`, `label`; a whole-file copy of the
-  foundation component, so re-sync it when the pin moves) and a recipe bound only through relationships. It is as tall as
-  its text with the dot centred on the first line, as Figma and React Spectrum S2 draw it. The oracle for `StatusLight`;
-  the workflow trial for promoting a component and recipe upstream (bead 4qa.7, adobe/spectrum-design-data#1761).
+- Status light has no extension any more: foundation 3.31.1 ships its own component and recipe (the promotion
+  trial of bead 4qa.7, adobe/spectrum-design-data#1761, landed), and `StatusLight` is checked against that.
 - `extensions/visuals/radio-group.json`: a recipe the foundation does not have yet. It is the oracle for
   `RadioGroup` and a candidate to promote (artifact move, `platforms/README.md` in spectrum-design-data).
 

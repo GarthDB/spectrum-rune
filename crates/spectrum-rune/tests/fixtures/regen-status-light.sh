@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Regenerates status_light_scene.json from the oracle: the `status-light` recipe in platforms/rune/extensions/visuals
-# (with its component in the sibling extension; the foundation has neither yet), rendered as the `rune` platform by `design-data` (versions in oracle.toml) against the pinned foundation
-# release (see regen-radio-button.sh). Coordinates are relative to the container.
+# Regenerates status_light_scene.json from the oracle: the foundation's `status-light` recipe, rendered as the `rune`
+# platform by `design-data` (versions in oracle.toml) against the pinned foundation release (see regen-radio-button.sh). Coordinates are relative to the container.
 # Also writes status_light_wrap.json: the oracle at a request width (wrap.sh), where the label wraps.
 #
 # Matrix: every variant of the catalog component x the four scheme+scale corners at size M, then sizes S, L, XL x the

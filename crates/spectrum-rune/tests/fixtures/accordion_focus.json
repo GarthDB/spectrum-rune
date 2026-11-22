@@ -15,7 +15,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -35,7 +35,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -55,7 +55,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -75,7 +75,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -95,7 +95,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -115,7 +115,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -135,7 +135,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -155,7 +155,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "19,19,19",
     "icon": "19,19,19"
   },
@@ -175,7 +175,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -195,7 +195,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -215,7 +215,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -235,7 +235,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -255,7 +255,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -275,7 +275,7 @@
     "quiet": false,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -295,7 +295,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
@@ -315,7 +315,7 @@
     "quiet": true,
     "disabled": false,
     "state": "hover+keyboard-focus",
-    "item_fill": null,
+    "item_fill": "0,0,0,0.08",
     "title": "242,242,242",
     "icon": "242,242,242"
   },
