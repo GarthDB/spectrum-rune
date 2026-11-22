@@ -15,6 +15,7 @@ use spectrum_rune::constraints::{
 use spectrum_rune::font;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::interaction::State;
+use spectrum_rune::picker::Picker;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale, Tokens};
@@ -22,9 +23,10 @@ use spectrum_rune::Size;
 
 type Opts = Vec<(&'static str, OptionValue<'static>)>;
 
-const COMPONENTS: [(&str, &str); 3] = [
+const COMPONENTS: [(&str, &str); 4] = [
     ("badge", "Badge"),
     ("button", "Button"),
+    ("picker", "Picker"),
     ("status-light", "Status light"),
 ];
 
@@ -54,6 +56,12 @@ fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> 
                     ("keyboard-focus", "keyboard focus"),
                 ],
             ),
+        ],
+        "picker" => vec![
+            ("label", [label, vec![("none", "none")]].concat()),
+            ("value", vec![("none", "none"), ("canada", "Canada")]),
+            ("placeholder", vec![("select", "Select"), ("none", "none")]),
+            ("width", width),
         ],
         "status-light" => vec![("label", label), ("width", width)],
         _ => Vec::new(),
@@ -205,6 +213,24 @@ fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
             }
             (b.options(), b.build(t))
         }
+        "picker" => {
+            let mut p = Picker::new(key)
+                .label(label)
+                .size(size_of(&v("size")))
+                .quiet(v("isQuiet") == "true")
+                .disabled(v("isDisabled") == "true")
+                .error(v("isError") == "true");
+            if let Some(x) = picker_text(s, "value") {
+                p = p.value(x);
+            }
+            if let Some(x) = picker_text(s, "placeholder") {
+                p = p.placeholder(x);
+            }
+            if let Some(w) = width {
+                p = p.width(w);
+            }
+            (p.options(), p.build(t))
+        }
         "button" => {
             let on = |opt: &str| v(opt) == "true";
             let mut b = Button::new(key)
@@ -258,6 +284,15 @@ fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
     }
 }
 
+/// The picker's free-text presets: `None` for `none`.
+fn picker_text(s: &G, opt: &str) -> Option<&'static str> {
+    match (opt, extra(s, "picker", opt).as_str()) {
+        ("value", "canada") => Some("Canada"),
+        ("placeholder", "select") => Some("Select"),
+        _ => None,
+    }
+}
+
 /// The `design-data render` arguments for the chosen values (the catalog option names, `--size`, scheme, scale).
 fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
     let mut a: Vec<String> = vec![
@@ -299,7 +334,17 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
     if let Some(x) = size {
         a.extend(["--size".to_owned(), x.to_owned()]);
     }
-    if label || comp != "badge" {
+    // The picker's label is an option of the recipe (its field-label), not `--label`.
+    if comp == "picker" {
+        if label {
+            let text = if extra(s, comp, "label") == "long" {
+                WRAPPED
+            } else {
+                "Label"
+            };
+            a.extend(["--option".to_owned(), format!("label=\"{text}\"")]);
+        }
+    } else if label || comp != "badge" {
         let text = if extra(s, comp, "label") == "long" {
             WRAPPED
         } else {
@@ -311,6 +356,13 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
         let state = extra(s, comp, "state");
         if state != "rest" {
             a.extend(["--state".to_owned(), state]);
+        }
+    }
+    if comp == "picker" {
+        for opt in ["value", "placeholder"] {
+            if let Some(x) = picker_text(s, opt) {
+                a.extend(["--option".to_owned(), format!("{opt}=\"{x}\"")]);
+            }
         }
     }
     if let Ok(w) = extra(s, comp, "width").parse::<f32>() {
@@ -1120,8 +1172,8 @@ mod tests {
                     let reported = preview(&s, comp, t).0;
                     for name in ["label", "icon"] {
                         let has = |o: &Opts| o.iter().any(|(n, _)| *n == name);
-                        // Button's builder does not report its label (no visual option of its own).
-                        if comp == "button" && name == "label" {
+                        // Button and Picker builders do not report their label (no visual option of their own).
+                        if matches!(comp, "button" | "picker") && name == "label" {
                             continue;
                         }
                         assert_eq!(has(&derived), has(&reported), "{comp} {opt} = {id}: {name}");
@@ -1226,7 +1278,7 @@ mod tests {
         use rune::{Env, Runtime};
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
         std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 7] = [
+        let shots: [(&str, &[(&str, &str)]); 8] = [
             ("badge", &[]),
             (
                 "button-hover",
@@ -1245,7 +1297,8 @@ mod tests {
                     ("button/style", "outline"),
                 ],
             ),
-            ("catalog-only", &[("/component", "picker")]),
+            ("catalog-only", &[("/component", "tabs")]),
+            ("picker", &[("/component", "picker")]),
             (
                 "button-compare",
                 &[

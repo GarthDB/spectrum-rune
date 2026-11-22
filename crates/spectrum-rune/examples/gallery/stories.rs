@@ -12,6 +12,7 @@ use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::constraints::{check, OptionValue, Severity};
 use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
+use spectrum_rune::picker::Picker;
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
@@ -45,6 +46,7 @@ stories! {
     "button" => "Button", button;
     "action-button" => "Action button", action_button;
     "badge" => "Badge", badge;
+    "picker" => "Picker", picker;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -498,6 +500,36 @@ fn badge(_: &G, t: &'static Tokens) -> El {
         })),
     ));
     page(sections)
+}
+
+/// The closed field only: pressing, Space, Enter or Arrow Down flips `expanded` (there is no menu).
+fn picker(s: &G, t: &'static Tokens) -> El {
+    let pk = |name: &str| {
+        let key = format!("picker/{name}");
+        Picker::new(key.clone())
+            .label("Country")
+            .placeholder("Select")
+            .open(s.on(&key, false))
+            .on_open(flip(key))
+    };
+    let states = flow()
+        .child(pk("placeholder").build(t))
+        .child(pk("value").value("Canada").build(t))
+        .child(pk("quiet").value("Canada").quiet(true).build(t))
+        .child(pk("error").value("Canada").error(true).build(t))
+        .child(pk("dis").value("Canada").disabled(true).build(t))
+        .child(pk("dis-ph").disabled(true).build(t));
+    let sizes =
+        flow().children(SIZES.map(|(z, n)| pk(&format!("size-{n}")).value(n).size(z).build(t)));
+    let truncated = pk("truncated")
+        .value("A value too long for the field is cut off at the end")
+        .width(160.0)
+        .build(t);
+    page(vec![
+        section(t, "States", states),
+        section(t, "Sizes", sizes),
+        section(t, "Truncated value (width 160)", truncated),
+    ])
 }
 
 fn status_light(_: &G, t: &'static Tokens) -> El {
