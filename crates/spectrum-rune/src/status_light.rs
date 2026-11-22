@@ -1,5 +1,4 @@
-//! Spectrum Status light, from the `status-light` recipe in `platforms/rune/extensions/visuals/status-light.json`
-//! (the foundation has none yet; see the manifest README): container > dot, label. The dot is aligned with the top
+//! Spectrum Status light, from the foundation's `status-light` recipe (visuals/status-light.json): container > dot, label. The dot is aligned with the top
 //! of the label's first line, both starting at the block padding. Every size, colour and type value comes from [`Tokens`].
 //!
 //! Variants: the six semantic ones and the named colours, as in the Figma Web POC.

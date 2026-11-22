@@ -4,8 +4,7 @@
 # checkout to read instead (at the oracle.toml dataset commit).
 # Coordinates are relative to the `item`; the tests compare with 1px / 3-per-channel tolerance.
 # Only the fields the tests read are kept, rounded to 2 decimals, colours written as `r,g,b[,a]`.
-# `content_pad` is the content's own padding (top, bottom) from the scene's measurements: the
-# content's height is the CLI's placeholder, so only its padding and position are compared.
+# Data 3.31.1 draws no content part, so no content padding is recorded (accordion.rs pins it itself).
 #
 # Matrix (each block answers one question; the full cross product is far too big):
 #   A. geometry and colour at rest: sizes x densities x {closed, open} x the four scheme+scale
@@ -43,7 +42,7 @@ render() {
   design-data render accordion "${args[@]}" | jq -c \
     --arg size "$size" --arg density "$density" --arg state "$state" --arg scheme "$scheme" --arg scale "$scale" \
     --argjson open "$open" --argjson quiet "$quiet" --argjson disabled "$disabled" '
-    (.nodes[] | select(.part == "item")) as $i
+    (.nodes[] | select(.part == "accordion-item")) as $i
     | def r: if type == "number" then (. * 100 | round / 100) else . end;
       def col: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
       def part($p; $keys): [.nodes[] | select(.part == $p)][0]
@@ -53,15 +52,12 @@ render() {
                    | with_entries(select(.value != null and .value != "transparent" and (.key | IN($keys[])))))
                ) | map_values(r) | (if .fill then .fill |= col else . end)
                | (if .color then .color |= col else . end) end;
-      def pad($k): [.measurements[] | select(.part == "content" and .prop == $k)][0].h;
     {scheme: $scheme, scale: $scale, size: $size, density: (if $density == "-" then null else $density end),
      open: $open, quiet: $quiet, disabled: $disabled, state: $state,
-     item: part("item"; ["h", "fill"]),
+     item: part("accordion-item"; ["h", "fill"]),
      header: part("header"; ["h"]),
      icon: part("disclosure-icon"; ["x","y","w","h","color","rotation"]),
      title: part("title"; ["x","y","h","color"]),
-     content: part("content"; ["y","h"]),
-     content_pad: (if $open then [pad("paddingBlockStart"), pad("paddingBlockEnd")] else null end),
      divider: part("divider"; ["y","h","fill"])}
     | del(.item.x, .item.y, .header.x, .header.y, .content.x, .divider.x)
     | with_entries(select(.value != null))'
@@ -126,7 +122,7 @@ focus_case() {
     def col: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
     def node($p): [.nodes[] | select(.part == $p)][0];
     {scheme: $scheme, open: $open, quiet: $quiet, disabled: $dis, state: $state,
-     item_fill: (node("item").fill | col), title: (node("title").color | col),
+     item_fill: (node("accordion-item").fill | col), title: (node("title").color | col),
      icon: (node("disclosure-icon").color | col)}'
 }
 {
@@ -157,7 +153,7 @@ actions_case() {
   design-data render accordion "${args[@]}" | jq -c \
     --arg acts "$acts" --arg size "$size" --arg density "$density" --arg scheme "$scheme" --arg scale "$scale" \
     --argjson open "$open" --argjson dis "$dis" '
-    (.nodes[] | select(.part == "item")) as $i
+    (.nodes[] | select(.part == "accordion-item")) as $i
     | def r: if type == "number" then (. * 100 | round / 100) else . end;
       def col: if type == "string" then gsub("rgba?\\(|\\)| "; "") else . end;
       def part($p): [.nodes[] | select(.part == $p)][0]
@@ -167,11 +163,11 @@ actions_case() {
                | map_values(r) | (if .fill then .fill |= col else . end)
                | (if .color then .color |= col else . end)
                | (if .stroke then .stroke |= col else . end) end;
-      (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "direct-actions")) as $d
+      (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "actions")) as $d
     | {scheme: $scheme, scale: $scale, size: $size, density: $density, open: $open, disabled: $dis, actions: $acts,
        item_h: ($i.h | r), header_h: (part("header").h),
        title_gap: (($d.x - ($t.x + $t.w)) | r),
-       direct: part("direct-actions"),
+       direct: part("actions"),
        button: part("action-button"), button_icon: part("action-button.icon"), button_hold: part("action-button.hold-icon"),
        switch: part("switch"), track: part("switch.track"), handle: part("switch.handle")}
     | with_entries(select(.value != null))'
@@ -194,7 +190,7 @@ overflow="$(dirname "$out")/accordion_actions_gap.json"
 for size in m l xl; do
   design-data render accordion --size $size --format scene --label "A much longer accordion title to exceed the minimum width of the item" \
     --option hasSwitch=true 2>/dev/null | jq -c --arg size "$size" '
-    (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "direct-actions")) as $d
+    (.nodes[] | select(.part == "title")) as $t | (.nodes[] | select(.part == "actions")) as $d
     | {size: $size, gap: (($d.x - ($t.x + $t.w)) * 100 | round / 100)}'
 done | jq -s . > "$overflow"
 echo "wrote $overflow"

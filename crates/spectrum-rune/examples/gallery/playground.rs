@@ -1505,7 +1505,7 @@ mod tests {
         rt.pointer_up(x, y);
         rt.frame(0.05);
         let tree = rt.accessibility_json().to_string();
-        assert!(tree.contains("component-height-"), "{tree}");
+        assert!(tree.contains("base-height-"), "{tree}");
     }
 
     /// The oracle runs by itself once the options have been still for the delay, and not before.

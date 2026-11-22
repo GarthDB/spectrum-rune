@@ -2,10 +2,9 @@
 //! Regenerate the fixture with `tests/fixtures/regen-accordion.sh` (its header explains the
 //! matrix and why).
 //!
-//! The content's height is the CLI's placeholder (0 high; the item is only the recipe's padding),
-//! so the test puts a 30 high body in the content and compares the content's position, its two
+//! The oracle draws no content since data 3.31.1 (see `CONTENT_PAD`), so the test puts a 30 high body in the content and compares the content's position, its two
 //! paddings (body offset inside, and what is left below the body) and that the divider sits at the
-//! bottom of whatever the app supplied: item height and divider y are the oracle's plus 30.
+//! bottom of whatever the app supplied: item height and divider y are the oracle's plus 30 and the content padding.
 //!
 //! Not asserted from the element, because `ElementInfo` does not expose it: the chevron's rotation
 //! (read from pixels in `tests/accordion_pixels.rs`, with the divider's colour and the hover
@@ -20,6 +19,10 @@ use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
 use spectrum_rune::Size;
 
 const BODY: f32 = 30.0;
+/// The content's own padding (top, bottom). Data 3.31.1's recipe draws no content part, so the oracle no
+/// longer says what an open item adds; these are the values it gave through 3.15.1 (same at every size and
+/// scale), kept so the component's behaviour stays pinned. Re-derive them if the recipe regains a content part.
+const CONTENT_PAD: [f32; 2] = [10.0, 15.0];
 
 #[derive(Clone)]
 pub struct App {
@@ -204,7 +207,11 @@ fn matches_oracle_scene() {
         }
 
         // Whatever the app put in the content moves everything below it.
-        let extra = if open { BODY } else { 0.0 };
+        let extra = if open {
+            BODY + CONTENT_PAD[0] + CONTENT_PAD[1]
+        } else {
+            0.0
+        };
         let item = part(&rt, "item").unwrap();
         let o = item.target;
         close(
@@ -276,7 +283,7 @@ fn matches_oracle_scene() {
         if let Some(content) = content {
             close(
                 content.target[1] - o[1],
-                num(&c["content"]["y"]),
+                num(&c["header"]["h"]),
                 &format!("{what} content y"),
             );
             close(
@@ -294,7 +301,7 @@ fn matches_oracle_scene() {
                 &format!("{what} content x"),
             );
             close(body.target[0], item.target[0], &format!("{what} body x"));
-            let [top, bottom] = [num(&c["content_pad"][0]), num(&c["content_pad"][1])];
+            let [top, bottom] = CONTENT_PAD;
             close(
                 body.target[1] - content.target[1],
                 top,

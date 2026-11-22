@@ -44,7 +44,7 @@ impl Size {
             Size::S => Dims {
                 height: t.component_height_75,
                 gap: t.base_gap_small,
-                control: t.checkbox_control_size_small,
+                control: t.control_size_small,
                 radius: t.corner_radius_small_size_small,
                 mark: 8.0,
                 mark_set: 75,
@@ -53,7 +53,7 @@ impl Size {
             Size::M => Dims {
                 height: t.component_height_100,
                 gap: t.base_gap_medium,
-                control: t.checkbox_control_size_medium,
+                control: t.control_size_medium,
                 radius: t.corner_radius_small_size_medium,
                 mark: 10.0,
                 mark_set: 100,
@@ -62,7 +62,7 @@ impl Size {
             Size::L => Dims {
                 height: t.component_height_200,
                 gap: t.base_gap_large,
-                control: t.checkbox_control_size_large,
+                control: t.control_size_large,
                 radius: t.corner_radius_small_size_large,
                 mark: 10.0,
                 mark_set: 200,
@@ -71,7 +71,7 @@ impl Size {
             Size::XL => Dims {
                 height: t.component_height_300,
                 gap: t.base_gap_extra_large,
-                control: t.checkbox_control_size_extra_large,
+                control: t.control_size_extra_large,
                 radius: t.corner_radius_small_size_extra_large,
                 mark: 12.0,
                 mark_set: 300,
