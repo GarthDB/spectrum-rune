@@ -18,6 +18,7 @@ pub mod accordion;
 pub mod accordion_group;
 pub mod action_button;
 pub mod badge;
+pub mod breadcrumbs;
 pub mod button;
 pub mod checkbox;
 pub mod constraints;
