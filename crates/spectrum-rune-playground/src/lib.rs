@@ -4,8 +4,10 @@
 //! needs only an adapter (`preview`) from the chosen values to its builder. Dev-only: the token panel runs
 //! the oracle CLI (`oracle.rs`) on demand.
 
+pub mod adapters;
+pub mod oracle;
+
 use crate::adapters::{adapter, Choice, ADAPTERS, WRAPPED};
-use crate::G;
 use rune::{col, el, row, text, El};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::constraints::{
@@ -21,12 +23,50 @@ use spectrum_rune::Size;
 
 type Opts = crate::adapters::Opts;
 
+/// The CLI arguments an oracle run used, and its report or error.
+pub type OracleRun = (Vec<String>, Result<Report, String>);
+
+/// Everything the playground keeps between frames. A host holds one and exposes it through [`Host`].
+#[derive(Clone)]
+pub struct Play {
+    /// The chosen values, keyed `component/option` (the playground's own `/component`, `/picker`, `/compare`).
+    pub values: std::collections::HashMap<String, String>,
+    /// `None` follows the system until the host's scheme switch is used.
+    pub scheme: Option<ColorScheme>,
+    pub scale: Scale,
+    /// The last oracle run: the CLI arguments it ran with, and its report or error.
+    pub oracle: Option<OracleRun>,
+    /// The args an auto-run is waiting to run with, and when (`poll`'s clock): the debounce.
+    pub oracle_due: Option<(Vec<String>, f64)>,
+    /// The system scheme as the view last saw it, for `poll` (which has no `Cx`).
+    pub system_dark: std::cell::Cell<bool>,
+}
+
+impl Default for Play {
+    fn default() -> Self {
+        Play {
+            values: Default::default(),
+            scheme: None,
+            scale: Scale::Desktop,
+            oracle: None,
+            oracle_due: None,
+            system_dark: std::cell::Cell::new(false),
+        }
+    }
+}
+
+/// An app that hosts the playground: it owns a [`Play`], and the playground's buttons reach it through here.
+pub trait Host: 'static {
+    fn play(&self) -> &Play;
+    fn play_mut(&mut self) -> &mut Play;
+}
+
 /// Free-form options and the request width have no catalog values: a few presets each (the adapter's).
-fn extras(comp: &str) -> crate::adapters::Extras {
+pub fn extras(comp: &str) -> crate::adapters::Extras {
     adapter(comp).map_or_else(Vec::new, |a| a.extras())
 }
 
-fn lit_str(l: &Lit) -> String {
+pub fn lit_str(l: &Lit) -> String {
     match l {
         Lit::Str(s) => (*s).to_owned(),
         Lit::Bool(b) => b.to_string(),
@@ -39,20 +79,20 @@ fn default_of(def: &OptionDef) -> String {
     def.default.as_ref().map_or("none".to_owned(), lit_str)
 }
 
-fn pick<'a>(s: &'a G, comp: &str, opt: &str, default: &'a str) -> &'a str {
-    s.play
+fn pick<'a>(s: &'a Play, comp: &str, opt: &str, default: &'a str) -> &'a str {
+    s.values
         .get(&format!("{comp}/{opt}"))
         .map_or(default, String::as_str)
 }
 
-fn extra(s: &G, comp: &str, opt: &str) -> String {
+fn extra(s: &Play, comp: &str, opt: &str) -> String {
     let presets = extras(comp);
     let (_, list) = presets.iter().find(|(o, _)| *o == opt).unwrap();
     pick(s, comp, opt, list[0].0).to_owned()
 }
 
 /// The chosen values under the catalog's option names, with `over` (option, value) replacing one choice.
-fn options(s: &G, comp: &str, over: Option<(&str, &str)>) -> Opts {
+pub fn options(s: &Play, comp: &str, over: Option<(&str, &str)>) -> Opts {
     let mut o: Opts = Vec::new();
     for def in component(comp)
         .unwrap()
@@ -81,7 +121,7 @@ fn options(s: &G, comp: &str, over: Option<(&str, &str)>) -> Opts {
     o
 }
 
-fn errors(comp: &str, o: &Opts) -> Vec<&'static str> {
+pub fn errors(comp: &str, o: &Opts) -> Vec<&'static str> {
     check(comp, o)
         .into_iter()
         .filter(|v| v.severity == Severity::Error)
@@ -90,7 +130,7 @@ fn errors(comp: &str, o: &Opts) -> Vec<&'static str> {
 }
 
 /// Every rule the options break, errors and advisories, as (severity, description).
-fn reasons(comp: &str, o: &Opts) -> Vec<(Severity, &'static str)> {
+pub fn reasons(comp: &str, o: &Opts) -> Vec<(Severity, &'static str)> {
     check(comp, o)
         .into_iter()
         .map(|v| {
@@ -113,12 +153,12 @@ fn inherit(
 }
 
 /// The adapter: chosen values to the builder. Returns the builder's own `options()` and the built element.
-fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
+pub fn preview(s: &Play, comp: &str, t: &Tokens) -> (Opts, El) {
     preview_keyed(s, comp, t, "playground/preview")
 }
 
 /// `preview` with the key its parts are named under (`<key>/container`, ...): a second copy needs its own.
-fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
+fn preview_keyed(s: &Play, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
     adapter(comp)
         .expect("a previewed component")
         .build(&choice(s, comp), t, key)
@@ -126,7 +166,7 @@ fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
 
 /// The chosen values of `comp`: its catalog options (one source of truth: the catalog values and defaults
 /// `options` derives) and the preset chosen for each of its extras.
-fn choice(s: &G, comp: &str) -> Choice {
+fn choice(s: &Play, comp: &str) -> Choice {
     Choice {
         options: options(s, comp, None),
         extras: extras(comp)
@@ -138,7 +178,7 @@ fn choice(s: &G, comp: &str) -> Choice {
 
 /// The `design-data render` arguments for the chosen values (the catalog option names, `--size`, scheme, scale),
 /// then what the component's adapter adds (label, icon, state) and the width.
-fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
+pub fn oracle_args(s: &Play, comp: &str, dark: bool) -> Vec<String> {
     let mut a: Vec<String> = vec![
         "--color-scheme".into(),
         if dark { "dark" } else { "light" }.into(),
@@ -175,8 +215,8 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
     a
 }
 
-struct Preview {
-    s: G,
+pub struct Preview {
+    s: Play,
     comp: &'static str,
     dark: bool,
 }
@@ -195,7 +235,7 @@ fn scheme(dark: bool) -> ColorScheme {
 
 /// What Rune drew for one part: its box relative to the container, fill (sRGB hex, alpha), corner radius
 /// and text colour. `ElementInfo` has no stroke or font size.
-struct RuneEl {
+pub struct RuneEl {
     rect: [f32; 4],
     fill: (String, f32),
     radius: f32,
@@ -204,7 +244,7 @@ struct RuneEl {
 
 /// Rune's own rendering of the current selection: the preview built in a throwaway runtime (the view of
 /// the real page cannot read element rects).
-fn rune_parts(s: &G, comp: &'static str, dark: bool) -> Vec<(String, RuneEl)> {
+pub fn rune_parts(s: &Play, comp: &'static str, dark: bool) -> Vec<(String, RuneEl)> {
     use rune::{Env, Runtime};
     let state = Preview {
         s: s.clone(),
@@ -243,7 +283,7 @@ fn rune_parts(s: &G, comp: &'static str, dark: bool) -> Vec<(String, RuneEl)> {
 }
 
 /// Whether the oracle's `rgb(..)`/`rgba(..)`/`transparent` is within 3 per channel of Rune's hex.
-fn same_color(oracle: &str, rune: &(String, f32)) -> bool {
+pub fn same_color(oracle: &str, rune: &(String, f32)) -> bool {
     let n: Vec<f32> = oracle
         .trim_start_matches("rgba(")
         .trim_start_matches("rgb(")
@@ -263,7 +303,7 @@ fn same_color(oracle: &str, rune: &(String, f32)) -> bool {
 }
 
 /// The alpha of Rune's `#rrggbb` or `#rrggbbaa` colour.
-fn hex_alpha(hex: &str) -> f32 {
+pub fn hex_alpha(hex: &str) -> f32 {
     hex.get(7..9)
         .and_then(|a| u8::from_str_radix(a, 16).ok())
         .map_or(1.0, |a| f32::from(a) / 255.0)
@@ -304,7 +344,12 @@ pub struct Report {
 /// Oracle vs Rune for the current selection: each oracle part's box (flagged when it differs by more
 /// than 1px), fill, radius and text colour against Rune's, and the tokens it reads. Parts that differ
 /// come first.
-fn compare(s: &G, comp: &'static str, dark: bool, args: &[String]) -> Result<Report, String> {
+pub fn compare(
+    s: &Play,
+    comp: &'static str,
+    dark: bool,
+    args: &[String],
+) -> Result<Report, String> {
     if let Some(why) = errors(comp, &options(s, comp, None)).first() {
         return Err(format!("not defined: {why}"));
     }
@@ -446,7 +491,7 @@ fn report_view(t: &'static Tokens, r: &Report) -> El {
 }
 
 /// An option's value for the panel: free-form ones (`label`, `icon`) as what the preview shows.
-fn shown_value(s: &G, comp: &str, name: &str, v: &OptionValue) -> String {
+pub fn shown_value(s: &Play, comp: &str, name: &str, v: &OptionValue) -> String {
     match (name, v) {
         ("label", OptionValue::Present) => match extra(s, comp, "label").as_str() {
             "long" => WRAPPED.to_owned(),
@@ -457,7 +502,7 @@ fn shown_value(s: &G, comp: &str, name: &str, v: &OptionValue) -> String {
     }
 }
 
-fn fmt(v: &OptionValue) -> String {
+pub fn fmt(v: &OptionValue) -> String {
     match v {
         OptionValue::Str(s) => (*s).to_owned(),
         OptionValue::Bool(b) => b.to_string(),
@@ -488,7 +533,7 @@ fn caption(t: &Tokens, s: impl Into<String>) -> El {
 
 /// One option: its values as buttons, the chosen one selected, an excluded one disabled. A value that
 /// would break an error rule says so; one that would only break an advisory stays available and says so.
-fn control(
+fn control<H: Host>(
     t: &'static Tokens,
     comp: &'static str,
     opt: &'static str,
@@ -526,8 +571,8 @@ fn control(
             .quiet(true)
             .selected(id == current)
             .disabled(blocked)
-            .on_press(move |g: &mut G| {
-                g.play.insert(key.clone(), id2.clone());
+            .on_press(move |g: &mut H| {
+                g.play_mut().values.insert(key.clone(), id2.clone());
             })
             .build(t)
     });
@@ -542,7 +587,7 @@ fn control(
 /// A static white or black Button is invisible on the stage's own surface, so it sits on a contrasting
 /// one: the darker of the two tokens behind white, the lighter behind black, in either scheme.
 /// shortcut: Spectrum has no backdrop token for static colours; these are stand-ins, see a14.56.
-fn backdrop(s: &G, comp: &str, t: &Tokens, built: El) -> El {
+fn backdrop(s: &Play, comp: &str, t: &Tokens, built: El) -> El {
     let on = match (comp, pick(s, comp, "staticColor", "none")) {
         ("button", c @ ("white" | "black")) => c,
         _ => return built,
@@ -565,7 +610,7 @@ fn backdrop(s: &G, comp: &str, t: &Tokens, built: El) -> El {
 }
 
 /// The component list's items in order: the previewed components, then the catalog-only ones, as (id, shown).
-fn menu_order() -> Vec<(&'static str, &'static str)> {
+pub fn menu_order() -> Vec<(&'static str, &'static str)> {
     ADAPTERS
         .iter()
         .map(|a| (a.id(), a.name()))
@@ -578,7 +623,7 @@ fn menu_order() -> Vec<(&'static str, &'static str)> {
         .collect()
 }
 
-fn selected(s: &G) -> &'static str {
+pub fn selected(s: &Play) -> &'static str {
     CATALOG
         .iter()
         .find(|c| c.name == pick(s, "", "component", "badge"))
@@ -586,7 +631,7 @@ fn selected(s: &G) -> &'static str {
 }
 
 /// Whether the playground has a preview adapter for the component (the rest show the catalog only).
-fn previewed(comp: &str) -> bool {
+pub fn previewed(comp: &str) -> bool {
     adapter(comp).is_some()
 }
 
@@ -595,10 +640,7 @@ const ORACLE_DELAY: f64 = 0.3;
 
 /// Runs the oracle once the options have been still for `ORACLE_DELAY`. It blocks the UI for the CLI's
 /// run (about 0.15 s warm, 2 s cold). shortcut: no background thread; move it to one if that is felt.
-pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
-    if s.story != "playground" {
-        return false;
-    }
+pub fn poll(s: &mut Play, t: f64, tx: &mut rune::Tx) -> bool {
     let dark = s
         .scheme
         .map_or(s.system_dark.get(), |c| c == ColorScheme::Dark);
@@ -631,7 +673,8 @@ pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
     }
 }
 
-pub fn playground(s: &G, t: &'static Tokens) -> El {
+pub fn playground<H: Host>(host: &H, t: &'static Tokens) -> El {
+    let s = host.play();
     let comp = selected(s);
     let open = pick(s, "", "picker", "closed") == "open";
     let shown_name = adapter(comp).map_or(comp, |a| a.name());
@@ -645,9 +688,9 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                 .size(Size::M)
                 .width(280.0)
                 .open(open)
-                .on_open(move |g: &mut G| {
+                .on_open(move |g: &mut H| {
                     let v = if open { "closed" } else { "open" };
-                    g.play.insert("/picker".into(), v.into());
+                    g.play_mut().values.insert("/picker".into(), v.into());
                 })
                 .build(t),
         );
@@ -657,12 +700,18 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         let mut menu = Menu::new("playground/pick-menu")
             .label("Component")
             .selection(Selection::Single)
-            .on_choose(|g: &mut G, id: &str| {
-                g.play.insert("/component".into(), id.to_owned());
-                g.play.insert("/picker".into(), "closed".into());
+            .on_choose(|g: &mut H, id: &str| {
+                g.play_mut()
+                    .values
+                    .insert("/component".into(), id.to_owned());
+                g.play_mut()
+                    .values
+                    .insert("/picker".into(), "closed".into());
             })
-            .on_dismiss(|g: &mut G| {
-                g.play.insert("/picker".into(), "closed".into());
+            .on_dismiss(|g: &mut H| {
+                g.play_mut()
+                    .values
+                    .insert("/picker".into(), "closed".into());
             });
         for (id, name) in menu_order() {
             menu = menu.item(MenuItem::new(id, name).selected(id == comp));
@@ -698,7 +747,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .chain(def.values.iter().map(|l| (lit_str(l), lit_str(l))))
             .collect();
         let dflt = default_of(def);
-        controls = controls.child(control(
+        controls = controls.child(control::<H>(
             t,
             comp,
             def.name,
@@ -720,7 +769,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             .iter()
             .map(|(id, shown)| (id.to_string(), shown.to_string()))
             .collect();
-        let c = control(t, comp, opt, values, &current, None, |v| {
+        let c = control::<H>(t, comp, opt, values, &current, None, |v| {
             if opt == "width" || opt == "state" {
                 Vec::new()
             } else {
@@ -876,9 +925,9 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                 .label("Retry oracle (design-data CLI)")
                 .on_press({
                     let args = args.clone();
-                    move |g: &mut G| {
-                        let r = compare(g, comp, dark, &args);
-                        g.oracle = Some((args.clone(), r));
+                    move |g: &mut H| {
+                        let r = compare(g.play(), comp, dark, &args);
+                        g.play_mut().oracle = Some((args.clone(), r));
                     }
                 })
                 .build(t),
@@ -919,9 +968,9 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                     Switch::new("playground/compare")
                         .label("Compare light and dark")
                         .selected(compare)
-                        .on_toggle(move |g: &mut G| {
+                        .on_toggle(move |g: &mut H| {
                             let v = if compare { "off" } else { "on" };
-                            g.play.insert("/compare".into(), v.into());
+                            g.play_mut().values.insert("/compare".into(), v.into());
                         })
                         .build(t),
                 ),
@@ -946,631 +995,4 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                     ),
                 ),
         )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
-
-    /// The options derived from the catalog (what the controls grey out by) equal what each builder reports,
-    /// for every value of every enumerated option, so the adapter and the catalog cannot drift apart.
-    #[test]
-    fn catalog_options_match_builder_options() {
-        let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for ad in ADAPTERS {
-            let comp = ad.id();
-            for def in component(comp)
-                .unwrap()
-                .options
-                .iter()
-                .filter(|d| !d.values.is_empty())
-            {
-                for l in def.values {
-                    let mut s = crate::init();
-                    s.play.insert(format!("{comp}/{}", def.name), lit_str(l));
-                    let sorted = |mut o: Opts| {
-                        o.sort_by_key(|(n, _)| *n);
-                        o
-                    };
-                    let mut derived = sorted(options(&s, comp, None));
-                    if errors(comp, &derived).is_empty() {
-                        let reported = sorted(preview(&s, comp, t).0);
-                        // A builder may leave out options with no visual effect (Button's size, isDisabled).
-                        derived.retain(|(n, _)| reported.iter().any(|(r, _)| r == n));
-                        assert_eq!(derived, reported, "{comp} {} = {}", def.name, lit_str(l));
-                    }
-                }
-            }
-        }
-    }
-
-    /// The label and icon presets (not catalog values) must reach the builder too.
-    #[test]
-    fn extras_match_builder_options() {
-        let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for ad in ADAPTERS {
-            let comp = ad.id();
-            for (opt, presets) in extras(comp) {
-                for (id, _) in presets {
-                    let mut s = crate::init();
-                    s.play.insert(format!("{comp}/{opt}"), id.to_owned());
-                    let derived = options(&s, comp, None);
-                    if !errors(comp, &derived).is_empty() {
-                        continue;
-                    }
-                    let reported = preview(&s, comp, t).0;
-                    for name in ["label", "icon"] {
-                        let has = |o: &Opts| o.iter().any(|(n, _)| *n == name);
-                        // Button and Picker builders do not report their label (no visual option of their own).
-                        if matches!(comp, "button" | "picker") && name == "label" {
-                            continue;
-                        }
-                        assert_eq!(has(&derived), has(&reported), "{comp} {opt} = {id}: {name}");
-                    }
-                }
-            }
-        }
-    }
-
-    /// Every combination the controls can reach builds without a panic: the catalog options and the
-    /// presets, skipping what `errors()` excludes (the UI shows a message for those instead).
-    #[test]
-    fn every_reachable_combination_builds() {
-        let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for ad in ADAPTERS {
-            let comp = ad.id();
-            let mut controls: Vec<(String, Vec<String>)> = Vec::new();
-            for def in component(comp)
-                .unwrap()
-                .options
-                .iter()
-                .filter(|d| !d.values.is_empty())
-            {
-                let unset = def.default.is_none().then(|| "none".to_owned());
-                let all = unset.into_iter().chain(def.values.iter().map(lit_str));
-                controls.push((def.name.to_owned(), all.collect()));
-            }
-            for (opt, presets) in extras(comp) {
-                controls.push((
-                    opt.to_owned(),
-                    presets.iter().map(|(id, _)| id.to_string()).collect(),
-                ));
-            }
-            let total: usize = controls.iter().map(|(_, v)| v.len()).product();
-            let mut built = 0;
-            for mut n in 0..total {
-                let mut s = crate::init();
-                for (opt, values) in &controls {
-                    s.play
-                        .insert(format!("{comp}/{opt}"), values[n % values.len()].clone());
-                    n /= values.len();
-                }
-                if errors(comp, &options(&s, comp, None)).is_empty() {
-                    preview(&s, comp, t);
-                    built += 1;
-                }
-            }
-            assert!(built > 0, "{comp}: no combination is valid");
-        }
-    }
-
-    #[test]
-    fn outline_is_greyed_out_for_accent_button() {
-        let mut s = crate::init();
-        s.play.insert("button/variant".into(), "accent".into());
-        let why = errors("button", &options(&s, "button", Some(("style", "outline"))));
-        assert_eq!(
-            why,
-            ["Outline style is only defined for primary and secondary."]
-        );
-        assert!(errors("button", &options(&s, "button", Some(("style", "fill")))).is_empty());
-        // An icon-only button needs an icon: hiding the label is excluded until one is chosen.
-        let why = errors(
-            "button",
-            &options(&s, "button", Some(("isLabelHidden", "true"))),
-        );
-        assert_eq!(why, ["An icon-only button needs an icon."]);
-    }
-
-    /// A value that would break an error rule is rendered disabled, pressing it changes nothing, and
-    /// the reason is listed in the UI (the test above checks `errors()`, this checks what is rendered).
-    #[test]
-    fn excluded_value_is_rendered_disabled_with_its_reason() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        s.play.insert("/component".into(), "button".into());
-        s.play.insert("button/variant".into(), "accent".into());
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        let tree = rt.accessibility_json().to_string();
-        assert!(
-            tree.contains(
-                "outline: not available, Error · Outline style is only defined for primary and secondary."
-            ),
-            "{tree}"
-        );
-        let (x, y) = rt
-            .find("playground/button/style/outline/container")
-            .unwrap();
-        rt.pointer_move(x, y);
-        rt.pointer_down(x, y);
-        rt.pointer_up(x, y);
-        rt.frame(0.05);
-        assert!(!rt.state.play.contains_key("button/style"));
-    }
-
-    /// Writes the playground in a few states to `target/gallery/playground-*.png` (for PRs). Needs the
-    /// oracle CLI (`DESIGN_DATA`) for the oracle panel; run with `--release -- --ignored`.
-    #[test]
-    #[ignore = "slow unoptimised; needs the oracle CLI"]
-    fn render_playground_shots() {
-        use rune::{Env, Runtime};
-        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/gallery");
-        std::fs::create_dir_all(&dir).unwrap();
-        let shots: [(&str, &[(&str, &str)]); 13] = [
-            ("badge", &[]),
-            (
-                "button-hover",
-                &[
-                    ("/component", "button"),
-                    ("button/variant", "accent"),
-                    ("button/state", "hover"),
-                    ("button/icon", "check"),
-                ],
-            ),
-            (
-                "button-excluded",
-                &[
-                    ("/component", "button"),
-                    ("button/variant", "accent"),
-                    ("button/style", "outline"),
-                ],
-            ),
-            ("catalog-only", &[("/component", "tabs")]),
-            (
-                "selector-open",
-                &[("/component", "button"), ("/picker", "open")],
-            ),
-            (
-                "status-light-s",
-                &[("/component", "status-light"), ("status-light/size", "s")],
-            ),
-            (
-                "status-light-xl",
-                &[("/component", "status-light"), ("status-light/size", "xl")],
-            ),
-            ("picker", &[("/component", "picker")]),
-            (
-                "picker-help",
-                &[
-                    ("/component", "picker"),
-                    ("picker/isRequired", "true"),
-                    ("picker/description", "help"),
-                ],
-            ),
-            (
-                "picker-error",
-                &[
-                    ("/component", "picker"),
-                    ("picker/isError", "true"),
-                    ("picker/description", "help"),
-                ],
-            ),
-            (
-                "button-compare",
-                &[
-                    ("/component", "button"),
-                    ("button/variant", "accent"),
-                    ("/compare", "on"),
-                ],
-            ),
-            (
-                "button-static-white",
-                &[("/component", "button"), ("button/staticColor", "white")],
-            ),
-            (
-                "button-static-black",
-                &[("/component", "button"), ("button/staticColor", "black")],
-            ),
-        ];
-        for (name, play) in shots {
-            for dark in [false, true] {
-                let mut s = crate::init();
-                s.story = "playground";
-                s.scheme = Some(scheme(dark));
-                for (k, v) in play {
-                    s.play.insert((*k).into(), (*v).into());
-                }
-                let (w, h) = (1100u32, 2500u32);
-                let mut rt =
-                    Runtime::new(s, crate::view, (w as f32, h as f32), Env::new(dark, 1.0));
-                rt.poll = Some(poll);
-                for _ in 0..12 {
-                    rt.frame(0.1);
-                }
-                let tag = if dark { "dark" } else { "light" };
-                crate::pixels::Pixels::of(&rt, (w, h))
-                    .write_png(&dir.join(format!("playground-{name}-{tag}.png")));
-            }
-        }
-    }
-
-    fn tree_of(play: &[(&str, &str)]) -> String {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        for (k, v) in play {
-            s.play.insert((*k).into(), (*v).into());
-        }
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 2500.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        rt.accessibility_json().to_string()
-    }
-
-    /// The catalog default is marked, an option without one reads "unset", and the options panel shows
-    /// the real label text.
-    #[test]
-    fn defaults_are_marked_and_the_panel_shows_real_values() {
-        let tree = tree_of(&[("/component", "button")]);
-        assert!(tree.contains("fill (default)"), "{tree}");
-        assert!(tree.contains("unset (default)"), "{tree}");
-        assert!(tree.contains("label = Label"), "{tree}");
-        assert!(tree.contains("Builder options"), "{tree}");
-    }
-
-    /// When the current selection is itself excluded, the reason is said once (on the stage), not under
-    /// every value of every control.
-    #[test]
-    fn an_excluded_selection_does_not_repeat_its_reason() {
-        let tree = tree_of(&[
-            ("/component", "button"),
-            ("button/variant", "accent"),
-            ("button/style", "outline"),
-        ]);
-        assert_eq!(
-            tree.matches("Not defined: Outline style").count(),
-            1,
-            "{tree}"
-        );
-        assert_eq!(
-            tree.matches("not available, Error · Outline style").count(),
-            0
-        );
-    }
-
-    #[test]
-    fn oracle_colours_compare_within_three_per_channel() {
-        let rune = ("#3b63fb".to_owned(), 1.0);
-        assert!(same_color("rgb(59, 99, 251)", &rune));
-        assert!(same_color("rgb(61, 97, 250)", &rune));
-        assert!(!same_color("rgb(59, 99, 240)", &rune));
-        // A translucent text colour: Rune's hex carries the alpha, the oracle's rgba its own.
-        let text = "#000000ed".to_owned();
-        assert!(same_color(
-            "rgba(0, 0, 0, 0.93)",
-            &(text.clone(), hex_alpha(&text))
-        ));
-        assert!(same_color("transparent", &("#000000".to_owned(), 0.0)));
-        assert!(!same_color("transparent", &rune));
-    }
-
-    /// A static white or black Button is previewed on a surface that contrasts with it.
-    #[test]
-    fn static_colour_buttons_get_a_contrasting_backdrop() {
-        use rune::{Env, Runtime};
-        for (static_color, dark) in [
-            ("white", false),
-            ("white", true),
-            ("black", false),
-            ("black", true),
-        ] {
-            let mut s = crate::init();
-            s.story = "playground";
-            s.scheme = Some(scheme(dark));
-            s.play.insert("/component".into(), "button".into());
-            s.play
-                .insert("button/staticColor".into(), static_color.into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 1500.0), Env::new(dark, 1.0));
-            for _ in 0..10 {
-                rt.frame(0.05);
-            }
-            let fill = |key: &str| {
-                rt.elements()
-                    .iter()
-                    .find(|e| e.key.as_deref() == Some(key))
-                    .unwrap()
-                    .fill
-            };
-            let back = fill("playground/stage/backdrop");
-            let lum = |c: rune::Color| c.r + c.g + c.b;
-            if static_color == "white" {
-                assert!(lum(back) < 1.5, "white needs a dark backdrop: {back:?}");
-            } else {
-                assert!(lum(back) > 1.5, "black needs a light backdrop: {back:?}");
-            }
-        }
-    }
-
-    /// "Compare light and dark" shows a second copy under the other scheme's tokens.
-    #[test]
-    fn compare_shows_a_copy_under_the_other_scheme() {
-        use rune::{Env, Runtime};
-        for dark in [false, true] {
-            let mut s = crate::init();
-            s.story = "playground";
-            s.scheme = Some(scheme(dark));
-            s.play.insert("/component".into(), "button".into());
-            s.play.insert("/compare".into(), "on".into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 1500.0), Env::new(dark, 1.0));
-            for _ in 0..10 {
-                rt.frame(0.05);
-            }
-            let fill = |key: &str| {
-                rt.elements()
-                    .iter()
-                    .find(|e| e.key.as_deref() == Some(key))
-                    .unwrap()
-                    .fill
-            };
-            let (here, there) = (
-                fill("playground/preview/container"),
-                fill("playground/alt/container"),
-            );
-            assert_ne!(here, there, "dark={dark}: both copies look the same");
-        }
-    }
-
-    fn press(rt: &mut rune::Runtime<G>, key: &str) {
-        let (x, y) = rt.find(key).unwrap();
-        rt.pointer_move(x, y);
-        rt.pointer_down(x, y);
-        rt.pointer_up(x, y);
-        rt.frame(0.05);
-    }
-
-    /// The component Picker opens a list, choosing from it selects the component and closes the list.
-    #[test]
-    fn the_component_picker_opens_and_selects() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        assert!(
-            rt.find("playground/pick-menu/container").is_none(),
-            "closed: no list"
-        );
-        press(&mut rt, "playground/pick/field");
-        assert!(
-            rt.find("playground/pick-menu/container").is_some(),
-            "open: the catalog is listed"
-        );
-        // The first catalog-only component: the list scrolls, so a far one is out of reach of a press.
-        let (id, _) = menu_order()[ADAPTERS.len()];
-        let n = ADAPTERS.len() + 1;
-        press(&mut rt, &format!("playground/pick-menu/menu-item-{n}"));
-        assert_eq!(rt.state.play["/component"], id);
-        assert!(
-            rt.find("playground/pick-menu/container").is_none(),
-            "closed again"
-        );
-        let tree = rt.accessibility_json().to_string();
-        assert!(tree.contains("Not previewed"), "{tree}");
-    }
-
-    /// A rule the current options break is listed as active, the others as inactive.
-    #[test]
-    fn catalog_rules_show_their_live_state() {
-        use rune::{Env, Runtime};
-        let text_for = |variant: &str| {
-            let mut s = crate::init();
-            s.story = "playground";
-            s.play.insert("/component".into(), "button".into());
-            s.play.insert("button/variant".into(), variant.into());
-            s.play.insert("button/style".into(), "outline".into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
-            rt.frame(0.05);
-            rt.accessibility_json().to_string()
-        };
-        assert!(text_for("accent").contains("active · Error · Outline style"));
-        assert!(text_for("primary").contains("inactive · Error · Outline style"));
-    }
-
-    /// Needs the oracle CLI in the oracle.toml range (`DESIGN_DATA=... cargo test -- --ignored`).
-    #[test]
-    #[ignore]
-    fn oracle_runs_every_component_at_its_defaults() {
-        for ad in ADAPTERS {
-            let comp = ad.id();
-            let s = crate::init();
-            let args = oracle_args(&s, comp, false);
-            let r = compare(&s, comp, false, &args).expect(comp);
-            assert!(r.parts.iter().any(|p| p.name == "container"), "{comp}");
-            assert!(
-                r.parts.iter().any(|p| !p.rows.is_empty()),
-                "{comp}: no tokens"
-            );
-            let bad: Vec<_> = r
-                .parts
-                .iter()
-                .filter(|p| !matches!(p.verdict, Verdict::Matches))
-                .map(|p| &p.name)
-                .collect();
-            assert!(bad.is_empty(), "{comp}: {bad:?}");
-        }
-    }
-
-    /// Static white and black Buttons match the oracle too (translucent fills and text colours).
-    #[test]
-    #[ignore]
-    fn oracle_matches_static_colour_buttons() {
-        for c in ["white", "black"] {
-            let mut s = crate::init();
-            s.play.insert("/component".into(), "button".into());
-            s.play.insert("button/staticColor".into(), c.into());
-            let args = oracle_args(&s, "button", false);
-            let r = compare(&s, "button", false, &args).expect(c);
-            let bad: Vec<_> = r
-                .parts
-                .iter()
-                .filter(|p| !matches!(p.verdict, Verdict::Matches))
-                .map(|p| &p.name)
-                .collect();
-            assert!(bad.is_empty(), "{c}: {bad:?}");
-        }
-    }
-
-    /// The state control reaches the oracle: a hovered Button reads different tokens than one at rest.
-    #[test]
-    #[ignore]
-    fn oracle_state_changes_the_tokens() {
-        let tokens_at = |state: &str| {
-            let mut s = crate::init();
-            s.play.insert("/component".into(), "button".into());
-            s.play.insert("button/icon".into(), "check".into());
-            s.play.insert("button/state".into(), state.into());
-            let args = oracle_args(&s, "button", false);
-            let r = compare(&s, "button", false, &args).expect(state);
-            r.parts
-                .iter()
-                .flat_map(|p| p.rows.iter().map(|r| (r.prop.clone(), r.token.clone())))
-                .collect::<Vec<_>>()
-        };
-        assert_ne!(tokens_at("rest"), tokens_at("hover"));
-    }
-
-    /// Pressing Run lists the oracle's tokens in the UI (needs the CLI, like the test above).
-    #[test]
-    #[ignore]
-    fn run_button_lists_the_oracle_tokens() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        let (x, y) = rt.find("playground/oracle/run/container").unwrap();
-        rt.pointer_move(x, y);
-        rt.pointer_down(x, y);
-        rt.pointer_up(x, y);
-        rt.frame(0.05);
-        let tree = rt.accessibility_json().to_string();
-        assert!(tree.contains("base-height-"), "{tree}");
-    }
-
-    /// The oracle runs by itself once the options have been still for the delay, and not before.
-    /// It needs no CLI: a missing or out-of-range one is an error result, still a run.
-    #[test]
-    fn oracle_runs_after_the_options_settle() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
-        rt.poll = Some(poll);
-        rt.frame(0.05);
-        assert!(rt.state.oracle.is_none(), "ran before the delay");
-        for _ in 0..4 {
-            rt.frame(0.1);
-        }
-        assert!(rt.state.oracle.is_some(), "did not run after the delay");
-    }
-
-    /// The preview stage stays at the top while the page scrolls.
-    #[test]
-    fn the_stage_stays_pinned_when_the_page_scrolls() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 400.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        let y = |rt: &Runtime<G>, key: &str| {
-            rt.elements()
-                .iter()
-                .find(|e| e.key.as_deref() == Some(key))
-                .unwrap()
-                .rect[1]
-        };
-        let ctl = y(&rt, "playground/pick/field");
-        let top = y(&rt, "gallery/body");
-        assert!(
-            y(&rt, "playground/stage") > top + 80.0,
-            "the stage starts below the picker"
-        );
-        for _ in 0..10 {
-            rt.wheel(500.0, 300.0, -200.0);
-            rt.frame(0.05);
-        }
-        assert!(
-            y(&rt, "playground/pick/field") < ctl - 100.0,
-            "the page did not scroll"
-        );
-        assert!(
-            y(&rt, "playground/stage") - top < 80.0,
-            "the stage scrolled away"
-        );
-    }
-
-    /// The state control drives the Button preview: hover and down fill differently from rest.
-    #[test]
-    fn the_state_control_drives_the_button_preview() {
-        use rune::{Env, Runtime};
-        let fill_at = |state: &str| {
-            let mut s = crate::init();
-            s.story = "playground";
-            s.play.insert("/component".into(), "button".into());
-            s.play.insert("button/state".into(), state.into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
-            for _ in 0..10 {
-                rt.frame(0.05);
-            }
-            let e = rt.elements();
-            e.iter()
-                .find(|e| e.key.as_deref() == Some("playground/preview/container"))
-                .unwrap()
-                .fill
-        };
-        assert_ne!(fill_at("rest"), fill_at("hover"));
-        assert_ne!(fill_at("rest"), fill_at("down"));
-        assert_eq!(fill_at("keyboard-focus"), fill_at("rest"));
-    }
-
-    /// Every catalog component builds in the playground, previewed or not, without the oracle.
-    #[test]
-    fn every_catalog_component_builds() {
-        use rune::{Env, Runtime};
-        for c in CATALOG {
-            let mut s = crate::init();
-            s.story = "playground";
-            s.play.insert("/component".into(), c.name.into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
-            rt.poll = Some(poll);
-            for _ in 0..10 {
-                rt.frame(0.1);
-            }
-            let tree = rt.accessibility_json().to_string();
-            assert!(tree.contains("Catalog rules"), "{}", c.name);
-            assert_eq!(
-                tree.contains("Not previewed"),
-                !previewed(c.name),
-                "{}",
-                c.name
-            );
-        }
-    }
-
-    #[test]
-    fn pressing_a_value_selects_it() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        let (x, y) = rt.find("playground/badge/style/subtle/container").unwrap();
-        rt.pointer_move(x, y);
-        rt.pointer_down(x, y);
-        rt.pointer_up(x, y);
-        rt.frame(0.05);
-        assert_eq!(rt.state.play["badge/style"], "subtle");
-    }
 }

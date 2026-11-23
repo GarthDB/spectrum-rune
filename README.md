@@ -267,7 +267,7 @@ chmod +x design-data-darwin-arm64
 ```
 
 (Pick the asset for your platform; `gh release view "design-data-cli@0.63.3" -R adobe/spectrum-design-data`
-lists them.) `cargo xtask gen`, the `regen-*.sh` scripts, the gallery playground's Run oracle button and the `--ignored`
+lists them.) `cargo xtask gen`, the `regen-*.sh` scripts, the playground's Run oracle button and the `--ignored`
 oracle tests all use `$DESIGN_DATA` (a path to the binary, e.g.
 `DESIGN_DATA=~/.cache/spectrum-rune/oracle/design-data-darwin-arm64`), falling back to `design-data` on `PATH`.
 
@@ -368,7 +368,7 @@ dataset changes nothing.
   the recipe nor in the tokens. A picker without a label omits the label row, which the oracle still reserves
   (a field-label of 0 width and the full control height).
   `picker_model::PickerModel` is the list's keyboard and selection behaviour (select-only combobox keys, type-ahead, no
-  drawing), tested without a window; nothing uses it yet (the playground's list is a stand-in).
+  drawing), tested without a window; nothing uses it yet (the playground's list is the `Menu`, which has its own focus handling).
 - **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
   group's layout (gap 0, each item keeping its divider) has no oracle: only the stacked item heights are
   checked against the item oracle. Per-item `disabled` is a Rune-side convenience; the catalog's
@@ -439,3 +439,10 @@ Apache-2.0, see [LICENSE](LICENSE) and [NOTICE](NOTICE). The generated tokens, i
 the test fixtures are derived from [Spectrum Design Data](https://github.com/adobe/spectrum-design-data)
 (Apache-2.0, Adobe). Rune is MIT. The Adobe Clean Spectrum typeface is not part of this repository and
 is licensed separately; never commit it.
+
+## The playground crate
+
+`crates/spectrum-rune-playground` (unpublished) is the option playground the gallery's Playground story shows: a control per
+catalog option (values an `error` rule excludes are greyed with the reason), a live preview, the builder's options, the rules
+and an oracle comparison. A host app embeds one `Play` and implements `Host` for its state; `playground(&host, tokens)` is the
+view and `poll(&mut play, t, tx)` runs the debounced oracle. Components are added with an `Adapter` (`adapters.rs`).

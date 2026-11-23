@@ -31,11 +31,11 @@ macro_rules! stories {
             ($id, |s: &mut G| s.story = $id),
             (concat!($id, "-dark"), |s: &mut G| {
                 s.story = $id;
-                s.scheme = Some(spectrum_rune::tokens::ColorScheme::Dark);
+                s.play.scheme = Some(spectrum_rune::tokens::ColorScheme::Dark);
             }),
             (concat!($id, "-mobile"), |s: &mut G| {
                 s.story = $id;
-                s.scale = spectrum_rune::tokens::Scale::Mobile;
+                s.play.scale = spectrum_rune::tokens::Scale::Mobile;
             }),
         )*];
     };
@@ -54,7 +54,7 @@ stories! {
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
-    "playground" => "Playground", crate::playground::playground;
+    "playground" => "Playground", spectrum_rune_playground::playground;
 }
 
 /// Backdrops for the static colours. Fixed hex values: the `blue_*`/`yellow_*` tokens invert in the

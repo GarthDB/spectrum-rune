@@ -5,7 +5,7 @@
 use serde_json::Value;
 use std::process::Command;
 
-const ORACLE_TOML: &str = include_str!("../../../../oracle.toml");
+const ORACLE_TOML: &str = include_str!("../../../oracle.toml");
 
 fn version(s: &str) -> Option<(u32, u32, u32)> {
     let mut p = s.trim().split('.').map(|n| n.parse().ok());

@@ -9,9 +9,8 @@
 //! The page is Spectrum's `background_base_color`. The licensed Adobe Clean Spectrum font is read
 //! from the system, never bundled; the header and the startup output say whether it was found.
 
-mod adapters;
-mod oracle;
-mod playground;
+#[cfg(test)]
+mod playground_tests;
 mod stories;
 
 use rune::text::measure;
@@ -20,11 +19,9 @@ use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::font;
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
+use spectrum_rune_playground::Play;
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
-
-/// The CLI arguments an oracle run used, and its report or error.
-pub type OracleRun = (Vec<String>, Result<crate::playground::Report, String>);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStatus {
@@ -71,23 +68,14 @@ fn font_status() -> FontStatus {
 #[derive(Clone)]
 pub struct G {
     pub story: &'static str,
-    /// `None` follows the system (`--theme`) until the header switch is used.
-    pub scheme: Option<ColorScheme>,
-    pub scale: Scale,
     /// Keys whose state differs from the story's default (toggles).
     pub flipped: HashSet<String>,
     /// The chosen radio per group.
     pub picked: HashMap<String, String>,
     /// The open items per accordion group.
     pub open: HashMap<String, Vec<String>>,
-    /// The Playground's chosen values, keyed `component/option`.
-    pub play: HashMap<String, String>,
-    /// The last oracle run (dev-only): the CLI arguments it ran with, and its report or error.
-    pub oracle: Option<OracleRun>,
-    /// The args an auto-run is waiting to run with, and when (poll's clock): the debounce.
-    pub oracle_due: Option<(Vec<String>, f64)>,
-    /// The system scheme as the view last saw it, for `poll` (which has no `Cx`).
-    pub system_dark: std::cell::Cell<bool>,
+    /// The playground's state (its chosen values, scheme, scale and oracle run).
+    pub play: spectrum_rune_playground::Play,
 }
 
 impl G {
@@ -105,21 +93,16 @@ impl G {
 fn init() -> G {
     G {
         story: stories::STORIES[0].0,
-        scheme: None,
-        scale: Scale::Desktop,
         flipped: HashSet::new(),
         picked: HashMap::new(),
         open: HashMap::new(),
-        play: HashMap::new(),
-        oracle: None,
-        oracle_due: None,
-        system_dark: std::cell::Cell::new(false),
+        play: Default::default(),
     }
 }
 
 fn view(s: &G, cx: &mut Cx<G>) -> El {
-    s.system_dark.set(cx.system_dark());
-    let scheme = s.scheme.unwrap_or(if cx.system_dark() {
+    s.play.system_dark.set(cx.system_dark());
+    let scheme = s.play.scheme.unwrap_or(if cx.system_dark() {
         ColorScheme::Dark
     } else {
         ColorScheme::Light
@@ -128,9 +111,9 @@ fn view(s: &G, cx: &mut Cx<G>) -> El {
 }
 
 fn build(s: &G, scheme: ColorScheme) -> El {
-    let t = tokens(scheme, s.scale);
+    let t = tokens(scheme, s.play.scale);
     let dark = scheme == ColorScheme::Dark;
-    let mobile = s.scale == Scale::Mobile;
+    let mobile = s.play.scale == Scale::Mobile;
 
     let nav = row()
         .gap(4.0)
@@ -158,7 +141,7 @@ fn build(s: &G, scheme: ColorScheme) -> El {
                 .label("Dark")
                 .selected(dark)
                 .on_toggle(move |g: &mut G| {
-                    g.scheme = Some(if dark {
+                    g.play.scheme = Some(if dark {
                         ColorScheme::Light
                     } else {
                         ColorScheme::Dark
@@ -171,7 +154,7 @@ fn build(s: &G, scheme: ColorScheme) -> El {
                 .label("Mobile scale")
                 .selected(mobile)
                 .on_toggle(move |g: &mut G| {
-                    g.scale = if mobile {
+                    g.play.scale = if mobile {
                         Scale::Desktop
                     } else {
                         Scale::Mobile
@@ -218,12 +201,25 @@ fn build(s: &G, scheme: ColorScheme) -> El {
         )
 }
 
+impl spectrum_rune_playground::Host for G {
+    fn play(&self) -> &Play {
+        &self.play
+    }
+    fn play_mut(&mut self) -> &mut Play {
+        &mut self.play
+    }
+}
+
+fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
+    s.story == "playground" && spectrum_rune_playground::poll(&mut s.play, t, tx)
+}
+
 fn main() {
     eprintln!("spectrum-rune gallery: {}", font_status().describe());
     // Off is CoreText without font smoothing: what `-webkit-font-smoothing: antialiased` draws.
     App::new(AppSpec {
         scenes: stories::SCENES,
-        poll: Some(playground::poll),
+        poll: Some(poll),
         ..AppSpec::new("Spectrum for Rune", (1100.0, 900.0), init, view)
     })
     .font_smoothing(FontSmoothing::Off)
@@ -282,9 +278,9 @@ mod tests {
                 for (id, setup) in stories::SCENES {
                     let mut s = init();
                     setup(&mut s);
-                    s.scale = scale;
+                    s.play.scale = scale;
                     let dark = scheme == ColorScheme::Dark;
-                    s.scheme = Some(scheme);
+                    s.play.scheme = Some(scheme);
                     let story = s.story;
                     let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(dark, 1.0));
                     rt.frame(0.05);
