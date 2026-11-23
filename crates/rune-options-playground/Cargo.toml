@@ -9,3 +9,8 @@ description = "An options playground for Rune component libraries: a control per
 [dependencies]
 rune.workspace = true
 rune-kit.workspace = true
+
+[[example]]
+name = "toy"
+path = "examples/toy.rs"
+test = true

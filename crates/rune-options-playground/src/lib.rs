@@ -396,7 +396,15 @@ fn status(k: &Kit, key: String, dot: rune::Color, line: String) -> El {
         .gap(6.0)
         .center_y()
         .child(el().w(8.0).h(8.0).radius(4.0).fill(dot))
-        .child(text(line).font(k.ty.caption()).color(k.c.text_base).wrap())
+        .child(
+            col().grow(1.0).child(
+                text(line)
+                    .font(k.ty.caption())
+                    .color(k.c.text_base)
+                    .w_full()
+                    .wrap(),
+            ),
+        )
 }
 
 /// The oracle panel's body: per part a header (matches / differs / no such part in Rune) and its token rows in
