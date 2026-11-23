@@ -13,7 +13,7 @@
 //! Verification: geometry, fill and tip against the oracle (`tests/popover.rs`), the shadow from pixels.
 
 use crate::tokens::Tokens;
-use rune::{col, el, icon, row, El, Icon, Key, Mods, Side};
+use rune::{col, el, icon, row, Align, El, Icon, Key, Mods, Side};
 use std::rc::Rc;
 
 /// Which side of its trigger the popover sits on.
@@ -61,7 +61,10 @@ pub struct Popover {
     width: Option<f32>,
     height: Option<f32>,
     offset: f32,
+    align: Align,
     anchor: Option<String>,
+    return_focus: Option<String>,
+    modal: Option<Rc<dyn Fn(El) -> El>>,
     label: Option<String>,
     content: Vec<El>,
     dismiss: Option<Dismiss>,
@@ -77,7 +80,10 @@ impl Popover {
             width: None,
             height: None,
             offset: 8.0,
+            align: Align::Center,
             anchor: None,
+            return_focus: None,
+            modal: None,
             label: None,
             content: Vec::new(),
             dismiss: None,
@@ -108,6 +114,27 @@ impl Popover {
     /// view, after the trigger, so it draws above later siblings and escapes clipping ancestors.
     pub fn anchor(mut self, trigger: impl Into<String>) -> Self {
         self.anchor = Some(trigger.into());
+        self
+    }
+    /// Which end of the trigger's side the popover lines up with when anchored (the middle by default).
+    pub fn align(mut self, a: Align) -> Self {
+        self.align = a;
+        self
+    }
+    /// Makes it modal while shown: focus stays inside it (Tab cycles) and the rest of the page is inert, a press
+    /// outside or Escape calls `dismiss`, and focus goes back to the element keyed `return_to` (the trigger) when it
+    /// is removed. A menu popover, such as a Picker's, is modal.
+    pub fn modal<S: 'static>(
+        mut self,
+        return_to: impl Into<String>,
+        dismiss: impl Fn(&mut S) + 'static,
+    ) -> Self {
+        let dismiss = Rc::new(dismiss);
+        self.return_focus = Some(return_to.into());
+        self.modal = Some(Rc::new(move |e: El| {
+            let d = dismiss.clone();
+            e.modal(true, move |s: &mut S| d(s))
+        }));
         self
     }
     /// The popover's accessible name.
@@ -204,7 +231,10 @@ impl Popover {
             } else {
                 (self.offset - t.popover_tip_height).max(0.0)
             };
-            root = root.anchored(trigger, side, rune::Align::Center, gap);
+            root = root.anchored(trigger, side, self.align, gap);
+        }
+        if let (Some(m), Some(back)) = (&self.modal, self.return_focus) {
+            root = m(root).focus_return(back);
         }
         root
     }

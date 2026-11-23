@@ -14,6 +14,7 @@ use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
 use spectrum_rune::menu::{Menu, MenuItem, Selection};
 use spectrum_rune::picker::Picker;
+use spectrum_rune::picker_menu::PickerMenu;
 use spectrum_rune::popover::{Placement, Popover};
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
@@ -38,7 +39,18 @@ macro_rules! stories {
                 s.story = $id;
                 s.scale = spectrum_rune::tokens::Scale::Mobile;
             }),
-        )*];
+        )*
+        // The Picker with its menu open (a popover under the field).
+        ("picker-open", |s: &mut G| {
+            s.story = "picker";
+            s.flip("picker/value");
+        }),
+        ("picker-open-dark", |s: &mut G| {
+            s.story = "picker";
+            s.scheme = Some(spectrum_rune::tokens::ColorScheme::Dark);
+            s.flip("picker/value");
+        }),
+        ];
     };
 }
 
@@ -633,33 +645,122 @@ fn badge(_: &G, t: &'static Tokens) -> El {
 }
 
 /// The closed field only: pressing, Space, Enter or Arrow Down flips `expanded` (there is no menu).
+const COUNTRIES: [(&str, &str); 4] = [
+    ("ca", "Canada"),
+    ("mx", "Mexico"),
+    ("us", "United States"),
+    ("jp", "Japan"),
+];
+
+/// The country a picker shows: the one chosen from its menu, else `default`.
+fn country<'a>(s: &'a G, key: &str, default: Option<&'a str>) -> Option<&'a str> {
+    s.picked
+        .get(key)
+        .map(|id| {
+            COUNTRIES
+                .iter()
+                .find(|(i, _)| i == id)
+                .map_or("", |(_, n)| *n)
+        })
+        .or(default)
+}
+
 fn picker(s: &G, t: &'static Tokens) -> El {
-    let pk = |name: &str| {
+    let pk = |name: &str, default: Option<&str>| {
         let key = format!("picker/{name}");
-        Picker::new(key.clone())
+        let p = Picker::new(key.clone())
             .label("Country")
             .placeholder("Select")
             .open(s.on(&key, false))
-            .on_open(flip(key))
+            .on_open(flip(key.clone()));
+        match country(s, &key, default) {
+            Some(v) => p.value(v),
+            None => p,
+        }
     };
     let states = flow()
-        .child(pk("placeholder").build(t))
-        .child(pk("value").value("Canada").build(t))
-        .child(pk("quiet").value("Canada").quiet(true).build(t))
-        .child(pk("error").value("Canada").error(true).build(t))
-        .child(pk("dis").value("Canada").disabled(true).build(t))
-        .child(pk("dis-ph").disabled(true).build(t));
+        .child(pk("placeholder", None).build(t))
+        .child(pk("value", Some("Canada")).build(t))
+        .child(pk("quiet", Some("Canada")).quiet(true).build(t))
+        .child(pk("error", Some("Canada")).error(true).build(t))
+        .child(pk("dis", Some("Canada")).disabled(true).build(t))
+        .child(pk("dis-ph", None).disabled(true).build(t));
     let sizes =
-        flow().children(SIZES.map(|(z, n)| pk(&format!("size-{n}")).value(n).size(z).build(t)));
-    let truncated = pk("truncated")
-        .value("A value too long for the field is cut off at the end")
-        .width(160.0)
-        .build(t);
+        flow().children(SIZES.map(|(z, n)| pk(&format!("size-{n}"), Some(n)).size(z).build(t)));
+    let truncated = pk(
+        "truncated",
+        Some("A value too long for the field is cut off at the end"),
+    )
+    .width(160.0)
+    .build(t);
     page(vec![
-        section(t, "States", states),
+        section(t, "States (press one: its menu opens)", states),
         section(t, "Sizes", sizes),
         section(t, "Truncated value (width 160)", truncated),
     ])
+}
+
+/// The menus of the open pickers, to mount at the root of the view (they draw above the page and escape its clipping).
+pub fn overlays(s: &G, t: &'static Tokens) -> Vec<El> {
+    if s.story != "picker" {
+        return Vec::new();
+    }
+    let mut out = Vec::new();
+    let sized =
+        |n: &str| -> Option<Size> { SIZES.iter().find(|(_, name)| *name == n).map(|(z, _)| *z) };
+    for name in [
+        "placeholder",
+        "value",
+        "quiet",
+        "error",
+        "size-s",
+        "size-m",
+        "size-l",
+        "size-xl",
+        "truncated",
+    ] {
+        let key = format!("picker/{name}");
+        if !s.on(&key, false) {
+            continue;
+        }
+        let chosen = COUNTRIES
+            .iter()
+            .find(|(_, n)| {
+                Some(*n)
+                    == country(
+                        s,
+                        &key,
+                        if name == "placeholder" {
+                            None
+                        } else {
+                            Some("Canada")
+                        },
+                    )
+            })
+            .map(|(i, _)| *i);
+        let (k1, k2) = (key.clone(), key.clone());
+        let mut menu = PickerMenu::new(key.clone())
+            .label("Country")
+            .size(
+                name.strip_prefix("size-")
+                    .and_then(sized)
+                    .unwrap_or(Size::M),
+            )
+            .width(if name == "truncated" { 160.0 } else { 240.0 })
+            .on_choose(move |g: &mut G, id: &str| {
+                g.picked.insert(k1.clone(), id.to_owned());
+                g.flip(&k1);
+            })
+            .on_close(move |g: &mut G| g.flip(&k2));
+        for (id, label) in COUNTRIES {
+            menu = menu.item(id, label);
+        }
+        if let Some(id) = chosen {
+            menu = menu.selected(id);
+        }
+        out.push(menu.build(t));
+    }
+    out
 }
 
 fn status_light(_: &G, t: &'static Tokens) -> El {

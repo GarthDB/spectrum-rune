@@ -161,6 +161,7 @@ pub struct Menu {
     label: Option<String>,
     choose: Option<Choose>,
     dismiss: Option<Dismiss>,
+    autofocus: bool,
 }
 
 impl Menu {
@@ -175,6 +176,7 @@ impl Menu {
             label: None,
             choose: None,
             dismiss: None,
+            autofocus: false,
         }
     }
     pub fn item(mut self, item: MenuItem) -> Self {
@@ -210,6 +212,12 @@ impl Menu {
         }));
         self
     }
+    /// Takes focus when it appears in a modal (a [`crate::popover::Popover`] with `modal`): on the selected item, else
+    /// the first one that is not disabled.
+    pub fn autofocus(mut self, v: bool) -> Self {
+        self.autofocus = v;
+        self
+    }
     /// Called on Escape while an item has focus.
     pub fn on_dismiss<S: 'static>(mut self, f: impl Fn(&mut S) + 'static) -> Self {
         let f = Rc::new(f);
@@ -231,6 +239,12 @@ impl Menu {
         let part = |name: &str| format!("{}/{name}", self.key);
         let single = self.selection == Selection::Single;
         let n = self.items.len();
+        let first_enabled = self.items.iter().position(|i| !i.disabled);
+        let focus_on = self
+            .items
+            .iter()
+            .position(|i| i.selected && !i.disabled)
+            .or(first_enabled);
         let mut root = col()
             .key(part("container"))
             .gap(t.spacing_50)
@@ -332,6 +346,9 @@ impl Menu {
                         .font(font::text_style(&d.value)),
                     t.neutral_subdued_content_color_key_focus,
                 ));
+            }
+            if self.autofocus && focus_on == Some(i) {
+                line = line.autofocus();
             }
             if !it.disabled {
                 line = interaction.attach(line);

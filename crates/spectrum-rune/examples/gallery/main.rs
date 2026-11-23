@@ -173,6 +173,7 @@ fn build(s: &G, scheme: ColorScheme) -> El {
         .map(|(.., f)| *f);
     let body = story.map_or_else(rune::el, |f| f(s, t));
 
+    let overlays = stories::overlays(s, t);
     col()
         .key("gallery")
         .w_full()
@@ -199,6 +200,7 @@ fn build(s: &G, scheme: ColorScheme) -> El {
                 })
                 .child(body),
         )
+        .children(overlays)
 }
 
 fn main() {
@@ -297,7 +299,8 @@ mod tests {
 
     #[test]
     fn scenes_cover_every_story() {
-        assert_eq!(stories::SCENES.len(), stories::STORIES.len() * 3);
+        // Three per story, and the Picker with its menu open in light and dark.
+        assert_eq!(stories::SCENES.len(), stories::STORIES.len() * 3 + 2);
     }
 
     #[test]
