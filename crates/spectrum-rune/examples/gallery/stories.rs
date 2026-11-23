@@ -26,6 +26,7 @@ use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
+use spectrum_rune::tag::Tag;
 use spectrum_rune::tokens::Tokens;
 use spectrum_rune::tooltip::{self, Tooltip};
 use spectrum_rune::{ActionButtonSize, Size};
@@ -82,6 +83,7 @@ stories! {
     "progress" => "Progress and meter", progress;
     "divider" => "Divider", divider;
     "link" => "Link", link;
+    "tag" => "Tag", tag;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -272,6 +274,42 @@ fn popover(_: &G, t: &'static Tokens) -> El {
                 .child(one("small", Placement::Top, false, 90.0, 40.0))
                 .child(one("large", Placement::Top, false, 220.0, 110.0)),
         ),
+    ])
+}
+
+fn tag(s: &G, t: &'static Tokens) -> El {
+    // Press a tag to toggle it: it is selected (or not) in this page's state.
+    let tg = |key: &str, label: &str| {
+        let k = key.to_owned();
+        Tag::new(format!("tag/{key}"), label)
+            .selected(s.on(key, false))
+            .on_press(move |g: &mut G| g.flip(&k))
+    };
+    let sizes = flow().children(
+        SIZES
+            .iter()
+            .take(3)
+            .map(|(z, n)| tg(&format!("size-{n}"), n).size(*z).build(t)),
+    );
+    let looks = flow()
+        .child(Tag::new("tag/plain", "Plain").build(t))
+        .child(Tag::new("tag/selected", "Selected").selected(true).build(t))
+        .child(
+            Tag::new("tag/emphasized", "Emphasized")
+                .selected(true)
+                .emphasized(true)
+                .build(t),
+        )
+        .child(Tag::new("tag/disabled", "Disabled").disabled(true).build(t));
+    let live = flow().child(tg("live-neutral", "Press me").build(t)).child(
+        tg("live-emphasized", "Emphasized")
+            .emphasized(true)
+            .build(t),
+    );
+    page(vec![
+        section(t, "Sizes (press to toggle)", sizes),
+        section(t, "Looks (static)", looks),
+        section(t, "Interactive: hover, press, Tab to focus", live),
     ])
 }
 
