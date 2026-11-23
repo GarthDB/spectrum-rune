@@ -1,0 +1,3434 @@
+[
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\"",
+    "container": {
+      "w": 200.0,
+      "h": 30.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "7,147,85"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "212,91,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "80,80,80",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "240,56,35"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "light",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\"",
+    "container": {
+      "w": 200.0,
+      "h": 36.1
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "80,80,80",
+      "text": "40%"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "218,218,218"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "75,117,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 43.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 40.296,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 178.184,
+      "y": 0,
+      "w": 21.816000000000003,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 27.6,
+      "w": 23.496,
+      "h": 15.600000000000001,
+      "size": 12.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 19.6,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 4.0,
+      "radius": 2.0,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 54.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 36.2,
+      "w": 27.412,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 61.6
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 53.728,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 170.912,
+      "y": 0,
+      "w": 29.088,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 40.8,
+      "w": 31.328,
+      "h": 20.8,
+      "size": 16.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 26.799999999999997,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 68.80000000000001
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 60.444,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 167.276,
+      "y": 0,
+      "w": 32.724000000000004,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 45.400000000000006,
+      "w": 35.244,
+      "h": 23.400000000000002,
+      "size": 18.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 29.400000000000006,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "desktop",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\"",
+    "container": {
+      "w": 200.0,
+      "h": 30.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 47.012,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 174.548,
+      "y": 0,
+      "w": 25.452,
+      "h": 18.2,
+      "size": 14.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "track": {
+      "y": 24.200000000000003,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 6.0,
+      "radius": 3.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "s",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 52.0
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 50.370000000000005,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 172.73000000000002,
+      "y": 0,
+      "w": 27.27,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 32.5,
+      "w": 29.37,
+      "h": 19.5,
+      "size": 15.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 23.5,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 5.0,
+      "radius": 2.5,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 64.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 42.1,
+      "w": 33.286,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "l",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 71.4
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 63.802,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 165.458,
+      "y": 0,
+      "w": 34.542,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 46.7,
+      "w": 37.202,
+      "h": 24.7,
+      "size": 19.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 30.700000000000003,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 10.0,
+      "radius": 5.0,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"informative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "86,129,255"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"positive\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "9,157,89"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"notice\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "224,100,0"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "xl",
+    "args": "--option value=40 --option variant=\"negative\" --option helpText=\"Help\"",
+    "container": {
+      "w": 200.0,
+      "h": 82.2
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 73.876,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 160.004,
+      "y": 0,
+      "w": 39.996,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "help": {
+      "x": 0,
+      "y": 53.6,
+      "w": 43.076,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "175,175,175",
+      "text": "Help"
+    },
+    "track": {
+      "y": 34.6,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 13.0,
+      "radius": 6.5,
+      "fill": "252,67,46"
+    }
+  },
+  {
+    "comp": "meter",
+    "scheme": "dark",
+    "scale": "mobile",
+    "size": "m",
+    "args": "--option value=40 --option variant=\"informative\"",
+    "container": {
+      "w": 200.0,
+      "h": 36.1
+    },
+    "label": {
+      "x": 0,
+      "y": 0,
+      "w": 57.086,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "Loading"
+    },
+    "value": {
+      "x": 169.094,
+      "y": 0,
+      "w": 30.906000000000002,
+      "h": 22.1,
+      "size": 17.0,
+      "color": "175,175,175",
+      "text": "40%"
+    },
+    "track": {
+      "y": 28.1,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "57,57,57"
+    },
+    "fill": {
+      "x": 0,
+      "w": 80.0,
+      "h": 8.0,
+      "radius": 4.0,
+      "fill": "86,129,255"
+    }
+  }
+]

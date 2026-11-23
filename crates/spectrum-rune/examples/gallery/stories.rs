@@ -14,9 +14,12 @@ use spectrum_rune::constraints::{check, OptionValue, Severity};
 use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
 use spectrum_rune::menu::{Menu, MenuItem, Selection};
+use spectrum_rune::meter::{self, Meter};
 use spectrum_rune::picker::Picker;
 use spectrum_rune::picker_menu::PickerMenu;
 use spectrum_rune::popover::{Placement, Popover};
+use spectrum_rune::progress_bar::ProgressBar;
+use spectrum_rune::progress_circle::ProgressCircle;
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::status_light::{self, StatusLight};
@@ -74,6 +77,7 @@ stories! {
     "popover" => "Popover", popover;
     "tooltip" => "Tooltip", tooltip;
     "breadcrumbs" => "Breadcrumbs", breadcrumbs;
+    "progress" => "Progress and meter", progress;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -264,6 +268,88 @@ fn popover(_: &G, t: &'static Tokens) -> El {
                 .child(one("small", Placement::Top, false, 90.0, 40.0))
                 .child(one("large", Placement::Top, false, 220.0, 110.0)),
         ),
+    ])
+}
+
+fn progress(_: &G, t: &'static Tokens) -> El {
+    let bar = |key: &str, z: Size, v: f32| {
+        ProgressBar::new(format!("progress/{key}"))
+            .size(z)
+            .label("Loading")
+            .value(v)
+            .width(220.0)
+            .build(t)
+    };
+    let sizes = flow().children(SIZES.map(|(z, n)| bar(&format!("size-{n}"), z, 40.0)));
+    let values =
+        flow().children([0.0, 25.0, 60.0, 100.0].map(|v| bar(&format!("v{v}"), Size::M, v)));
+    let other = flow()
+        .child(
+            ProgressBar::new("progress/indeterminate")
+                .label("Working")
+                .indeterminate(true)
+                .width(220.0)
+                .build(t),
+        )
+        .child(
+            ProgressBar::new("progress/value-label")
+                .label("Uploading")
+                .value(40.0)
+                .value_label("2 of 5")
+                .width(220.0)
+                .build(t),
+        )
+        .child(
+            ProgressBar::new("progress/hidden")
+                .label("Hidden label")
+                .hide_label(true)
+                .value(40.0)
+                .width(220.0)
+                .build(t),
+        );
+    let variants = flow().children(
+        [
+            ("informative", meter::Variant::Informative),
+            ("positive", meter::Variant::Positive),
+            ("notice", meter::Variant::Notice),
+            ("negative", meter::Variant::Negative),
+        ]
+        .map(|(n, v)| {
+            Meter::new(format!("progress/meter-{n}"))
+                .label(n)
+                .variant(v)
+                .value(70.0)
+                .help_text("Help text")
+                .width(220.0)
+                .build(t)
+        }),
+    );
+    let circles = flow()
+        .children([Size::S, Size::M, Size::L].map(|z| {
+            ProgressCircle::new(format!("progress/circle-{z:?}"))
+                .size(z)
+                .label("Loading")
+                .value(65.0)
+                .build(t)
+        }))
+        .children([0.0, 25.0, 50.0, 100.0].map(|v| {
+            ProgressCircle::new(format!("progress/circle-v{v}"))
+                .label("Loading")
+                .value(v)
+                .build(t)
+        }))
+        .child(
+            ProgressCircle::new("progress/circle-indeterminate")
+                .label("Working")
+                .indeterminate(true)
+                .build(t),
+        );
+    page(vec![
+        section(t, "Progress bar sizes (40%)", sizes),
+        section(t, "Progress bar values", values),
+        section(t, "Indeterminate, value label, hidden label", other),
+        section(t, "Meter variants", variants),
+        section(t, "Progress circle: sizes, values, indeterminate", circles),
     ])
 }
 
