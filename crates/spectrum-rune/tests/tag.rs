@@ -38,6 +38,7 @@ pub fn tag(c: &Value) -> El {
         .selected(look == "selected" || look == "emphasized")
         .emphasized(look == "emphasized")
         .disabled(look == "disabled")
+        .removable(c["removable"] == true)
         .on_press(|s: &mut App| s.pressed += 1);
     col().padding(20.0).child(t1.build(t))
 }
@@ -81,7 +82,7 @@ fn settle(rt: &mut Runtime<App>) {
 #[test]
 fn matches_oracle_scene() {
     let cases: Vec<Value> = serde_json::from_str(include_str!("fixtures/tag_scene.json")).unwrap();
-    assert_eq!(cases.len(), 84);
+    assert_eq!(cases.len(), 124);
     for c in &cases {
         let what = format!(
             "{} {} {} {} {}",
@@ -186,4 +187,51 @@ fn press_and_enter_call_the_handler_and_a_disabled_tag_does_not() {
     settle(&mut rt);
     assert_eq!(rt.state.pressed, 0);
     assert!(!part(&rt, "container").unwrap().focusable);
+}
+
+#[derive(Clone, Default)]
+struct Removal {
+    removed: u32,
+}
+
+fn removal_view(_: &Removal, _: &mut Cx<Removal>) -> El {
+    let t = tokens(ColorScheme::Light, Scale::Desktop);
+    col().padding(20.0).child(
+        Tag::new("tg", "Label")
+            .on_remove(|s: &mut Removal| s.removed += 1)
+            .build(t),
+    )
+}
+
+#[test]
+fn the_remove_button_and_delete_or_backspace_call_on_remove() {
+    let mut rt = Runtime::new(
+        Removal::default(),
+        removal_view,
+        (300.0, 120.0),
+        Env::new(false, 1.0),
+    );
+    for _ in 0..30 {
+        rt.frame(0.05);
+    }
+    let (x, y) = rt.find("tg/clear-button/container").unwrap();
+    rt.pointer_move(x, y);
+    rt.pointer_down(x, y);
+    rt.pointer_up(x, y);
+    for _ in 0..10 {
+        rt.frame(0.05);
+    }
+    assert_eq!(rt.state.removed, 1, "the remove button");
+    rt.pointer_move(290.0, 110.0);
+    rt.key(KeyEvent::from(Key::Tab));
+    rt.key(KeyEvent::from(Key::Backspace));
+    for _ in 0..10 {
+        rt.frame(0.05);
+    }
+    assert_eq!(rt.state.removed, 2, "Backspace on the focused tag");
+    rt.key(KeyEvent::from(Key::Delete));
+    for _ in 0..10 {
+        rt.frame(0.05);
+    }
+    assert_eq!(rt.state.removed, 3, "Delete on the focused tag");
 }
