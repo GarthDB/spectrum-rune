@@ -25,6 +25,7 @@ use spectrum_rune::progress_bar::ProgressBar;
 use spectrum_rune::progress_circle::ProgressCircle;
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
+use spectrum_rune::side_navigation::{SideNavigation, SideNavigationItem};
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tag::Tag;
@@ -86,6 +87,7 @@ stories! {
     "link" => "Link", link;
     "tag" => "Tag", tag;
     "clear-button" => "Clear button", clear_button;
+    "side-navigation" => "Side navigation", side_navigation;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -331,6 +333,49 @@ fn tag(s: &G, t: &'static Tokens) -> El {
         ),
         section(t, "Looks (static)", looks),
         section(t, "Interactive: hover, press, Tab to focus", live),
+    ])
+}
+
+fn side_navigation(s: &G, t: &'static Tokens) -> El {
+    use spectrum_rune::icons::{WORKFLOW_ADD, WORKFLOW_EDIT, WORKFLOW_SEARCH, WORKFLOW_SETTINGS};
+    // The selected item is the one last pressed (kept in `picked`); the second is disabled.
+    let nav = |key: &str, title: Option<&str>| {
+        let current = s
+            .picked
+            .get(key)
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(0);
+        let k = key.to_owned();
+        let items = [
+            ("Search", &WORKFLOW_SEARCH, false),
+            ("Reports", &WORKFLOW_EDIT, true),
+            ("Create", &WORKFLOW_ADD, false),
+            ("Settings", &WORKFLOW_SETTINGS, false),
+        ];
+        let mut n =
+            SideNavigation::new(format!("side-navigation/{key}")).on_select(move |g: &mut G, i| {
+                g.picked.insert(k.clone(), i.to_string());
+            });
+        if let Some(title) = title {
+            n = n.title(title);
+        }
+        for (i, (label, ic, disabled)) in items.into_iter().enumerate() {
+            n = n.item(
+                SideNavigationItem::new(label)
+                    .icon(ic)
+                    .selected(i == current)
+                    .disabled(disabled),
+            );
+        }
+        n.build(t)
+    };
+    page(vec![
+        section(
+            t,
+            "With a section title (press an item; arrows move focus)",
+            flow().child(nav("with-title", Some("Workspace"))),
+        ),
+        section(t, "Without", flow().child(nav("plain", None))),
     ])
 }
 
