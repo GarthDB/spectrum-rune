@@ -308,8 +308,27 @@ fn tag(s: &G, t: &'static Tokens) -> El {
             .emphasized(true)
             .build(t),
     );
+    // The remove button: pressing it (or Delete or Backspace on a focused tag) flips the tag's `removed` toggle, which hides it.
+    let removable = flow().children(["Design", "Rune", "Spectrum"].map(|n| {
+        let key = format!("removed-{n}");
+        let k = key.clone();
+        if s.on(&key, false) {
+            text(format!("{n} removed"))
+                .font(font::text_style(&t.component_s_regular))
+                .color(t.neutral_subdued_content_color_default)
+        } else {
+            Tag::new(format!("tag/{n}"), n)
+                .on_remove(move |g: &mut G| g.flip(&k))
+                .build(t)
+        }
+    }));
     page(vec![
         section(t, "Sizes (press to toggle)", sizes),
+        section(
+            t,
+            "Removable (press the cross, or Delete when focused)",
+            removable,
+        ),
         section(t, "Looks (static)", looks),
         section(t, "Interactive: hover, press, Tab to focus", live),
     ])

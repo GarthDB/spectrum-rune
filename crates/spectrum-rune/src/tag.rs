@@ -3,12 +3,15 @@
 //!
 //! Built: the label, the three sizes (`S`, `M`, `L`), `selected` (a neutral fill, or the accent one with `emphasized`),
 //! `disabled`, and, when [`Tag::on_press`] makes it interactive, hover, down and keyboard focus (the hover fill and ring).
-//! A tag with no handler is static: no states. Not built (the recipe has them): `isRemovable` (needs the Clear button),
-//! `hasAvatar` (needs the Avatar) and `icon`; `isError` is not visual in the recipe.
+//! A tag with no handler is static: no states. [`Tag::removable`] adds the recipe's remove button (a [`ClearButton`]); its
+//! press, and Delete or Backspace on a focused tag, call [`Tag::on_remove`]. The recipe draws that button's cross in the
+//! neutral content colour even on a selected tag, so on the neutral selected fill it is dark on dark: we follow the oracle.
+//! Not built (the recipe has them): `hasAvatar` (needs the Avatar) and `icon`; `isError` is not visual in the recipe.
 //!
 //! Verification: geometry, fills and colours against the oracle (`tests/tag.rs`), the focus fill and ring from pixels
 //! (`tests/tag_pixels.rs`).
 
+use crate::clear_button::ClearButton;
 use crate::font;
 use crate::interaction::{Interaction, State};
 use crate::tokens::{Tokens, Typography};
@@ -17,6 +20,7 @@ use rune::{row, text, El, Key, Mods};
 use std::rc::Rc;
 
 type Press = Rc<dyn Fn(El) -> El>;
+type Remove = Rc<dyn Fn(ClearButton) -> ClearButton>;
 
 pub struct Tag {
     key: String,
@@ -26,6 +30,9 @@ pub struct Tag {
     emphasized: bool,
     disabled: bool,
     press: Option<Press>,
+    removable: bool,
+    remove: Option<Remove>,
+    remove_key: Option<Press>,
 }
 
 impl Tag {
@@ -39,6 +46,9 @@ impl Tag {
             emphasized: false,
             disabled: false,
             press: None,
+            removable: false,
+            remove: None,
+            remove_key: None,
         }
     }
     /// `S`, `M` or `L`; the recipe has no `XL` (it draws as `L`).
@@ -57,6 +67,33 @@ impl Tag {
     }
     pub fn disabled(mut self, v: bool) -> Self {
         self.disabled = v;
+        self
+    }
+    /// Shows the remove button (the recipe's `isRemovable`); give it a handler with [`Tag::on_remove`].
+    pub fn removable(mut self, v: bool) -> Self {
+        self.removable = v;
+        self
+    }
+    /// Called when the remove button is pressed, and on Delete or Backspace while the tag has focus. Implies `removable`.
+    pub fn on_remove<S: 'static>(mut self, f: impl Fn(&mut S) + 'static) -> Self {
+        let f = Rc::new(f);
+        let g = f.clone();
+        self.removable = true;
+        self.remove = Some(Rc::new(move |b: ClearButton| {
+            let f = f.clone();
+            b.on_press(move |s: &mut S| f(s))
+        }));
+        self.remove_key = Some(Rc::new(move |e: El| {
+            let g = g.clone();
+            e.on_key(move |s: &mut S, ev, tx| {
+                let hit =
+                    matches!(ev.key, Key::Backspace | Key::Delete) && ev.mods == Mods::default();
+                if hit && !tx.key_repeat() {
+                    g(s);
+                }
+                hit
+            })
+        }));
         self
     }
     /// Makes the tag interactive: called on press and on Enter or Space. A disabled tag does not call it.
@@ -103,8 +140,22 @@ impl Tag {
                 t.tag_minimum_width_large,
             ),
         };
+        // A removable tag's right padding is the small gap, and the label is a full padding from the button.
+        let (pad_right, gap) = if self.removable {
+            (
+                match self.size {
+                    Size::S => t.base_gap_small,
+                    Size::M => t.base_gap_medium,
+                    Size::L | Size::XL => t.base_gap_large,
+                },
+                pad,
+            )
+        } else {
+            (pad, gap)
+        };
+        let button_size = self.size;
         let container_key = format!("{}/container", self.key);
-        let interactive = self.press.is_some() && !self.disabled;
+        let interactive = (self.press.is_some() || self.remove.is_some()) && !self.disabled;
         let interaction = Interaction::of(&container_key);
         let state = if interactive {
             interaction.state()
@@ -167,7 +218,7 @@ impl Tag {
             .min_w(min_width)
             .min_h(height)
             .pl(pad)
-            .pr(pad)
+            .pr(pad_right)
             .gap(gap)
             .center_y()
             .radius(radius)
@@ -187,6 +238,16 @@ impl Tag {
                     .group_color(focus_ink)
                     .a11y_hidden(),
             );
+        if self.removable {
+            let mut b = ClearButton::new(format!("{}/clear-button", self.key))
+                .size(button_size)
+                .label("Remove")
+                .disabled(self.disabled);
+            if let Some(r) = &self.remove {
+                b = r(b);
+            }
+            tag = tag.child(b.build(t));
+        }
         if interactive {
             tag = tag
                 .focusable(true)
@@ -200,6 +261,9 @@ impl Tag {
             tag = interaction.attach(tag);
             if let Some(p) = &self.press {
                 tag = p(tag);
+            }
+            if let Some(k) = &self.remove_key {
+                tag = k(tag);
             }
         }
         crate::hug(tag)
