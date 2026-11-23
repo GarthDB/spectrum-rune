@@ -95,7 +95,7 @@ fn init() -> G {
         flipped: HashSet::new(),
         picked: HashMap::new(),
         open: HashMap::new(),
-        play: Default::default(),
+        play: spectrum_rune_playground::Play::new(&spectrum_rune_playground::spectrum::Spectrum),
     }
 }
 
@@ -208,12 +208,14 @@ fn main() {
         ..AppSpec::new("Spectrum for Rune", (1100.0, 900.0), init, view)
     })
     .playground(
-        spectrum_rune_playground::stories().into_iter().fold(
-            rune::Playground::<G>::new()
-                .enabled(true)
-                .group_order(&["Components"]),
-            |p, s| p.story(s),
-        ),
+        spectrum_rune_playground::stories(&spectrum_rune_playground::spectrum::Spectrum)
+            .into_iter()
+            .fold(
+                rune::Playground::<G>::new()
+                    .enabled(true)
+                    .group_order(&["Components"]),
+                |p, s| p.story(s),
+            ),
     )
     .font_smoothing(FontSmoothing::Off)
     .run();

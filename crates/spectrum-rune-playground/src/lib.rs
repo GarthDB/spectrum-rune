@@ -5,14 +5,14 @@
 //! the oracle CLI (`oracle.rs`) on demand.
 
 pub mod adapters;
+pub mod model;
 pub mod oracle;
+pub mod spectrum;
 
-use crate::adapters::{adapter, Choice, ADAPTERS, WRAPPED};
+use crate::adapters::{Adapter, Choice, WRAPPED};
+use crate::model::{Library, Lit, OptionDef, OptionValue, Severity};
 use rune::{col, row, text, El};
 use spectrum_rune::action_button::ActionButton;
-use spectrum_rune::constraints::{
-    check, component, Lit, OptionDef, OptionValue, Severity, COMPONENTS as CATALOG,
-};
 use spectrum_rune::font;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
@@ -27,6 +27,8 @@ pub type OracleRun = (Vec<String>, Result<Report, String>);
 /// Everything the playground keeps between frames. A host holds one and exposes it through [`Host`].
 #[derive(Clone)]
 pub struct Play {
+    /// The component library being played with.
+    pub lib: &'static dyn Library,
     /// The chosen values, keyed `component/option` (the playground's own `/component`, `/picker`, `/compare`).
     pub values: std::collections::HashMap<String, String>,
     /// `None` follows the system until the host's scheme switch is used.
@@ -40,9 +42,10 @@ pub struct Play {
     pub system_dark: std::cell::Cell<bool>,
 }
 
-impl Default for Play {
-    fn default() -> Self {
+impl Play {
+    pub fn new(lib: &'static dyn Library) -> Play {
         Play {
+            lib,
             values: Default::default(),
             scheme: None,
             scale: Scale::Desktop,
@@ -50,6 +53,10 @@ impl Default for Play {
             oracle_due: None,
             system_dark: std::cell::Cell::new(false),
         }
+    }
+    /// The adapter that previews `comp`, if it has one.
+    pub fn adapter(&self, comp: &str) -> Option<&'static dyn Adapter> {
+        self.lib.adapters().iter().copied().find(|a| a.id() == comp)
     }
 }
 
@@ -60,8 +67,8 @@ pub trait Host: 'static {
 }
 
 /// Free-form options and the request width have no catalog values: a few presets each (the adapter's).
-pub fn extras(comp: &str) -> crate::adapters::Extras {
-    adapter(comp).map_or_else(Vec::new, |a| a.extras())
+pub fn extras(s: &Play, comp: &str) -> crate::adapters::Extras {
+    s.adapter(comp).map_or_else(Vec::new, |a| a.extras())
 }
 
 pub fn lit_str(l: &Lit) -> String {
@@ -84,7 +91,7 @@ fn pick<'a>(s: &'a Play, comp: &str, opt: &str, default: &'a str) -> &'a str {
 }
 
 fn extra(s: &Play, comp: &str, opt: &str) -> String {
-    let presets = extras(comp);
+    let presets = extras(s, comp);
     let (_, list) = presets.iter().find(|(o, _)| *o == opt).unwrap();
     pick(s, comp, opt, list[0].0).to_owned()
 }
@@ -92,12 +99,7 @@ fn extra(s: &Play, comp: &str, opt: &str) -> String {
 /// The chosen values under the catalog's option names, with `over` (option, value) replacing one choice.
 pub fn options(s: &Play, comp: &str, over: Option<(&str, &str)>) -> Opts {
     let mut o: Opts = Vec::new();
-    for def in component(comp)
-        .unwrap()
-        .options
-        .iter()
-        .filter(|d| !d.values.is_empty())
-    {
+    for def in s.lib.options(comp).iter().filter(|d| !d.values.is_empty()) {
         let chosen = match over {
             Some((n, v)) if n == def.name => v.to_owned(),
             _ => pick(s, comp, def.name, &default_of(def)).to_owned(),
@@ -109,7 +111,7 @@ pub fn options(s: &Play, comp: &str, over: Option<(&str, &str)>) -> Opts {
     for opt in ["label", "icon"] {
         let chosen = match over {
             Some((n, v)) if n == opt => v.to_owned(),
-            _ if extras(comp).iter().any(|(e, _)| *e == opt) => extra(s, comp, opt),
+            _ if extras(s, comp).iter().any(|(e, _)| *e == opt) => extra(s, comp, opt),
             _ => continue,
         };
         if chosen != "none" {
@@ -119,8 +121,9 @@ pub fn options(s: &Play, comp: &str, over: Option<(&str, &str)>) -> Opts {
     o
 }
 
-pub fn errors(comp: &str, o: &Opts) -> Vec<&'static str> {
-    check(comp, o)
+pub fn errors(s: &Play, comp: &str, o: &Opts) -> Vec<&'static str> {
+    s.lib
+        .check(comp, o)
         .into_iter()
         .filter(|v| v.severity == Severity::Error)
         .map(|v| v.description.unwrap_or("excluded option combination"))
@@ -128,8 +131,9 @@ pub fn errors(comp: &str, o: &Opts) -> Vec<&'static str> {
 }
 
 /// Every rule the options break, errors and advisories, as (severity, description).
-pub fn reasons(comp: &str, o: &Opts) -> Vec<(Severity, &'static str)> {
-    check(comp, o)
+pub fn reasons(s: &Play, comp: &str, o: &Opts) -> Vec<(Severity, &'static str)> {
+    s.lib
+        .check(comp, o)
         .into_iter()
         .map(|v| {
             (
@@ -157,7 +161,7 @@ pub fn preview(s: &Play, comp: &str, t: &Tokens) -> (Opts, El) {
 
 /// `preview` with the key its parts are named under (`<key>/container`, ...): a second copy needs its own.
 fn preview_keyed(s: &Play, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
-    adapter(comp)
+    s.adapter(comp)
         .expect("a previewed component")
         .build(&choice(s, comp), t, key)
 }
@@ -167,7 +171,7 @@ fn preview_keyed(s: &Play, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
 fn choice(s: &Play, comp: &str) -> Choice {
     Choice {
         options: options(s, comp, None),
-        extras: extras(comp)
+        extras: extras(s, comp)
             .iter()
             .map(|(opt, _)| (*opt, extra(s, comp, opt)))
             .collect(),
@@ -201,7 +205,7 @@ pub fn oracle_args(s: &Play, comp: &str, dark: bool) -> Vec<String> {
             (_, OptionValue::Present) => {}
         }
     }
-    if let Some(ad) = adapter(comp) {
+    if let Some(ad) = s.adapter(comp) {
         a.extend(ad.oracle_args(&choice(s, comp)));
     }
     if let Some(x) = size {
@@ -348,7 +352,7 @@ pub fn compare(
     dark: bool,
     args: &[String],
 ) -> Result<Report, String> {
-    if let Some(why) = errors(comp, &options(s, comp, None)).first() {
+    if let Some(why) = errors(s, comp, &options(s, comp, None)).first() {
         return Err(format!("not defined: {why}"));
     }
     let (version, parts) = crate::oracle::run(comp, args)?;
@@ -614,29 +618,30 @@ fn backdrop(s: &Play, comp: &str, t: &Tokens, built: El) -> El {
 }
 
 /// The component list's items in order: the previewed components, then the catalog-only ones, as (id, shown).
-pub fn menu_order() -> Vec<(&'static str, &'static str)> {
-    ADAPTERS
+pub fn menu_order(s: &Play) -> Vec<(&'static str, &'static str)> {
+    s.lib
+        .adapters()
         .iter()
         .map(|a| (a.id(), a.name()))
         .chain(
-            CATALOG
-                .iter()
-                .filter(|c| !previewed(c.name))
-                .map(|c| (c.name, c.name)),
+            s.lib
+                .components()
+                .into_iter()
+                .filter(|c| !previewed(s, c))
+                .map(|c| (c, c)),
         )
         .collect()
 }
 
 pub fn selected(s: &Play) -> &'static str {
-    CATALOG
-        .iter()
-        .find(|c| c.name == pick(s, "", "component", "badge"))
-        .map_or("badge", |c| c.name)
+    let want = pick(s, "", "component", "badge");
+    let all = s.lib.components();
+    all.iter().copied().find(|c| *c == want).unwrap_or(all[0])
 }
 
 /// Whether the playground has a preview adapter for the component (the rest show the catalog only).
-pub fn previewed(comp: &str) -> bool {
-    adapter(comp).is_some()
+pub fn previewed(s: &Play, comp: &str) -> bool {
+    s.adapter(comp).is_some()
 }
 
 /// How long the options must stay unchanged before the oracle runs by itself.
@@ -649,7 +654,7 @@ pub fn poll(s: &mut Play, t: f64, tx: &mut rune::Tx) -> bool {
         .scheme
         .map_or(s.system_dark.get(), |c| c == ColorScheme::Dark);
     let comp = selected(s);
-    if !previewed(comp) {
+    if !previewed(s, comp) {
         return false;
     }
     let args = oracle_args(s, comp, dark);
@@ -690,14 +695,9 @@ struct Parts {
 
 fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
     let comp = selected(s);
-    let now_reasons = reasons(comp, &options(s, comp, None));
+    let now_reasons = reasons(s, comp, &options(s, comp, None));
     let mut controls = col().gap(t.spacing_200).child(heading(t, "Options"));
-    for def in component(comp)
-        .unwrap()
-        .options
-        .iter()
-        .filter(|d| !d.values.is_empty())
-    {
+    for def in s.lib.options(comp).iter().filter(|d| !d.values.is_empty()) {
         let current = pick(s, comp, def.name, &default_of(def)).to_owned();
         let unset = def
             .default
@@ -718,13 +718,13 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
             |v| {
                 inherit(
                     &now_reasons,
-                    reasons(comp, &options(s, comp, Some((def.name, v)))),
+                    reasons(s, comp, &options(s, comp, Some((def.name, v)))),
                 )
             },
         ));
     }
     let mut state_control = None;
-    for (opt, presets) in extras(comp) {
+    for (opt, presets) in extras(s, comp) {
         let current = extra(s, comp, opt);
         let values = presets
             .iter()
@@ -736,7 +736,7 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
             } else {
                 inherit(
                     &now_reasons,
-                    reasons(comp, &options(s, comp, Some((opt, v)))),
+                    reasons(s, comp, &options(s, comp, Some((opt, v)))),
                 )
             }
         });
@@ -748,8 +748,8 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
     }
 
     let now = options(s, comp, None);
-    let broken = errors(comp, &now);
-    let (reported, shown) = if !previewed(comp) {
+    let broken = errors(s, comp, &now);
+    let (reported, shown) = if !previewed(s, comp) {
         (
             Vec::new(),
             text(format!(
@@ -807,12 +807,7 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
             t,
             "every catalog option, as the builder's options() reports it",
         ));
-    let mut names: Vec<&str> = component(comp)
-        .unwrap()
-        .options
-        .iter()
-        .map(|d| d.name)
-        .collect();
+    let mut names: Vec<&str> = s.lib.options(comp).iter().map(|d| d.name).collect();
     for (n, _) in &now {
         if !names.contains(n) {
             names.push(n);
@@ -837,16 +832,16 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
         panel = panel.child(line);
     }
     let mut rules = col().gap(t.spacing_50).child(heading(t, "Catalog rules"));
-    let c = component(comp).unwrap();
-    if c.rules.is_empty() {
+    let all_rules = s.lib.rules(comp);
+    if all_rules.is_empty() {
         rules = rules.child(caption(
             t,
             "none: the catalog has no rules for this component",
         ));
     }
-    let broken_now = check(comp, &now);
-    for (i, r) in c.rules.iter().enumerate() {
-        let hit = broken_now.iter().any(|v| std::ptr::eq(v.rule, r));
+    let broken_now = s.lib.check(comp, &now);
+    for (i, r) in all_rules.iter().enumerate() {
+        let hit = broken_now.iter().any(|v| v.rule == i);
         let (variant, state) = match (hit, r.severity) {
             (true, Severity::Error) => (status_light::Variant::Negative, "active"),
             (true, Severity::Advisory) => (status_light::Variant::Notice, "advisory"),
@@ -866,7 +861,7 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
             .build(t),
         );
     }
-    let oracle = if !previewed(comp) {
+    let oracle = if !previewed(s, comp) {
         col().child(caption(
             t,
             "oracle: nothing to compare, Rune has no preview of this component here",
@@ -907,7 +902,7 @@ fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
         };
         oracle
     };
-    let name = adapter(comp).map_or(comp, |a| a.name());
+    let name = s.adapter(comp).map_or(comp, |a| a.name());
     let summary = now
         .iter()
         .fold(name.to_owned(), |a, (n, v)| format!("{a} · {n} {}", fmt(v)));
@@ -984,7 +979,7 @@ pub fn side_view<H: Host>(h: &H, cx: &mut rune::Cx<H>) -> El {
 }
 
 /// The state of one playground story. Rune keeps one per story, apart from the app's.
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Page {
     pub play: Play,
 }
@@ -999,9 +994,11 @@ impl Host for Page {
 }
 
 impl Page {
-    /// A page with `component` chosen.
-    pub fn of(component: &str) -> Page {
-        let mut p = Page::default();
+    /// A page for `lib` with `component` chosen.
+    pub fn of(lib: &'static dyn Library, component: &str) -> Page {
+        let mut p = Page {
+            play: Play::new(lib),
+        };
         p.play.values.insert("/component".into(), component.into());
         p
     }
@@ -1009,13 +1006,13 @@ impl Page {
 
 /// One story per catalog component, under "Components/", the previewed ones first: give each to
 /// `rune::Playground::story`.
-pub fn stories() -> Vec<rune::Story<Page>> {
-    menu_order()
+pub fn stories(lib: &'static dyn Library) -> Vec<rune::Story<Page>> {
+    menu_order(&Play::new(lib))
         .into_iter()
         .map(|(id, name)| {
             // Rune takes story names as `&'static str`; the catalog is fixed, so this leaks a few dozen.
             let path: &'static str = Box::leak(format!("Components/{name}").into_boxed_str());
-            rune::Story::new(path, move || Page::of(id), stage_view::<Page>)
+            rune::Story::new(path, move || Page::of(lib, id), stage_view::<Page>)
                 .side(side_view::<Page>)
                 .poll(|p: &mut Page, t, tx| poll(&mut p.play, t, tx))
         })
