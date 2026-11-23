@@ -24,6 +24,7 @@ pub mod constraints;
 pub mod font;
 pub mod icons;
 pub mod interaction;
+pub mod menu;
 pub mod picker;
 pub mod picker_model;
 pub mod radio_button;

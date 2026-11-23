@@ -171,10 +171,32 @@ fn parse_px(v: &str) -> Res<f64> {
 }
 
 /// Values bound by recipes that `export` omits, per scale: normalized name -> scale -> px.
-fn scoped_values(
-    dir: &Path,
-    exported: &BTreeSet<String>,
-) -> Res<BTreeMap<String, BTreeMap<String, f64>>> {
+/// Recipe-scoped colours `export` omits: normalized name -> colour scheme -> `#rrggbb[aa]`.
+type ScopedColors = BTreeMap<String, BTreeMap<String, String>>;
+/// Recipe-scoped px values `export` omits: normalized name -> scale -> px.
+type ScopedPx = BTreeMap<String, BTreeMap<String, f64>>;
+
+/// `rgb(r, g, b)` / `rgba(r, g, b, a)` as `#rrggbb[aa]`, or `None` for anything else.
+fn css_to_hex(v: &str) -> Option<String> {
+    let inner = v
+        .strip_prefix("rgba(")
+        .or_else(|| v.strip_prefix("rgb("))?
+        .strip_suffix(')')?;
+    let n: Vec<f64> = inner
+        .split(',')
+        .map(|c| c.trim().parse().ok())
+        .collect::<Option<_>>()?;
+    if !(3..=4).contains(&n.len()) {
+        return None;
+    }
+    let mut h = format!("#{:02x}{:02x}{:02x}", n[0] as u8, n[1] as u8, n[2] as u8);
+    if let Some(a) = n.get(3).filter(|a| **a < 1.0) {
+        h.push_str(&format!("{:02x}", (a * 255.0).round() as u8));
+    }
+    Some(h)
+}
+
+fn scoped_values(dir: &Path, exported: &BTreeSet<String>) -> Res<(ScopedPx, ScopedColors)> {
     let mut states = Vec::new();
     let mut recipes: Vec<_> = std::fs::read_dir(dir.join("visuals"))
         .map_err(|e| e.to_string())?
@@ -212,6 +234,36 @@ fn scoped_values(
                 one(v["value"].clone());
             }
         }
+        // A recipe that repeats a part over `items` draws nothing without some: one selected and one plain item.
+        if catalog["options"]["items"]["type"] == "array" {
+            let mut with_items = Map::from_iter([(
+                "items".to_owned(),
+                serde_json::json!([{"label": "One"}, {"label": "Two", "isSelected": true}]),
+            )]);
+            if catalog["options"]["selectionMode"].is_object() {
+                with_items.insert("selectionMode".into(), "single".into());
+            }
+            variants.push(with_items);
+        }
+        // Colours `export` omits (one per scheme, and per interaction state): the variants again at the middle
+        // size, on desktop, in each scheme and state. Ids start with `c.`.
+        let mid = sizes
+            .iter()
+            .find(|z| *z == "m")
+            .or(sizes.first())
+            .cloned()
+            .unwrap_or_default();
+        for scheme in SCHEMES {
+            for (k, st) in [vec![], vec!["hover"], vec!["down"], vec!["keyboard-focus"]]
+                .into_iter()
+                .enumerate()
+            {
+                for (i, options) in variants.iter().enumerate() {
+                    let id = format!("c.desktop.{scheme}.{k}.{name}.{i}");
+                    states.push(serde_json::json!({"id": id, "component": name, "size": mid, "options": options, "colorScheme": scheme, "scale": "desktop", "states": st}));
+                }
+            }
+        }
         for scale in SCALES {
             for size in &sizes {
                 for (i, options) in variants.iter().enumerate() {
@@ -243,6 +295,8 @@ fn scoped_values(
     .map_err(|e| e.to_string())?;
 
     let mut out: BTreeMap<String, BTreeMap<String, f64>> = BTreeMap::new();
+    let mut colors: ScopedColors = BTreeMap::new();
+    let mut ambiguous = BTreeSet::new();
     for state in index["states"]
         .as_array()
         .ok_or("index.json has no states")?
@@ -251,7 +305,9 @@ fn scoped_values(
             return Err(format!("render {} failed: {err}", state["id"]));
         }
         let id = state["id"].as_str().ok_or("state without id")?;
+        let colour_pass = id.starts_with("c.");
         let scale = id.split('.').nth(1).ok_or("bad state id")?;
+        let scheme = id.split('.').nth(2).unwrap_or("light");
         let scene_file = state["scene"].as_str().ok_or("state without scene")?;
         let scene_path = if Path::new(scene_file).is_absolute() {
             PathBuf::from(scene_file)
@@ -273,8 +329,26 @@ fn scoped_values(
                 let raw_value = t["value"].as_str().ok_or("token without value")?;
                 // shortcut: only px values are generated; a colour a recipe binds that `export` omits is skipped
                 // (and listed), see the oracle bump notes
+                if let Some(hex) = css_to_hex(raw_value) {
+                    if colour_pass {
+                        let slot = colors.entry(norm.clone()).or_default();
+                        if let Some(old) = slot.insert(scheme.to_owned(), hex.clone()) {
+                            // Two tokens that differ only by a scheme word in their name (square-light,
+                            // square-dark) collapse to one name: not a scheme-dependent token, so skipped.
+                            if old != hex {
+                                ambiguous.insert(norm.clone());
+                            }
+                        }
+                    }
+                    continue;
+                }
+                if colour_pass {
+                    continue;
+                }
                 let Ok(value) = parse_px(raw_value) else {
-                    eprintln!("skipped scoped non-px token `{raw}` = {raw_value} ({id})");
+                    eprintln!(
+                        "skipped scoped non-px, non-colour token `{raw}` = {raw_value} ({id})"
+                    );
                     continue;
                 };
                 let slot = out.entry(norm.clone()).or_default();
@@ -286,7 +360,8 @@ fn scoped_values(
             }
         }
     }
-    Ok(out)
+    colors.retain(|name, _| !ambiguous.contains(name));
+    Ok((out, colors))
 }
 
 /// Drops scoped tokens that have a value for some scales only, with a note (the build fails if Rune reads one).
@@ -462,7 +537,17 @@ fn generate() -> Res<()> {
             return Err(format!("{name} exports a different token set"));
         }
     }
-    let mut scoped = scoped_values(&dir, &keys)?;
+    let (mut scoped, mut colors) = scoped_values(&dir, &keys)?;
+    colors.retain(|name, by_scheme| {
+        let all = by_scheme.len() == SCHEMES.len();
+        if !all {
+            eprintln!(
+                "skipped scoped colour `{name}`: values for {:?} only",
+                by_scheme.keys()
+            );
+        }
+        all && !keys.contains(name)
+    });
     complete_scoped(&mut scoped);
     if let Some(clash) = scoped.keys().find(|k| keys.contains(*k)) {
         return Err(format!(
@@ -510,6 +595,14 @@ fn generate() -> Res<()> {
     for key in scoped.keys() {
         writeln!(out, "    pub {}: f32,", ident(key)?).unwrap();
     }
+    writeln!(
+        out,
+        "    // Recipe-scoped colours `export` omits (per scheme and state)."
+    )
+    .unwrap();
+    for key in colors.keys() {
+        writeln!(out, "    pub {}: Color,", ident(key)?).unwrap();
+    }
     writeln!(out, "}}\n").unwrap();
     for (name, map) in &modes {
         let scale = name.split('_').nth(1).unwrap().to_lowercase();
@@ -520,6 +613,10 @@ fn generate() -> Res<()> {
         }
         for (key, by_scale) in &scoped {
             writeln!(out, "    {}: {},", ident(key)?, f(by_scale[&scale])).unwrap();
+        }
+        let scheme = name.split('_').next().unwrap().to_lowercase();
+        for (key, by_scheme) in &colors {
+            writeln!(out, "    {}: {},", ident(key)?, color(&by_scheme[&scheme])?).unwrap();
         }
         writeln!(out, "}};\n").unwrap();
     }
