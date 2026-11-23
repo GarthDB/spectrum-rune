@@ -1,5 +1,5 @@
-//! Checks the RadioGroup against the `radio-group` recipe oracle (platforms/rune/extensions/visuals; regenerate the
-//! fixture with `tests/fixtures/regen-radio-group.sh`) and the keyboard behaviour of a radio group.
+//! Checks the RadioGroup against the foundation's `radio-group` recipe oracle (regenerate the fixture with
+//! `tests/fixtures/regen-radio-group.sh`) and the keyboard behaviour of a radio group.
 //!
 //! The oracle's radio buttons have no label, so what is compared is the gap between items and the item height.
 
