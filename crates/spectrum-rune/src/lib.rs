@@ -22,6 +22,7 @@ mod bar;
 pub mod breadcrumbs;
 pub mod button;
 pub mod checkbox;
+pub mod clear_button;
 pub mod constraints;
 pub mod divider;
 pub mod font;

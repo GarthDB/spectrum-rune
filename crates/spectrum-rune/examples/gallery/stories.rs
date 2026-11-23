@@ -10,6 +10,7 @@ use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::breadcrumbs::{self, BreadcrumbItem, Breadcrumbs};
 use spectrum_rune::button::{self, Button, StaticColor};
 use spectrum_rune::checkbox::Checkbox;
+use spectrum_rune::clear_button::ClearButton;
 use spectrum_rune::constraints::{check, OptionValue, Severity};
 use spectrum_rune::divider::{self, Divider};
 use spectrum_rune::font;
@@ -84,6 +85,7 @@ stories! {
     "divider" => "Divider", divider;
     "link" => "Link", link;
     "tag" => "Tag", tag;
+    "clear-button" => "Clear button", clear_button;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -310,6 +312,38 @@ fn tag(s: &G, t: &'static Tokens) -> El {
         section(t, "Sizes (press to toggle)", sizes),
         section(t, "Looks (static)", looks),
         section(t, "Interactive: hover, press, Tab to focus", live),
+    ])
+}
+
+fn clear_button(s: &G, t: &'static Tokens) -> El {
+    let cb = |key: &str| {
+        let k = key.to_owned();
+        ClearButton::new(format!("clear-button/{key}")).on_press(move |g: &mut G| g.flip(&k))
+    };
+    let sizes = flow().children(SIZES.map(|(z, n)| cb(&format!("size-{n}")).size(z).build(t)));
+    let states = flow().child(cb("rest").build(t)).child(
+        ClearButton::new("clear-button/disabled")
+            .disabled(true)
+            .build(t),
+    );
+    // Each press flips the button's own toggle, so the count shows that pressing works.
+    let pressed = s
+        .flipped
+        .iter()
+        .filter(|k| k.starts_with("clear-button/"))
+        .count();
+    page(vec![
+        section(t, "Sizes (press, Tab to focus)", sizes),
+        section(t, "States", states),
+        section(
+            t,
+            "Pressed",
+            flow().child(
+                text(format!("{pressed} button(s) toggled"))
+                    .font(font::text_style(&t.component_m_regular))
+                    .color(t.neutral_content_color_default),
+            ),
+        ),
     ])
 }
 
