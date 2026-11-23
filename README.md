@@ -20,6 +20,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
 | Picker (the closed field only; no menu) | `picker` | `value`, `open` (calls `on_open`) |
 | Menu (items with a checkmark selection; no popover) | `menu` | the chosen id (`on_choose`) |
+| Popover (surface and tip; six placements, optional `anchor` to a trigger) | `popover` | none (the app shows it; `on_dismiss` on Escape) |
 | Radio group | `radio_group` | `value` |
 | Accordion item (one item) | `accordion` | `open` |
 | Accordion (a group of items; single or multiple) | `accordion_group` | the open set |
