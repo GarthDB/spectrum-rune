@@ -4,7 +4,7 @@ mod tests {
     use rune::{row, Cx, El};
 
     fn init() -> Page {
-        Page::default()
+        Page::of(&Spectrum, "badge")
     }
 
     fn view(s: &Page, cx: &mut Cx<Page>) -> El {
@@ -17,7 +17,12 @@ mod tests {
     fn poll(s: &mut Page, t: f64, tx: &mut rune::Tx) -> bool {
         spectrum_rune_playground::poll(&mut s.play, t, tx)
     }
-    use spectrum_rune::constraints::{COMPONENTS as CATALOG, *};
+    use spectrum_rune_playground::model::*;
+    use spectrum_rune_playground::spectrum::Spectrum;
+
+    fn play() -> Play {
+        Play::new(&Spectrum)
+    }
     use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
     use spectrum_rune_playground::adapters::*;
     use spectrum_rune_playground::*;
@@ -27,15 +32,14 @@ mod tests {
     #[test]
     fn catalog_options_match_builder_options() {
         let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for ad in ADAPTERS {
+        for ad in Spectrum.adapters() {
             let comp = ad.id();
-            for def in component(comp)
-                .unwrap()
-                .options
+            for def in Spectrum
+                .options(comp)
                 .iter()
                 .filter(|d| !d.values.is_empty())
             {
-                for l in def.values {
+                for l in &def.values {
                     let mut s = init();
                     s.play
                         .values
@@ -45,7 +49,7 @@ mod tests {
                         o
                     };
                     let mut derived = sorted(options(&s.play, comp, None));
-                    if errors(comp, &derived).is_empty() {
+                    if errors(&play(), comp, &derived).is_empty() {
                         let reported = sorted(preview(&s.play, comp, t).0);
                         // A builder may leave out options with no visual effect (Button's size, isDisabled).
                         derived.retain(|(n, _)| reported.iter().any(|(r, _)| r == n));
@@ -60,14 +64,14 @@ mod tests {
     #[test]
     fn extras_match_builder_options() {
         let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for ad in ADAPTERS {
+        for ad in Spectrum.adapters() {
             let comp = ad.id();
-            for (opt, presets) in extras(comp) {
+            for (opt, presets) in extras(&play(), comp) {
                 for (id, _) in presets {
                     let mut s = init();
                     s.play.values.insert(format!("{comp}/{opt}"), id.to_owned());
                     let derived = options(&s.play, comp, None);
-                    if !errors(comp, &derived).is_empty() {
+                    if !errors(&play(), comp, &derived).is_empty() {
                         continue;
                     }
                     let reported = preview(&s.play, comp, t).0;
@@ -89,12 +93,11 @@ mod tests {
     #[test]
     fn every_reachable_combination_builds() {
         let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for ad in ADAPTERS {
+        for ad in Spectrum.adapters() {
             let comp = ad.id();
             let mut controls: Vec<(String, Vec<String>)> = Vec::new();
-            for def in component(comp)
-                .unwrap()
-                .options
+            for def in Spectrum
+                .options(comp)
                 .iter()
                 .filter(|d| !d.values.is_empty())
             {
@@ -102,7 +105,7 @@ mod tests {
                 let all = unset.into_iter().chain(def.values.iter().map(lit_str));
                 controls.push((def.name.to_owned(), all.collect()));
             }
-            for (opt, presets) in extras(comp) {
+            for (opt, presets) in extras(&play(), comp) {
                 controls.push((
                     opt.to_owned(),
                     presets.iter().map(|(id, _)| id.to_string()).collect(),
@@ -118,7 +121,7 @@ mod tests {
                         .insert(format!("{comp}/{opt}"), values[n % values.len()].clone());
                     n /= values.len();
                 }
-                if errors(comp, &options(&s.play, comp, None)).is_empty() {
+                if errors(&play(), comp, &options(&s.play, comp, None)).is_empty() {
                     preview(&s.play, comp, t);
                     built += 1;
                 }
@@ -134,6 +137,7 @@ mod tests {
             .values
             .insert("button/variant".into(), "accent".into());
         let why = errors(
+            &s.play,
             "button",
             &options(&s.play, "button", Some(("style", "outline"))),
         );
@@ -142,12 +146,14 @@ mod tests {
             ["Outline style is only defined for primary and secondary."]
         );
         assert!(errors(
+            &s.play,
             "button",
             &options(&s.play, "button", Some(("style", "fill")))
         )
         .is_empty());
         // An icon-only button needs an icon: hiding the label is excluded until one is chosen.
         let why = errors(
+            &s.play,
             "button",
             &options(&s.play, "button", Some(("isLabelHidden", "true"))),
         );
@@ -437,7 +443,7 @@ mod tests {
     #[test]
     #[ignore]
     fn oracle_runs_every_component_at_its_defaults() {
-        for ad in ADAPTERS {
+        for ad in Spectrum.adapters() {
             let comp = ad.id();
             let s = init();
             let args = oracle_args(&s.play, comp, false);
@@ -559,21 +565,21 @@ mod tests {
     #[test]
     fn every_catalog_component_builds() {
         use rune::{Env, Runtime};
-        for c in CATALOG {
+        for c in Spectrum.components() {
             let mut s = init();
-            s.play.values.insert("/component".into(), c.name.into());
+            s.play.values.insert("/component".into(), c.into());
             let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(false, 1.0));
             rt.poll = Some(poll);
             for _ in 0..10 {
                 rt.frame(0.1);
             }
             let tree = rt.accessibility_json().to_string();
-            assert!(tree.contains("Catalog rules"), "{}", c.name);
+            assert!(tree.contains("Catalog rules"), "{}", c);
             assert_eq!(
                 tree.contains("Not previewed"),
-                !previewed(c.name),
+                !previewed(&play(), c),
                 "{}",
-                c.name
+                c
             );
         }
     }
@@ -595,7 +601,10 @@ mod tests {
     /// One story per catalog component, each under its own path and opening on its own component.
     #[test]
     fn there_is_one_story_per_catalog_component() {
-        assert_eq!(stories().len(), menu_order().len());
-        assert_eq!(Page::of("button").play.values["/component"], "button");
+        assert_eq!(stories(&Spectrum).len(), menu_order(&play()).len());
+        assert_eq!(
+            Page::of(&Spectrum, "button").play.values["/component"],
+            "button"
+        );
     }
 }

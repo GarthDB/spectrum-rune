@@ -3,16 +3,34 @@
 //! besides its catalog options. Nothing here reads the gallery's state: an adapter sees a [`Choice`], so it
 //! can move into a shared playground crate (Stage 3, a14.44) unchanged.
 
+use crate::model::OptionValue;
 use rune::El;
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::button::{self, Button};
-use spectrum_rune::constraints::OptionValue;
+use spectrum_rune::constraints as c;
 use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::interaction::State;
 use spectrum_rune::picker::Picker;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::tokens::Tokens;
 use spectrum_rune::Size;
+
+/// A Spectrum builder's `options()` as the playground's values.
+fn conv(o: Vec<(&'static str, c::OptionValue<'static>)>) -> Opts {
+    o.into_iter()
+        .map(|(n, v)| {
+            (
+                n,
+                match v {
+                    c::OptionValue::Str(s) => OptionValue::Str(s),
+                    c::OptionValue::Bool(b) => OptionValue::Bool(b),
+                    c::OptionValue::Num(n) => OptionValue::Num(n),
+                    c::OptionValue::Present => OptionValue::Present,
+                },
+            )
+        })
+        .collect()
+}
 
 pub type Opts = Vec<(&'static str, OptionValue<'static>)>;
 /// Option name and its presets as (id, shown); the first preset is the default.
@@ -87,10 +105,6 @@ pub trait Adapter: Sync {
 /// The previewed components, in the order the playground lists them.
 pub static ADAPTERS: [&dyn Adapter; 4] = [&BadgeA, &ButtonA, &PickerA, &StatusLightA];
 
-pub fn adapter(id: &str) -> Option<&'static dyn Adapter> {
-    ADAPTERS.iter().copied().find(|a| a.id() == id)
-}
-
 fn label_presets() -> Vec<(&'static str, &'static str)> {
     vec![("short", "Label"), ("long", WRAPPED)]
 }
@@ -141,7 +155,7 @@ impl Adapter for BadgeA {
         if let Some(w) = c.width() {
             b = b.width(w);
         }
-        (b.options(), b.build(t))
+        (conv(b.options()), b.build(t))
     }
     fn oracle_args(&self, c: &Choice) -> Vec<String> {
         let mut a = Vec::new();
@@ -216,7 +230,7 @@ impl Adapter for ButtonA {
         if let Some(w) = c.width() {
             b = b.width(w);
         }
-        (b.options(), b.build(t))
+        (conv(b.options()), b.build(t))
     }
     fn oracle_args(&self, c: &Choice) -> Vec<String> {
         let mut a = Vec::new();
@@ -283,7 +297,7 @@ impl Adapter for PickerA {
         if let Some(w) = c.width() {
             p = p.width(w);
         }
-        (p.options(), p.build(t))
+        (conv(p.options()), p.build(t))
     }
     fn oracle_args(&self, c: &Choice) -> Vec<String> {
         let mut a = Vec::new();
@@ -323,7 +337,7 @@ impl Adapter for StatusLightA {
         if let Some(w) = c.width() {
             b = b.width(w);
         }
-        (b.options(), b.build(t))
+        (conv(b.options()), b.build(t))
     }
     fn oracle_args(&self, c: &Choice) -> Vec<String> {
         vec!["--label".to_owned(), c.label().to_owned()]

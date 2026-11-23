@@ -449,7 +449,7 @@ catalog's rules and an oracle comparison (`design-data render`, debounced). The 
 
 ```rust,ignore
 App::new(spec).playground(
-    stories().into_iter().fold(Playground::<State>::new().enabled(true), |p, s| p.story(s)),
+    stories(&Spectrum).into_iter().fold(Playground::<State>::new().enabled(true), |p, s| p.story(s)),
 )
 ```
 
