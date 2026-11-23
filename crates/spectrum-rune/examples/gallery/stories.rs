@@ -54,7 +54,6 @@ stories! {
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
-    "playground" => "Playground", spectrum_rune_playground::playground;
 }
 
 /// Backdrops for the static colours. Fixed hex values: the `blue_*`/`yellow_*` tokens invert in the

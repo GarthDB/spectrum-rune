@@ -8,14 +8,12 @@ pub mod adapters;
 pub mod oracle;
 
 use crate::adapters::{adapter, Choice, ADAPTERS, WRAPPED};
-use rune::{col, el, row, text, El};
+use rune::{col, row, text, El};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::constraints::{
     check, component, Lit, OptionDef, OptionValue, Severity, COMPONENTS as CATALOG,
 };
 use spectrum_rune::font;
-use spectrum_rune::menu::{Menu, MenuItem, Selection};
-use spectrum_rune::picker::Picker;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale, Tokens};
@@ -529,6 +527,8 @@ fn caption(t: &Tokens, s: impl Into<String>) -> El {
     text(s.into())
         .font(font::text_style(&t.component_s_regular))
         .color(t.neutral_subdued_content_color_default)
+        .w_full()
+        .wrap()
 }
 
 /// One option: its values as buttons, the chosen one selected, an excluded one disabled. A value that
@@ -552,11 +552,15 @@ fn control<H: Host>(
             notes.push(match sev {
                 Severity::Error => text(format!("{shown}: not available, Error · {rule}"))
                     .font(font::text_style(&t.component_s_regular))
-                    .color(t.negative_content_color_default),
+                    .color(t.negative_content_color_default)
+                    .w_full()
+                    .wrap(),
                 Severity::Advisory => text(format!("{shown}: Advisory · {rule}"))
                     .font(font::text_style(&t.component_s_regular))
                     // shortcut: Spectrum has no notice text colour; neutral stands in, see a14.56
-                    .color(t.neutral_content_color_default),
+                    .color(t.neutral_content_color_default)
+                    .w_full()
+                    .wrap(),
             });
         }
         let key = format!("{comp}/{opt}");
@@ -673,62 +677,19 @@ pub fn poll(s: &mut Play, t: f64, tx: &mut rune::Tx) -> bool {
     }
 }
 
-pub fn playground<H: Host>(host: &H, t: &'static Tokens) -> El {
-    let s = host.play();
+/// The pieces of one component's playground, built from its state and the tokens of the appearance it shows in.
+struct Parts {
+    summary: String,
+    shown: El,
+    compare: El,
+    controls: El,
+    panel: El,
+    rules: El,
+    oracle: El,
+}
+
+fn parts<H: Host>(s: &Play, t: &'static Tokens) -> Parts {
     let comp = selected(s);
-    let open = pick(s, "", "picker", "closed") == "open";
-    let shown_name = adapter(comp).map_or(comp, |a| a.name());
-    let mut picker = col()
-        .gap(t.spacing_75)
-        .child(heading(t, "Component"))
-        .child(
-            Picker::new("playground/pick")
-                .value(shown_name)
-                .placeholder("Select a component")
-                .size(Size::M)
-                .width(280.0)
-                .open(open)
-                .on_open(move |g: &mut H| {
-                    let v = if open { "closed" } else { "open" };
-                    g.play_mut().values.insert("/picker".into(), v.into());
-                })
-                .build(t),
-        );
-    if open {
-        // The list is the Spectrum Menu in the page flow (not an overlay), scrolling: the previewed components
-        // first, then the catalog-only ones. A menu has no surface of its own: a layer behind it.
-        let mut menu = Menu::new("playground/pick-menu")
-            .label("Component")
-            .selection(Selection::Single)
-            .on_choose(|g: &mut H, id: &str| {
-                g.play_mut()
-                    .values
-                    .insert("/component".into(), id.to_owned());
-                g.play_mut()
-                    .values
-                    .insert("/picker".into(), "closed".into());
-            })
-            .on_dismiss(|g: &mut H| {
-                g.play_mut()
-                    .values
-                    .insert("/picker".into(), "closed".into());
-            });
-        for (id, name) in menu_order() {
-            menu = menu.item(MenuItem::new(id, name).selected(id == comp));
-        }
-        picker = picker.child(
-            el().key("playground/pick-list")
-                .w(280.0)
-                .h(320.0)
-                .fill(t.background_layer_1_color)
-                .radius(t.corner_radius_500)
-                .padding(t.spacing_100)
-                .scroll(rune::ScrollSpec {
-                    stick_bottom: false,
-                })
-                .child(menu.build(t)),
-        );
-    }
     let now_reasons = reasons(comp, &options(s, comp, None));
     let mut controls = col().gap(t.spacing_200).child(heading(t, "Options"));
     for def in component(comp)
@@ -951,48 +912,112 @@ pub fn playground<H: Host>(host: &H, t: &'static Tokens) -> El {
         .iter()
         .fold(name.to_owned(), |a, (n, v)| format!("{a} · {n} {}", fmt(v)));
     let compare = pick(s, "", "compare", "off") == "on";
-    let stage = col()
+    let compare = Switch::new("playground/compare")
+        .label("Compare light and dark")
+        .selected(compare)
+        .on_toggle(move |g: &mut H| {
+            let v = if compare { "off" } else { "on" };
+            g.play_mut().values.insert("/compare".into(), v.into());
+        })
+        .build(t);
+    Parts {
+        summary,
+        shown,
+        compare,
+        controls,
+        panel,
+        rules,
+        oracle,
+    }
+}
+
+fn tokens_now(s: &Play, cx: &rune::Cx<impl Host>) -> &'static Tokens {
+    s.system_dark.set(cx.system_dark());
+    tokens(scheme(cx.system_dark()), s.scale)
+}
+
+/// The stage: the preview, as Rune's playground shows it in its stage (its appearance), and a line saying what it is.
+pub fn stage_view<H: Host>(h: &H, cx: &mut rune::Cx<H>) -> El {
+    let s = h.play();
+    let t = tokens_now(s, cx);
+    let p = parts::<H>(s, t);
+    col()
         .key("playground/stage")
-        .w_full()
-        .fill(t.background_layer_1_color)
-        .padding(t.spacing_300)
         .gap(t.spacing_100)
-        .sticky_top(0.0)
-        .child(
-            row()
-                .gap(t.spacing_300)
-                .center_y()
-                .flex_wrap()
-                .child(caption(t, summary))
-                .child(
-                    Switch::new("playground/compare")
-                        .label("Compare light and dark")
-                        .selected(compare)
-                        .on_toggle(move |g: &mut H| {
-                            let v = if compare { "off" } else { "on" };
-                            g.play_mut().values.insert("/compare".into(), v.into());
-                        })
-                        .build(t),
-                ),
-        )
-        .child(shown);
+        .child(caption(t, p.summary))
+        .child(p.shown)
+}
+
+/// The side column: the compare and scale switches, a control per catalog option, the builder's options, the
+/// catalog's rules and the oracle's tokens.
+pub fn side_view<H: Host>(h: &H, cx: &mut rune::Cx<H>) -> El {
+    let s = h.play();
+    let t = tokens_now(s, cx);
+    let mobile = s.scale == Scale::Mobile;
+    let p = parts::<H>(s, t);
     col()
         .w_full()
-        .gap(t.spacing_400)
-        .child(picker)
-        .child(stage)
+        .gap(t.spacing_300)
+        .child(p.compare)
         .child(
-            row()
-                .gap(t.spacing_500)
-                .flex_wrap()
-                .child(controls.w(520.0))
-                .child(
-                    col().gap(t.spacing_400).child(panel).child(rules).child(
-                        col()
-                            .gap(t.spacing_50)
-                            .child(heading(t, "Oracle"))
-                            .child(oracle),
-                    ),
-                ),
+            Switch::new("playground/mobile")
+                .label("Mobile scale")
+                .selected(mobile)
+                .on_toggle(move |g: &mut H| {
+                    g.play_mut().scale = if mobile {
+                        Scale::Desktop
+                    } else {
+                        Scale::Mobile
+                    };
+                })
+                .build(t),
         )
+        .child(p.controls)
+        .child(p.panel)
+        .child(p.rules)
+        .child(
+            col()
+                .gap(t.spacing_50)
+                .child(heading(t, "Oracle"))
+                .child(p.oracle),
+        )
+}
+
+/// The state of one playground story. Rune keeps one per story, apart from the app's.
+#[derive(Clone, Default)]
+pub struct Page {
+    pub play: Play,
+}
+
+impl Host for Page {
+    fn play(&self) -> &Play {
+        &self.play
+    }
+    fn play_mut(&mut self) -> &mut Play {
+        &mut self.play
+    }
+}
+
+impl Page {
+    /// A page with `component` chosen.
+    pub fn of(component: &str) -> Page {
+        let mut p = Page::default();
+        p.play.values.insert("/component".into(), component.into());
+        p
+    }
+}
+
+/// One story per catalog component, under "Components/", the previewed ones first: give each to
+/// `rune::Playground::story`.
+pub fn stories() -> Vec<rune::Story<Page>> {
+    menu_order()
+        .into_iter()
+        .map(|(id, name)| {
+            // Rune takes story names as `&'static str`; the catalog is fixed, so this leaks a few dozen.
+            let path: &'static str = Box::leak(format!("Components/{name}").into_boxed_str());
+            rune::Story::new(path, move || Page::of(id), stage_view::<Page>)
+                .side(side_view::<Page>)
+                .poll(|p: &mut Page, t, tx| poll(&mut p.play, t, tx))
+        })
+        .collect()
 }
