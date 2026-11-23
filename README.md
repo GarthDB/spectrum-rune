@@ -447,7 +447,7 @@ is licensed separately; never commit it.
 column a control per catalog option (values an `error` rule excludes are greyed with the reason), the builder's options, the
 catalog's rules and an oracle comparison (`design-data render`, debounced). The gallery shows it:
 
-```rust
+```rust,ignore
 App::new(spec).playground(
     stories().into_iter().fold(Playground::<State>::new().enabled(true), |p, s| p.story(s)),
 )
