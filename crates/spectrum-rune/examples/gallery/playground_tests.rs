@@ -1,7 +1,22 @@
 #![cfg(test)]
 
 mod tests {
-    use crate::G;
+    use rune::{row, Cx, El};
+
+    fn init() -> Page {
+        Page::default()
+    }
+
+    fn view(s: &Page, cx: &mut Cx<Page>) -> El {
+        row()
+            .gap(24.0)
+            .child(stage_view(s, cx))
+            .child(side_view(s, cx))
+    }
+
+    fn poll(s: &mut Page, t: f64, tx: &mut rune::Tx) -> bool {
+        spectrum_rune_playground::poll(&mut s.play, t, tx)
+    }
     use spectrum_rune::constraints::{COMPONENTS as CATALOG, *};
     use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
     use spectrum_rune_playground::adapters::*;
@@ -21,7 +36,7 @@ mod tests {
                 .filter(|d| !d.values.is_empty())
             {
                 for l in def.values {
-                    let mut s = crate::init();
+                    let mut s = init();
                     s.play
                         .values
                         .insert(format!("{comp}/{}", def.name), lit_str(l));
@@ -49,7 +64,7 @@ mod tests {
             let comp = ad.id();
             for (opt, presets) in extras(comp) {
                 for (id, _) in presets {
-                    let mut s = crate::init();
+                    let mut s = init();
                     s.play.values.insert(format!("{comp}/{opt}"), id.to_owned());
                     let derived = options(&s.play, comp, None);
                     if !errors(comp, &derived).is_empty() {
@@ -96,7 +111,7 @@ mod tests {
             let total: usize = controls.iter().map(|(_, v)| v.len()).product();
             let mut built = 0;
             for mut n in 0..total {
-                let mut s = crate::init();
+                let mut s = init();
                 for (opt, values) in &controls {
                     s.play
                         .values
@@ -114,7 +129,7 @@ mod tests {
 
     #[test]
     fn outline_is_greyed_out_for_accent_button() {
-        let mut s = crate::init();
+        let mut s = init();
         s.play
             .values
             .insert("button/variant".into(), "accent".into());
@@ -144,13 +159,12 @@ mod tests {
     #[test]
     fn excluded_value_is_rendered_disabled_with_its_reason() {
         use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
+        let mut s = init();
         s.play.values.insert("/component".into(), "button".into());
         s.play
             .values
             .insert("button/variant".into(), "accent".into());
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+        let mut rt = Runtime::new(s, view, (1100.0, 1400.0), Env::new(false, 1.0));
         rt.frame(0.05);
         let tree = rt.accessibility_json().to_string();
         assert!(
@@ -245,8 +259,7 @@ mod tests {
         ];
         for (name, play) in shots {
             for dark in [false, true] {
-                let mut s = crate::init();
-                s.story = "playground";
+                let mut s = init();
                 s.play.scheme = Some(if dark {
                     ColorScheme::Dark
                 } else {
@@ -256,9 +269,8 @@ mod tests {
                     s.play.values.insert((*k).into(), (*v).into());
                 }
                 let (w, h) = (1100u32, 2500u32);
-                let mut rt =
-                    Runtime::new(s, crate::view, (w as f32, h as f32), Env::new(dark, 1.0));
-                rt.poll = Some(crate::poll);
+                let mut rt = Runtime::new(s, view, (w as f32, h as f32), Env::new(dark, 1.0));
+                rt.poll = Some(poll);
                 for _ in 0..12 {
                     rt.frame(0.1);
                 }
@@ -271,12 +283,11 @@ mod tests {
 
     fn tree_of(play: &[(&str, &str)]) -> String {
         use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
+        let mut s = init();
         for (k, v) in play {
             s.play.values.insert((*k).into(), (*v).into());
         }
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 2500.0), Env::new(false, 1.0));
+        let mut rt = Runtime::new(s, view, (1100.0, 2500.0), Env::new(false, 1.0));
         rt.frame(0.05);
         rt.accessibility_json().to_string()
     }
@@ -338,8 +349,7 @@ mod tests {
             ("black", false),
             ("black", true),
         ] {
-            let mut s = crate::init();
-            s.story = "playground";
+            let mut s = init();
             s.play.scheme = Some(if dark {
                 ColorScheme::Dark
             } else {
@@ -349,7 +359,7 @@ mod tests {
             s.play
                 .values
                 .insert("button/staticColor".into(), static_color.into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 1500.0), Env::new(dark, 1.0));
+            let mut rt = Runtime::new(s, view, (1100.0, 1500.0), Env::new(dark, 1.0));
             for _ in 0..10 {
                 rt.frame(0.05);
             }
@@ -375,8 +385,7 @@ mod tests {
     fn compare_shows_a_copy_under_the_other_scheme() {
         use rune::{Env, Runtime};
         for dark in [false, true] {
-            let mut s = crate::init();
-            s.story = "playground";
+            let mut s = init();
             s.play.scheme = Some(if dark {
                 ColorScheme::Dark
             } else {
@@ -384,7 +393,7 @@ mod tests {
             });
             s.play.values.insert("/component".into(), "button".into());
             s.play.values.insert("/compare".into(), "on".into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 1500.0), Env::new(dark, 1.0));
+            let mut rt = Runtime::new(s, view, (1100.0, 1500.0), Env::new(dark, 1.0));
             for _ in 0..10 {
                 rt.frame(0.05);
             }
@@ -403,51 +412,12 @@ mod tests {
         }
     }
 
-    fn press(rt: &mut rune::Runtime<G>, key: &str) {
-        let (x, y) = rt.find(key).unwrap();
-        rt.pointer_move(x, y);
-        rt.pointer_down(x, y);
-        rt.pointer_up(x, y);
-        rt.frame(0.05);
-    }
-
-    /// The component Picker opens a list, choosing from it selects the component and closes the list.
-    #[test]
-    fn the_component_picker_opens_and_selects() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        assert!(
-            rt.find("playground/pick-menu/container").is_none(),
-            "closed: no list"
-        );
-        press(&mut rt, "playground/pick/field");
-        assert!(
-            rt.find("playground/pick-menu/container").is_some(),
-            "open: the catalog is listed"
-        );
-        // The first catalog-only component: the list scrolls, so a far one is out of reach of a press.
-        let (id, _) = menu_order()[ADAPTERS.len()];
-        let n = ADAPTERS.len() + 1;
-        press(&mut rt, &format!("playground/pick-menu/menu-item-{n}"));
-        assert_eq!(rt.state.play.values["/component"], id);
-        assert!(
-            rt.find("playground/pick-menu/container").is_none(),
-            "closed again"
-        );
-        let tree = rt.accessibility_json().to_string();
-        assert!(tree.contains("Not previewed"), "{tree}");
-    }
-
     /// A rule the current options break is listed as active, the others as inactive.
     #[test]
     fn catalog_rules_show_their_live_state() {
         use rune::{Env, Runtime};
         let text_for = |variant: &str| {
-            let mut s = crate::init();
-            s.story = "playground";
+            let mut s = init();
             s.play.values.insert("/component".into(), "button".into());
             s.play
                 .values
@@ -455,7 +425,7 @@ mod tests {
             s.play
                 .values
                 .insert("button/style".into(), "outline".into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+            let mut rt = Runtime::new(s, view, (1100.0, 1400.0), Env::new(false, 1.0));
             rt.frame(0.05);
             rt.accessibility_json().to_string()
         };
@@ -469,7 +439,7 @@ mod tests {
     fn oracle_runs_every_component_at_its_defaults() {
         for ad in ADAPTERS {
             let comp = ad.id();
-            let s = crate::init();
+            let s = init();
             let args = oracle_args(&s.play, comp, false);
             let r = compare(&s.play, comp, false, &args).expect(comp);
             assert!(r.parts.iter().any(|p| p.name == "container"), "{comp}");
@@ -492,7 +462,7 @@ mod tests {
     #[ignore]
     fn oracle_matches_static_colour_buttons() {
         for c in ["white", "black"] {
-            let mut s = crate::init();
+            let mut s = init();
             s.play.values.insert("/component".into(), "button".into());
             s.play.values.insert("button/staticColor".into(), c.into());
             let args = oracle_args(&s.play, "button", false);
@@ -512,7 +482,7 @@ mod tests {
     #[ignore]
     fn oracle_state_changes_the_tokens() {
         let tokens_at = |state: &str| {
-            let mut s = crate::init();
+            let mut s = init();
             s.play.values.insert("/component".into(), "button".into());
             s.play.values.insert("button/icon".into(), "check".into());
             s.play.values.insert("button/state".into(), state.into());
@@ -531,9 +501,8 @@ mod tests {
     #[ignore]
     fn run_button_lists_the_oracle_tokens() {
         use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
+        let s = init();
+        let mut rt = Runtime::new(s, view, (1100.0, 1400.0), Env::new(false, 1.0));
         rt.frame(0.05);
         let (x, y) = rt.find("playground/oracle/run/container").unwrap();
         rt.pointer_move(x, y);
@@ -549,10 +518,9 @@ mod tests {
     #[test]
     fn oracle_runs_after_the_options_settle() {
         use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
-        rt.poll = Some(crate::poll);
+        let s = init();
+        let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(false, 1.0));
+        rt.poll = Some(poll);
         rt.frame(0.05);
         assert!(rt.state.play.oracle.is_none(), "ran before the delay");
         for _ in 0..4 {
@@ -564,51 +532,15 @@ mod tests {
         );
     }
 
-    /// The preview stage stays at the top while the page scrolls.
-    #[test]
-    fn the_stage_stays_pinned_when_the_page_scrolls() {
-        use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 400.0), Env::new(false, 1.0));
-        rt.frame(0.05);
-        let y = |rt: &Runtime<G>, key: &str| {
-            rt.elements()
-                .iter()
-                .find(|e| e.key.as_deref() == Some(key))
-                .unwrap()
-                .rect[1]
-        };
-        let ctl = y(&rt, "playground/pick/field");
-        let top = y(&rt, "gallery/body");
-        assert!(
-            y(&rt, "playground/stage") > top + 80.0,
-            "the stage starts below the picker"
-        );
-        for _ in 0..10 {
-            rt.wheel(500.0, 300.0, -200.0);
-            rt.frame(0.05);
-        }
-        assert!(
-            y(&rt, "playground/pick/field") < ctl - 100.0,
-            "the page did not scroll"
-        );
-        assert!(
-            y(&rt, "playground/stage") - top < 80.0,
-            "the stage scrolled away"
-        );
-    }
-
     /// The state control drives the Button preview: hover and down fill differently from rest.
     #[test]
     fn the_state_control_drives_the_button_preview() {
         use rune::{Env, Runtime};
         let fill_at = |state: &str| {
-            let mut s = crate::init();
-            s.story = "playground";
+            let mut s = init();
             s.play.values.insert("/component".into(), "button".into());
             s.play.values.insert("button/state".into(), state.into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
+            let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(false, 1.0));
             for _ in 0..10 {
                 rt.frame(0.05);
             }
@@ -628,11 +560,10 @@ mod tests {
     fn every_catalog_component_builds() {
         use rune::{Env, Runtime};
         for c in CATALOG {
-            let mut s = crate::init();
-            s.story = "playground";
+            let mut s = init();
             s.play.values.insert("/component".into(), c.name.into());
-            let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
-            rt.poll = Some(crate::poll);
+            let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(false, 1.0));
+            rt.poll = Some(poll);
             for _ in 0..10 {
                 rt.frame(0.1);
             }
@@ -650,9 +581,8 @@ mod tests {
     #[test]
     fn pressing_a_value_selects_it() {
         use rune::{Env, Runtime};
-        let mut s = crate::init();
-        s.story = "playground";
-        let mut rt = Runtime::new(s, crate::view, (1100.0, 900.0), Env::new(false, 1.0));
+        let s = init();
+        let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(false, 1.0));
         rt.frame(0.05);
         let (x, y) = rt.find("playground/badge/style/subtle/container").unwrap();
         rt.pointer_move(x, y);
@@ -660,5 +590,12 @@ mod tests {
         rt.pointer_up(x, y);
         rt.frame(0.05);
         assert_eq!(rt.state.play.values["badge/style"], "subtle");
+    }
+
+    /// One story per catalog component, each under its own path and opening on its own component.
+    #[test]
+    fn there_is_one_story_per_catalog_component() {
+        assert_eq!(stories().len(), menu_order().len());
+        assert_eq!(Page::of("button").play.values["/component"], "button");
     }
 }

@@ -442,7 +442,16 @@ is licensed separately; never commit it.
 
 ## The playground crate
 
-`crates/spectrum-rune-playground` (unpublished) is the option playground the gallery's Playground story shows: a control per
-catalog option (values an `error` rule excludes are greyed with the reason), a live preview, the builder's options, the rules
-and an oracle comparison. A host app embeds one `Play` and implements `Host` for its state; `playground(&host, tokens)` is the
-view and `poll(&mut play, t, tx)` runs the debounced oracle. Components are added with an `Adapter` (`adapters.rs`).
+`crates/spectrum-rune-playground` (unpublished) is an option playground hosted in Rune's own `App::playground` (⌘⇧D, or
+`--playground "Components/Button"` headless): one story per catalog component, the live preview on the stage, and in the side
+column a control per catalog option (values an `error` rule excludes are greyed with the reason), the builder's options, the
+catalog's rules and an oracle comparison (`design-data render`, debounced). The gallery shows it:
+
+```rust
+App::new(spec).playground(
+    stories().into_iter().fold(Playground::<State>::new().enabled(true), |p, s| p.story(s)),
+)
+```
+
+`enabled(true)` because Rune offers its playground in debug builds only. Components are added with an `Adapter`
+(`adapters.rs`); the stories keep their own state (`Page`), apart from the app's.

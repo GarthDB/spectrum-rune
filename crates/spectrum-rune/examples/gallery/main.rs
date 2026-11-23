@@ -19,7 +19,6 @@ use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::font;
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
-use spectrum_rune_playground::Play;
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
@@ -201,27 +200,21 @@ fn build(s: &G, scheme: ColorScheme) -> El {
         )
 }
 
-impl spectrum_rune_playground::Host for G {
-    fn play(&self) -> &Play {
-        &self.play
-    }
-    fn play_mut(&mut self) -> &mut Play {
-        &mut self.play
-    }
-}
-
-fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
-    s.story == "playground" && spectrum_rune_playground::poll(&mut s.play, t, tx)
-}
-
 fn main() {
     eprintln!("spectrum-rune gallery: {}", font_status().describe());
     // Off is CoreText without font smoothing: what `-webkit-font-smoothing: antialiased` draws.
     App::new(AppSpec {
         scenes: stories::SCENES,
-        poll: Some(poll),
         ..AppSpec::new("Spectrum for Rune", (1100.0, 900.0), init, view)
     })
+    .playground(
+        spectrum_rune_playground::stories().into_iter().fold(
+            rune::Playground::<G>::new()
+                .enabled(true)
+                .group_order(&["Components"]),
+            |p, s| p.story(s),
+        ),
+    )
     .font_smoothing(FontSmoothing::Off)
     .run();
 }
