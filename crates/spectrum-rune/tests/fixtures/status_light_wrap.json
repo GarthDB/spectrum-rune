@@ -7,12 +7,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 170,
-      "h": 15.6,
+      "h": 16,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.8,
+      "y": 4,
       "w": 8,
       "h": 8
     },
@@ -21,7 +21,7 @@
         "x": 12,
         "y": 0,
         "w": 144.36,
-        "h": 15.6,
+        "h": 16,
         "text": "Wrapped label text goes here"
       }
     ]
@@ -34,12 +34,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 190,
-      "h": 15.6,
+      "h": 16,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.8,
+      "y": 4,
       "w": 8,
       "h": 8
     },
@@ -48,7 +48,7 @@
         "x": 12,
         "y": 0,
         "w": 144.36,
-        "h": 15.6,
+        "h": 16,
         "text": "Wrapped label text goes here"
       }
     ]
@@ -61,12 +61,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 230,
-      "h": 15.6,
+      "h": 16,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.8,
+      "y": 4,
       "w": 8,
       "h": 8
     },
@@ -75,7 +75,7 @@
         "x": 12,
         "y": 0,
         "w": 144.36,
-        "h": 15.6,
+        "h": 16,
         "text": "Wrapped label text goes here"
       }
     ]
@@ -88,12 +88,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 110,
-      "h": 36.4,
+      "h": 36,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 4.1,
+      "y": 4,
       "w": 10,
       "h": 10
     },
@@ -102,14 +102,14 @@
         "x": 16,
         "y": 0,
         "w": 84.52,
-        "h": 18.2,
+        "h": 18,
         "text": "Wrapped label"
       },
       {
         "x": 16,
-        "y": 18.2,
+        "y": 18,
         "w": 81.1,
-        "h": 18.2,
+        "h": 18,
         "text": "text goes here"
       }
     ]
@@ -122,12 +122,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 170,
-      "h": 36.4,
+      "h": 36,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 4.1,
+      "y": 4,
       "w": 10,
       "h": 10
     },
@@ -136,14 +136,14 @@
         "x": 16,
         "y": 0,
         "w": 139.4,
-        "h": 18.2,
+        "h": 18,
         "text": "Wrapped label text goes"
       },
       {
         "x": 16,
-        "y": 18.2,
+        "y": 18,
         "w": 26.22,
-        "h": 18.2,
+        "h": 18,
         "text": "here"
       }
     ]
@@ -156,12 +156,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 230,
-      "h": 18.2,
+      "h": 18,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 4.1,
+      "y": 4,
       "w": 10,
       "h": 10
     },
@@ -170,7 +170,7 @@
         "x": 16,
         "y": 0,
         "w": 168.42,
-        "h": 18.2,
+        "h": 18,
         "text": "Wrapped label text goes here"
       }
     ]
@@ -183,12 +183,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 130,
-      "h": 41.6,
+      "h": 40,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 4.4,
+      "y": 4,
       "w": 12,
       "h": 12
     },
@@ -197,14 +197,14 @@
         "x": 18,
         "y": 0,
         "w": 96.59,
-        "h": 20.8,
+        "h": 20,
         "text": "Wrapped label"
       },
       {
         "x": 18,
-        "y": 20.8,
+        "y": 20,
         "w": 92.69,
-        "h": 20.8,
+        "h": 20,
         "text": "text goes here"
       }
     ]
@@ -217,12 +217,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 190,
-      "h": 41.6,
+      "h": 40,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 4.4,
+      "y": 4,
       "w": 12,
       "h": 12
     },
@@ -231,14 +231,14 @@
         "x": 18,
         "y": 0,
         "w": 159.31,
-        "h": 20.8,
+        "h": 20,
         "text": "Wrapped label text goes"
       },
       {
         "x": 18,
-        "y": 20.8,
+        "y": 20,
         "w": 29.97,
-        "h": 20.8,
+        "h": 20,
         "text": "here"
       }
     ]
@@ -251,12 +251,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 230,
-      "h": 20.8,
+      "h": 20,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 4.4,
+      "y": 4,
       "w": 12,
       "h": 12
     },
@@ -265,7 +265,7 @@
         "x": 18,
         "y": 0,
         "w": 192.48,
-        "h": 20.8,
+        "h": 20,
         "text": "Wrapped label text goes here"
       }
     ]
@@ -278,12 +278,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 110,
-      "h": 70.2,
+      "h": 66,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.7,
+      "y": 3,
       "w": 16,
       "h": 16
     },
@@ -292,21 +292,21 @@
         "x": 22,
         "y": 0,
         "w": 67.93,
-        "h": 23.4,
+        "h": 22,
         "text": "Wrapped"
       },
       {
         "x": 22,
-        "y": 23.4,
+        "y": 22,
         "w": 69.05,
-        "h": 23.4,
+        "h": 22,
         "text": "label text"
       },
       {
         "x": 22,
-        "y": 46.8,
+        "y": 44,
         "w": 72.36,
-        "h": 23.4,
+        "h": 22,
         "text": "goes here"
       }
     ]
@@ -319,12 +319,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 150,
-      "h": 46.8,
+      "h": 44,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.7,
+      "y": 3,
       "w": 16,
       "h": 16
     },
@@ -333,14 +333,14 @@
         "x": 22,
         "y": 0,
         "w": 108.67,
-        "h": 23.4,
+        "h": 22,
         "text": "Wrapped label"
       },
       {
         "x": 22,
-        "y": 23.4,
+        "y": 22,
         "w": 104.27,
-        "h": 23.4,
+        "h": 22,
         "text": "text goes here"
       }
     ]
@@ -353,12 +353,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 190,
-      "h": 46.8,
+      "h": 44,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.7,
+      "y": 3,
       "w": 16,
       "h": 16
     },
@@ -367,14 +367,14 @@
         "x": 22,
         "y": 0,
         "w": 140.58,
-        "h": 23.4,
+        "h": 22,
         "text": "Wrapped label text"
       },
       {
         "x": 22,
-        "y": 23.4,
+        "y": 22,
         "w": 72.36,
-        "h": 23.4,
+        "h": 22,
         "text": "goes here"
       }
     ]
@@ -387,12 +387,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 230,
-      "h": 46.8,
+      "h": 44,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 3.7,
+      "y": 3,
       "w": 16,
       "h": 16
     },
@@ -401,14 +401,14 @@
         "x": 22,
         "y": 0,
         "w": 179.23,
-        "h": 23.4,
+        "h": 22,
         "text": "Wrapped label text goes"
       },
       {
         "x": 22,
-        "y": 23.4,
+        "y": 22,
         "w": 33.71,
-        "h": 23.4,
+        "h": 22,
         "text": "here"
       }
     ]
@@ -421,12 +421,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 130,
-      "h": 44.2,
+      "h": 44,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.05,
+      "y": 5,
       "w": 12,
       "h": 12
     },
@@ -435,14 +435,14 @@
         "x": 18,
         "y": 0,
         "w": 102.63,
-        "h": 22.1,
+        "h": 22,
         "text": "Wrapped label"
       },
       {
         "x": 18,
-        "y": 22.1,
+        "y": 22,
         "w": 98.48,
-        "h": 22.1,
+        "h": 22,
         "text": "text goes here"
       }
     ]
@@ -455,12 +455,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 130,
-      "h": 85.8,
+      "h": 78,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.3,
+      "y": 4,
       "w": 18,
       "h": 18
     },
@@ -469,21 +469,21 @@
         "x": 24,
         "y": 0,
         "w": 83.03,
-        "h": 28.6,
+        "h": 26,
         "text": "Wrapped"
       },
       {
         "x": 24,
-        "y": 28.6,
+        "y": 26,
         "w": 84.39,
-        "h": 28.6,
+        "h": 26,
         "text": "label text"
       },
       {
         "x": 24,
-        "y": 57.2,
+        "y": 52,
         "w": 88.44,
-        "h": 28.6,
+        "h": 26,
         "text": "goes here"
       }
     ]
@@ -496,12 +496,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 170,
-      "h": 44.2,
+      "h": 44,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.05,
+      "y": 5,
       "w": 12,
       "h": 12
     },
@@ -510,14 +510,14 @@
         "x": 18,
         "y": 0,
         "w": 132.77,
-        "h": 22.1,
+        "h": 22,
         "text": "Wrapped label text"
       },
       {
         "x": 18,
-        "y": 22.1,
+        "y": 22,
         "w": 68.34,
-        "h": 22.1,
+        "h": 22,
         "text": "goes here"
       }
     ]
@@ -530,12 +530,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 170,
-      "h": 57.2,
+      "h": 52,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.3,
+      "y": 4,
       "w": 18,
       "h": 18
     },
@@ -544,14 +544,14 @@
         "x": 24,
         "y": 0,
         "w": 132.81,
-        "h": 28.6,
+        "h": 26,
         "text": "Wrapped label"
       },
       {
         "x": 24,
-        "y": 28.6,
+        "y": 26,
         "w": 127.45,
-        "h": 28.6,
+        "h": 26,
         "text": "text goes here"
       }
     ]
@@ -564,12 +564,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 210,
-      "h": 44.2,
+      "h": 44,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.05,
+      "y": 5,
       "w": 12,
       "h": 12
     },
@@ -578,14 +578,14 @@
         "x": 18,
         "y": 0,
         "w": 169.27,
-        "h": 22.1,
+        "h": 22,
         "text": "Wrapped label text goes"
       },
       {
         "x": 18,
-        "y": 22.1,
+        "y": 22,
         "w": 31.84,
-        "h": 22.1,
+        "h": 22,
         "text": "here"
       }
     ]
@@ -598,12 +598,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 210,
-      "h": 57.2,
+      "h": 52,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.3,
+      "y": 4,
       "w": 18,
       "h": 18
     },
@@ -612,14 +612,14 @@
         "x": 24,
         "y": 0,
         "w": 171.82,
-        "h": 28.6,
+        "h": 26,
         "text": "Wrapped label text"
       },
       {
         "x": 24,
-        "y": 28.6,
+        "y": 26,
         "w": 88.44,
-        "h": 28.6,
+        "h": 26,
         "text": "goes here"
       }
     ]
@@ -632,12 +632,12 @@
     "label": "Wrapped label text goes here",
     "container": {
       "w": 250,
-      "h": 22.1,
+      "h": 22,
       "radius": 0
     },
     "control": {
       "x": 0,
-      "y": 5.05,
+      "y": 5,
       "w": 12,
       "h": 12
     },
@@ -646,7 +646,7 @@
         "x": 18,
         "y": 0,
         "w": 204.51,
-        "h": 22.1,
+        "h": 22,
         "text": "Wrapped label text goes here"
       }
     ]
