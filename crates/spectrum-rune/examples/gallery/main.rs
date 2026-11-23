@@ -299,8 +299,8 @@ mod tests {
 
     #[test]
     fn scenes_cover_every_story() {
-        // Three per story, and the Picker with its menu open in light and dark.
-        assert_eq!(stories::SCENES.len(), stories::STORIES.len() * 3 + 2);
+        // Three per story, the Picker with its menu open in light and dark, and the Tooltip shown.
+        assert_eq!(stories::SCENES.len(), stories::STORIES.len() * 3 + 3);
     }
 
     #[test]

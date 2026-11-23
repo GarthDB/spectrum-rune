@@ -35,6 +35,7 @@ pub mod size;
 pub mod status_light;
 pub mod switch;
 pub mod tokens;
+pub mod tooltip;
 mod wrap;
 
 pub use size::{ActionButtonSize, Size};

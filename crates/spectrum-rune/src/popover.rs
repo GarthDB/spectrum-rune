@@ -52,6 +52,17 @@ static TIP_START: Icon = Icon {
     body: "<path d=\"M8 0 L1.6 6.4 Q0 8 1.6 9.6 L8 16 Z\" fill=\"currentColor\"/>",
 };
 
+/// The tip drawn on `side` of a surface (it points away from it), in a 16-point square whose top or left half it fills:
+/// scale it with the icon size (a Tooltip's tip is half a Popover's).
+pub(crate) fn tip_glyph(side: Side) -> &'static Icon {
+    match side {
+        Side::Top => &TIP_BOTTOM,
+        Side::Bottom => &TIP_TOP,
+        Side::Left => &TIP_END,
+        Side::Right => &TIP_START,
+    }
+}
+
 type Dismiss = Rc<dyn Fn(El) -> El>;
 
 pub struct Popover {

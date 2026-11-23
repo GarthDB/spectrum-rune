@@ -21,6 +21,7 @@ use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::Tokens;
+use spectrum_rune::tooltip::{self, Tooltip};
 use spectrum_rune::{ActionButtonSize, Size};
 
 type Story = fn(&G, &'static Tokens) -> El;
@@ -45,6 +46,11 @@ macro_rules! stories {
             s.story = "picker";
             s.flip("picker/value");
         }),
+        // The Tooltip shown on its trigger.
+        ("tooltip-shown", |s: &mut G| {
+            s.story = "tooltip";
+            s.flip("tooltip/live");
+        }),
         ("picker-open-dark", |s: &mut G| {
             s.story = "picker";
             s.scheme = Some(spectrum_rune::tokens::ColorScheme::Dark);
@@ -65,6 +71,7 @@ stories! {
     "picker" => "Picker", picker;
     "menu" => "Menu", menu;
     "popover" => "Popover", popover;
+    "tooltip" => "Tooltip", tooltip;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -254,6 +261,58 @@ fn popover(_: &G, t: &'static Tokens) -> El {
                 .child(one("hide", Placement::Top, true, 140.0, 64.0))
                 .child(one("small", Placement::Top, false, 90.0, 40.0))
                 .child(one("large", Placement::Top, false, 220.0, 110.0)),
+        ),
+    ])
+}
+
+fn tooltip(s: &G, t: &'static Tokens) -> El {
+    use tooltip::{Placement as P, Variant as V};
+    let one = |key: &str, v: V, p: P| {
+        // The tip sits outside the surface: a little room around each shows it.
+        el().padding(t.spacing_200).child(
+            Tooltip::new(format!("tooltip/{key}"), "Label")
+                .variant(v)
+                .placement(p)
+                .build(t),
+        )
+    };
+    let variants = flow().children([
+        one("neutral", V::Neutral, P::Top),
+        one("informative", V::Informative, P::Top),
+        one("negative", V::Negative, P::Top),
+    ]);
+    let placements = flow().children([
+        one("top", V::Neutral, P::Top),
+        one("bottom", V::Neutral, P::Bottom),
+        one("left", V::Neutral, P::Left),
+        one("right", V::Neutral, P::Right),
+    ]);
+    let wrapped = el().padding(t.spacing_200).child(
+        Tooltip::new(
+            "tooltip/wrapped",
+            "A longer label wraps at the maximum width of 160",
+        )
+        .build(t),
+    );
+    // The pointer resting on the button for 1.5 s shows its tooltip (mounted at the root, see `overlays`).
+    let live = Tooltip::bind(
+        el().key("tooltip/trigger")
+            .child(ActionButton::new("tooltip/live").label("Hover me").build(t)),
+        |g: &mut G, on| {
+            if g.on("tooltip/live", false) != on {
+                g.flip("tooltip/live");
+            }
+        },
+    );
+    let _ = s;
+    page(vec![
+        section(t, "Variants", variants),
+        section(t, "Placements (the tip faces the trigger)", placements),
+        section(t, "Wrapped at the maximum width", wrapped),
+        section(
+            t,
+            "On a trigger (rest the pointer on it)",
+            flow().child(live),
         ),
     ])
 }
@@ -702,6 +761,11 @@ fn picker(s: &G, t: &'static Tokens) -> El {
 
 /// The menus of the open pickers, to mount at the root of the view (they draw above the page and escape its clipping).
 pub fn overlays(s: &G, t: &'static Tokens) -> Vec<El> {
+    if s.story == "tooltip" && s.on("tooltip/live", false) {
+        return vec![Tooltip::new("tooltip/shown", "Hover tooltip")
+            .anchor("tooltip/trigger")
+            .build(t)];
+    }
     if s.story != "picker" {
         return Vec::new();
     }

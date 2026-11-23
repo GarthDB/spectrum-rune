@@ -20,6 +20,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
 | Picker (the closed field; its menu is `PickerMenu`, a `Menu` in a modal `Popover` under it) | `picker`, `picker_menu` | `value`, `open` (calls `on_open`); the menu: the chosen id, close |
 | Menu (items with a checkmark selection; `PickerMenu` and `Popover` give it a surface) | `menu` | the chosen id (`on_choose`) |
+| Tooltip (label on a surface with a tip; hover to show via `Tooltip::bind`, or `anchor` to a trigger) | `tooltip` | none (the app shows it) |
 | Popover (surface and tip; six placements, optional `anchor` to a trigger) | `popover` | none (the app shows it; `on_dismiss` on Escape) |
 | Radio group | `radio_group` | `value` |
 | Accordion item (one item) | `accordion` | `open` |
