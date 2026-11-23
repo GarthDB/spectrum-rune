@@ -262,13 +262,13 @@ The generator needs a `design-data` CLI inside that range on `PATH` (outside the
 is out of range. Download the pinned release binary instead:
 
 ```sh
-gh release download "design-data-cli@0.63.3" -R adobe/spectrum-design-data \
+gh release download "design-data-cli@0.63.4" -R adobe/spectrum-design-data \
   -p 'design-data-darwin-arm64' -p SHA256SUMS -D ~/.cache/spectrum-rune/oracle
 cd ~/.cache/spectrum-rune/oracle && shasum -a 256 -c SHA256SUMS --ignore-missing
 chmod +x design-data-darwin-arm64
 ```
 
-(Pick the asset for your platform; `gh release view "design-data-cli@0.63.3" -R adobe/spectrum-design-data`
+(Pick the asset for your platform; `gh release view "design-data-cli@0.63.4" -R adobe/spectrum-design-data`
 lists them.) `cargo xtask gen`, the `regen-*.sh` scripts, the playground's Run oracle button and the `--ignored`
 oracle tests all use `$DESIGN_DATA` (a path to the binary, e.g.
 `DESIGN_DATA=~/.cache/spectrum-rune/oracle/design-data-darwin-arm64`), falling back to `design-data` on `PATH`.
