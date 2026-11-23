@@ -4,69 +4,25 @@
 //! needs only an adapter (`preview`) from the chosen values to its builder. Dev-only: the token panel runs
 //! the oracle CLI (`oracle.rs`) on demand.
 
+use crate::adapters::{adapter, Choice, ADAPTERS, WRAPPED};
 use crate::G;
 use rune::{col, row, text, El};
 use spectrum_rune::action_button::ActionButton;
-use spectrum_rune::badge::{self, Badge};
-use spectrum_rune::button::{self, Button};
 use spectrum_rune::constraints::{
     check, component, Lit, OptionDef, OptionValue, Severity, COMPONENTS as CATALOG,
 };
 use spectrum_rune::font;
-use spectrum_rune::icons::CHECKMARK_100;
-use spectrum_rune::interaction::State;
 use spectrum_rune::picker::Picker;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::{tokens, ColorScheme, Scale, Tokens};
 use spectrum_rune::Size;
 
-type Opts = Vec<(&'static str, OptionValue<'static>)>;
+type Opts = crate::adapters::Opts;
 
-const COMPONENTS: [(&str, &str); 4] = [
-    ("badge", "Badge"),
-    ("button", "Button"),
-    ("picker", "Picker"),
-    ("status-light", "Status light"),
-];
-
-const WRAPPED: &str = "Wrapped label text goes here";
-
-/// Free-form options and the request width have no catalog values: a few presets each, the first is the default.
-fn extras(comp: &str) -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
-    let label = vec![("short", "Label"), ("long", WRAPPED)];
-    let width = vec![("auto", "auto"), ("120", "120"), ("200", "200")];
-    match comp {
-        "badge" => vec![
-            ("label", [label, vec![("none", "none")]].concat()),
-            ("icon", vec![("none", "none"), ("check", "checkmark")]),
-            ("width", width),
-        ],
-        "button" => vec![
-            ("label", label),
-            ("icon", vec![("none", "none"), ("check", "checkmark")]),
-            ("width", width),
-            // Rest, hover and down also drive the preview; keyboard focus is oracle only.
-            (
-                "state",
-                vec![
-                    ("rest", "rest"),
-                    ("hover", "hover"),
-                    ("down", "down"),
-                    ("keyboard-focus", "keyboard focus"),
-                ],
-            ),
-        ],
-        "picker" => vec![
-            ("label", [label, vec![("none", "none")]].concat()),
-            ("value", vec![("none", "none"), ("canada", "Canada")]),
-            ("placeholder", vec![("select", "Select"), ("none", "none")]),
-            ("description", vec![("none", "none"), ("help", "Help text")]),
-            ("width", width),
-        ],
-        "status-light" => vec![("label", label), ("width", width)],
-        _ => Vec::new(),
-    }
+/// Free-form options and the request width have no catalog values: a few presets each (the adapter's).
+fn extras(comp: &str) -> crate::adapters::Extras {
+    adapter(comp).map_or_else(Vec::new, |a| a.extras())
 }
 
 fn lit_str(l: &Lit) -> String {
@@ -155,16 +111,6 @@ fn inherit(
         .collect()
 }
 
-fn size_of(v: &str) -> Size {
-    match v {
-        "s" => Size::S,
-        "l" => Size::L,
-        "xl" => Size::XL,
-        "m" => Size::M,
-        other => panic!("catalog size `{other}` is not a Size"),
-    }
-}
-
 /// The adapter: chosen values to the builder. Returns the builder's own `options()` and the built element.
 fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
     preview_keyed(s, comp, t, "playground/preview")
@@ -172,134 +118,25 @@ fn preview(s: &G, comp: &str, t: &Tokens) -> (Opts, El) {
 
 /// `preview` with the key its parts are named under (`<key>/container`, ...): a second copy needs its own.
 fn preview_keyed(s: &G, comp: &str, t: &Tokens, key: &str) -> (Opts, El) {
-    let width = match extra(s, comp, "width").as_str() {
-        "auto" => None,
-        w => w.parse::<f32>().ok(),
-    };
-    let label = match extra(s, comp, "label").as_str() {
-        "short" => "Label",
-        "long" => WRAPPED,
-        _ => "",
-    };
-    // One source of truth: the catalog values (and defaults) `options` derives, not defaults repeated here.
-    let derived = options(s, comp, None);
-    let v = |opt: &str| match derived.iter().find(|(n, _)| *n == opt) {
-        Some((_, OptionValue::Str(x))) => (*x).to_owned(),
-        Some((_, OptionValue::Bool(b))) => b.to_string(),
-        Some((_, OptionValue::Num(n))) => n.to_string(),
-        _ => String::new(),
-    };
-    match comp {
-        "badge" => {
-            let mut b = Badge::new(key)
-                .label(label)
-                .variant(
-                    *badge::Variant::ALL
-                        .iter()
-                        .find(|x| x.as_str() == v("variant"))
-                        .expect("catalog variant missing from badge::Variant::ALL"),
-                )
-                .style(
-                    *badge::Style::ALL
-                        .iter()
-                        .find(|x| x.as_str() == v("style"))
-                        .expect("catalog style missing from badge::Style::ALL"),
-                )
-                .size(size_of(&v("size")));
-            if extra(s, comp, "icon") == "check" {
-                b = b.icon(&CHECKMARK_100);
-            }
-            if let Some(w) = width {
-                b = b.width(w);
-            }
-            (b.options(), b.build(t))
-        }
-        "picker" => {
-            let mut p = Picker::new(key)
-                .label(label)
-                .size(size_of(&v("size")))
-                .quiet(v("isQuiet") == "true")
-                .disabled(v("isDisabled") == "true")
-                .error(v("isError") == "true")
-                .required(v("isRequired") == "true");
-            if let Some(x) = picker_text(s, "description") {
-                p = p.description(x);
-            }
-            if let Some(x) = picker_text(s, "value") {
-                p = p.value(x);
-            }
-            if let Some(x) = picker_text(s, "placeholder") {
-                p = p.placeholder(x);
-            }
-            if let Some(w) = width {
-                p = p.width(w);
-            }
-            (p.options(), p.build(t))
-        }
-        "button" => {
-            let on = |opt: &str| v(opt) == "true";
-            let mut b = Button::new(key)
-                .label(label)
-                .variant(match v("variant").as_str() {
-                    "accent" => button::Variant::Accent,
-                    "negative" => button::Variant::Negative,
-                    "secondary" => button::Variant::Secondary,
-                    _ => button::Variant::Primary,
-                })
-                .style(match v("style").as_str() {
-                    "outline" => button::Style::Outline,
-                    _ => button::Style::Fill,
-                })
-                .size(size_of(&v("size")))
-                .label_hidden(on("isLabelHidden"))
-                .disabled(on("isDisabled"))
-                .pending(on("isPending"));
-            match v("staticColor").as_str() {
-                "white" => b = b.static_color(button::StaticColor::White),
-                "black" => b = b.static_color(button::StaticColor::Black),
-                _ => {}
-            }
-            match extra(s, comp, "state").as_str() {
-                "hover" => b = b.forced_state(State::Hover),
-                "down" => b = b.forced_state(State::Down),
-                _ => {}
-            }
-            if extra(s, comp, "icon") == "check" {
-                b = b.icon(&CHECKMARK_100);
-            }
-            if let Some(w) = width {
-                b = b.width(w);
-            }
-            (b.options(), b.build(t))
-        }
-        _ => {
-            let mut b = StatusLight::new(key, label)
-                .variant(
-                    *status_light::Variant::ALL
-                        .iter()
-                        .find(|x| x.as_str() == v("variant"))
-                        .expect("catalog variant missing from status_light::Variant::ALL"),
-                )
-                .size(size_of(&v("size")));
-            if let Some(w) = width {
-                b = b.width(w);
-            }
-            (b.options(), b.build(t))
-        }
+    adapter(comp)
+        .expect("a previewed component")
+        .build(&choice(s, comp), t, key)
+}
+
+/// The chosen values of `comp`: its catalog options (one source of truth: the catalog values and defaults
+/// `options` derives) and the preset chosen for each of its extras.
+fn choice(s: &G, comp: &str) -> Choice {
+    Choice {
+        options: options(s, comp, None),
+        extras: extras(comp)
+            .iter()
+            .map(|(opt, _)| (*opt, extra(s, comp, opt)))
+            .collect(),
     }
 }
 
-/// The picker's free-text presets: `None` for `none`.
-fn picker_text(s: &G, opt: &str) -> Option<&'static str> {
-    match (opt, extra(s, "picker", opt).as_str()) {
-        ("value", "canada") => Some("Canada"),
-        ("placeholder", "select") => Some("Select"),
-        ("description", "help") => Some("Help text"),
-        _ => None,
-    }
-}
-
-/// The `design-data render` arguments for the chosen values (the catalog option names, `--size`, scheme, scale).
+/// The `design-data render` arguments for the chosen values (the catalog option names, `--size`, scheme, scale),
+/// then what the component's adapter adds (label, icon, state) and the width.
 fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
     let mut a: Vec<String> = vec![
         "--color-scheme".into(),
@@ -312,64 +149,24 @@ fn oracle_args(s: &G, comp: &str, dark: bool) -> Vec<String> {
         }
         .into(),
     ];
-    let mut opt = |kv: String| a.extend(["--option".to_owned(), kv]);
     let mut size = None;
-    let mut icon = false;
-    let mut label = false;
     for (n, v) in options(s, comp, None) {
+        let mut opt = |kv: String| a.extend(["--option".to_owned(), kv]);
         match (n, v) {
             ("size", OptionValue::Str(x)) => size = Some(x),
-            ("icon", _) => icon = true,
-            ("label", _) => label = true,
+            // The free-form options the adapter names itself.
+            ("icon" | "label", _) => {}
             (n, OptionValue::Str(x)) => opt(format!("{n}=\"{x}\"")),
             (n, OptionValue::Bool(b)) => opt(format!("{n}={b}")),
             (n, OptionValue::Num(x)) => opt(format!("{n}={x}")),
             (_, OptionValue::Present) => {}
         }
     }
-    if icon {
-        opt("icon=true".into());
-    }
-    if !label && comp == "badge" {
-        opt("label=false".into());
-    }
-    // The Button's icon is not an option: the request's `--icon` field hides it.
-    if comp == "button" && !icon {
-        a.extend(["--icon".to_owned(), "none".to_owned()]);
+    if let Some(ad) = adapter(comp) {
+        a.extend(ad.oracle_args(&choice(s, comp)));
     }
     if let Some(x) = size {
         a.extend(["--size".to_owned(), x.to_owned()]);
-    }
-    // The picker's label is an option of the recipe (its field-label), not `--label`.
-    if comp == "picker" {
-        if label {
-            let text = if extra(s, comp, "label") == "long" {
-                WRAPPED
-            } else {
-                "Label"
-            };
-            a.extend(["--option".to_owned(), format!("label=\"{text}\"")]);
-        }
-    } else if label || comp != "badge" {
-        let text = if extra(s, comp, "label") == "long" {
-            WRAPPED
-        } else {
-            "Label"
-        };
-        a.extend(["--label".to_owned(), text.to_owned()]);
-    }
-    if comp == "button" {
-        let state = extra(s, comp, "state");
-        if state != "rest" {
-            a.extend(["--state".to_owned(), state]);
-        }
-    }
-    if comp == "picker" {
-        for opt in ["value", "placeholder", "description"] {
-            if let Some(x) = picker_text(s, opt) {
-                a.extend(["--option".to_owned(), format!("{opt}=\"{x}\"")]);
-            }
-        }
     }
     if let Ok(w) = extra(s, comp, "width").parse::<f32>() {
         a.extend(["--width".to_owned(), w.to_string()]);
@@ -775,7 +572,7 @@ fn selected(s: &G) -> &'static str {
 
 /// Whether the playground has a preview adapter for the component (the rest show the catalog only).
 fn previewed(comp: &str) -> bool {
-    COMPONENTS.iter().any(|c| c.0 == comp)
+    adapter(comp).is_some()
 }
 
 /// How long the options must stay unchanged before the oracle runs by itself.
@@ -833,10 +630,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
             })
             .build(t)
     };
-    let shown_name = COMPONENTS
-        .iter()
-        .find(|c| c.0 == comp)
-        .map_or(comp, |c| c.1);
+    let shown_name = adapter(comp).map_or(comp, |a| a.name());
     let mut picker = col()
         .gap(t.spacing_75)
         .child(heading(t, "Component"))
@@ -865,13 +659,13 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                 row()
                     .gap(t.spacing_75)
                     .flex_wrap()
-                    .children(COMPONENTS.iter().map(|(id, name)| pick_button(id, name))),
+                    .children(ADAPTERS.iter().map(|a| pick_button(a.id(), a.name()))),
             )
             .child(caption(
                 t,
                 format!(
                     "catalog only, options and rules without a preview ({})",
-                    CATALOG.len() - COMPONENTS.len()
+                    CATALOG.len() - ADAPTERS.len()
                 ),
             ))
             .child(
@@ -1101,10 +895,7 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
         };
         oracle
     };
-    let name = COMPONENTS
-        .iter()
-        .find(|c| c.0 == comp)
-        .map_or(comp, |c| c.1);
+    let name = adapter(comp).map_or(comp, |a| a.name());
     let summary = now
         .iter()
         .fold(name.to_owned(), |a, (n, v)| format!("{a} · {n} {}", fmt(v)));
@@ -1165,7 +956,8 @@ mod tests {
     #[test]
     fn catalog_options_match_builder_options() {
         let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for (comp, _) in COMPONENTS {
+        for ad in ADAPTERS {
+            let comp = ad.id();
             for def in component(comp)
                 .unwrap()
                 .options
@@ -1195,7 +987,8 @@ mod tests {
     #[test]
     fn extras_match_builder_options() {
         let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for (comp, _) in COMPONENTS {
+        for ad in ADAPTERS {
+            let comp = ad.id();
             for (opt, presets) in extras(comp) {
                 for (id, _) in presets {
                     let mut s = crate::init();
@@ -1223,7 +1016,8 @@ mod tests {
     #[test]
     fn every_reachable_combination_builds() {
         let t = tokens(ColorScheme::Light, Scale::Desktop);
-        for (comp, _) in COMPONENTS {
+        for ad in ADAPTERS {
+            let comp = ad.id();
             let mut controls: Vec<(String, Vec<String>)> = Vec::new();
             for def in component(comp)
                 .unwrap()
@@ -1583,7 +1377,8 @@ mod tests {
     #[test]
     #[ignore]
     fn oracle_runs_every_component_at_its_defaults() {
-        for (comp, _) in COMPONENTS {
+        for ad in ADAPTERS {
+            let comp = ad.id();
             let s = crate::init();
             let args = oracle_args(&s, comp, false);
             let r = compare(&s, comp, false, &args).expect(comp);

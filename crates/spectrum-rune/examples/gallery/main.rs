@@ -9,6 +9,7 @@
 //! The page is Spectrum's `background_base_color`. The licensed Adobe Clean Spectrum font is read
 //! from the system, never bundled; the header and the startup output say whether it was found.
 
+mod adapters;
 mod oracle;
 mod playground;
 mod stories;
