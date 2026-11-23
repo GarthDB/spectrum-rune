@@ -11,8 +11,10 @@ use spectrum_rune::breadcrumbs::{self, BreadcrumbItem, Breadcrumbs};
 use spectrum_rune::button::{self, Button, StaticColor};
 use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::constraints::{check, OptionValue, Severity};
+use spectrum_rune::divider::{self, Divider};
 use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
+use spectrum_rune::link::{self, Link};
 use spectrum_rune::menu::{Menu, MenuItem, Selection};
 use spectrum_rune::meter::{self, Meter};
 use spectrum_rune::picker::Picker;
@@ -78,6 +80,8 @@ stories! {
     "tooltip" => "Tooltip", tooltip;
     "breadcrumbs" => "Breadcrumbs", breadcrumbs;
     "progress" => "Progress and meter", progress;
+    "divider" => "Divider", divider;
+    "link" => "Link", link;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -268,6 +272,101 @@ fn popover(_: &G, t: &'static Tokens) -> El {
                 .child(one("small", Placement::Top, false, 90.0, 40.0))
                 .child(one("large", Placement::Top, false, 220.0, 110.0)),
         ),
+    ])
+}
+
+fn divider(_: &G, t: &'static Tokens) -> El {
+    let h = |key: &str, z: Size| {
+        col()
+            .w(240.0)
+            .gap(t.spacing_75)
+            .child(
+                text(format!("size {key}"))
+                    .font(font::text_style(&t.component_s_regular))
+                    .color(t.neutral_subdued_content_color_default),
+            )
+            .child(Divider::new(format!("divider/h-{key}")).size(z).build(t))
+    };
+    let v = |key: &str, z: Size| {
+        row()
+            .h(48.0)
+            .gap(t.spacing_200)
+            .center_y()
+            .child(
+                text(key.to_owned())
+                    .font(font::text_style(&t.component_s_regular))
+                    .color(t.neutral_content_color_default),
+            )
+            .child(
+                Divider::new(format!("divider/v-{key}"))
+                    .size(z)
+                    .orientation(divider::Orientation::Vertical)
+                    .build(t),
+            )
+            .child(
+                text("after".to_owned())
+                    .font(font::text_style(&t.component_s_regular))
+                    .color(t.neutral_content_color_default),
+            )
+    };
+    page(vec![
+        section(
+            t,
+            "Horizontal (fills its parent)",
+            flow().children(SIZES.iter().take(3).map(|(z, n)| h(n, *z))),
+        ),
+        section(
+            t,
+            "Vertical",
+            flow().children(SIZES.iter().take(3).map(|(z, n)| v(n, *z))),
+        ),
+    ])
+}
+
+fn link(s: &G, t: &'static Tokens) -> El {
+    let l = |key: &str, label: &str| {
+        let k = key.to_owned();
+        Link::new(format!("link/{key}"), label).on_press(move |g: &mut G| g.flip(&k))
+    };
+    let pressed = |key: &str| s.on(key, false);
+    let _ = pressed;
+    let variants = flow().child(l("primary", "Primary link").build(t)).child(
+        l("secondary", "Secondary link")
+            .variant(link::Variant::Secondary)
+            .build(t),
+    );
+    let quiet = flow()
+        .child(
+            l("quiet", "Quiet (underlined on hover)")
+                .quiet(true)
+                .build(t),
+        )
+        .child(
+            l("quiet-secondary", "Quiet secondary")
+                .quiet(true)
+                .variant(link::Variant::Secondary)
+                .build(t),
+        );
+    // The inline form sits in a sentence: regular weight.
+    let inline = row()
+        .gap(t.spacing_75)
+        .center_y()
+        .flex_wrap()
+        .child(
+            text("Read the".to_owned())
+                .font(font::text_style(&t.component_m_regular))
+                .color(t.neutral_content_color_default),
+        )
+        .child(l("inline", "documentation").standalone(false).build(t))
+        .child(
+            text("first.".to_owned())
+                .font(font::text_style(&t.component_m_regular))
+                .color(t.neutral_content_color_default),
+        );
+    page(vec![
+        section(t, "Variants (press or Enter)", variants),
+        section(t, "Quiet", quiet),
+        section(t, "Inline (not standalone)", flow().child(inline)),
     ])
 }
 
