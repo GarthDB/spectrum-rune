@@ -14,6 +14,7 @@ use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
 use spectrum_rune::menu::{Menu, MenuItem, Selection};
 use spectrum_rune::picker::Picker;
+use spectrum_rune::popover::{Placement, Popover};
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::status_light::{self, StatusLight};
@@ -51,6 +52,7 @@ stories! {
     "badge" => "Badge", badge;
     "picker" => "Picker", picker;
     "menu" => "Menu", menu;
+    "popover" => "Popover", popover;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -198,6 +200,48 @@ fn checkbox(s: &G, t: &'static Tokens) -> El {
                     .width(150.0)
                     .build(t)
             })),
+        ),
+    ])
+}
+
+fn popover(_: &G, t: &'static Tokens) -> El {
+    let body = |key: &str, line: &str| {
+        text(line.to_owned())
+            .key(key.to_owned())
+            .font(font::text_style(&t.component_m_regular))
+            .color(t.neutral_content_color_default)
+    };
+    let one = |key: &str, p: Placement, hide: bool, w: f32, h: f32| {
+        // A placement's tip points at the trigger: a little room around it shows the tip, which sits outside the surface.
+        el().padding(t.spacing_200).child(
+            Popover::new(format!("popover/{key}"))
+                .placement(p)
+                .hide_tip(hide)
+                .width(w)
+                .height(h)
+                .child(body(&format!("popover/{key}/text"), "Popover content"))
+                .build(t),
+        )
+    };
+    let places = [
+        ("top", Placement::Top),
+        ("bottom", Placement::Bottom),
+        ("left", Placement::Left),
+        ("right", Placement::Right),
+    ];
+    page(vec![
+        section(
+            t,
+            "Placements (the tip faces the trigger)",
+            flow().children(places.map(|(n, p)| one(n, p, false, 140.0, 64.0))),
+        ),
+        section(
+            t,
+            "Without a tip, and sized",
+            flow()
+                .child(one("hide", Placement::Top, true, 140.0, 64.0))
+                .child(one("small", Placement::Top, false, 90.0, 40.0))
+                .child(one("large", Placement::Top, false, 220.0, 110.0)),
         ),
     ])
 }
