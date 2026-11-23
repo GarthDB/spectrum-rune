@@ -4,11 +4,11 @@ A Layer 2 [platform manifest](https://opensource.adobe.com/spectrum-design-data/
 repo, not incubated in spectrum-design-data. It is the worked example of an implementation managing its own
 manifest.
 
-- `manifest.json`: identity and the foundation pin (`@adobe/spectrum-design-data@4.1.0`, the commit in `oracle.toml`).
+- `manifest.json`: identity and the foundation pin (`@adobe/spectrum-design-data@4.2.0`, the commit in `oracle.toml`).
 - `extensions/implementations/`: the `spectrum_rune::` type behind each component.
-- Status light has no extension any more: foundation 4.1.0 ships its own component and recipe (the promotion
+- Status light has no extension any more: foundation 4.2.0 ships its own component and recipe (the promotion
   trial of bead 4qa.7, adobe/spectrum-design-data#1761, landed), and `StatusLight` is checked against that.
-- `extensions/components/radio-group.json`: the foundation's radio-group with three `item-N` anatomy parts (each a `radio-button`) added, which the recipe below nests. Since data 4.1.0 a recipe part reads its `component` from the anatomy. Re-sync it when the pin moves.
+- `extensions/components/radio-group.json`: the foundation's radio-group with three `item-N` anatomy parts (each a `radio-button`) added, which the recipe below nests. Since data 4.2.0 a recipe part reads its `component` from the anatomy. Re-sync it when the pin moves.
 - `extensions/visuals/radio-group.json`: a recipe the foundation does not have yet. It is the oracle for
   `RadioGroup` and a candidate to promote (artifact move, `platforms/README.md` in spectrum-design-data).
 

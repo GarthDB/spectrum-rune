@@ -156,10 +156,15 @@ impl StatusLight {
             Size::XL => (t.base_gap_extra_large, t.ui_icon_2x_large),
         };
         let part = |name: &str| format!("{}/{name}", self.key);
-        // shortcut: the recipe binds the ratio `line-height-100` (1.3 x the font size) because status-light has no
-        // `line-height-font-size-*` relationships (adobe/spectrum-design-data#1756); Figma uses those per-size values.
+        // The label's line height is the per-size `line-height-font-size-*` the recipe binds (data 4.2.0,
+        // adobe/spectrum-design-data#1756), in px, not the ratio of the other components.
         let mut label_type = self.size.label_type(t);
-        label_type.line_height = label_type.size * t.line_height_100;
+        label_type.line_height = match self.size {
+            Size::S => t.line_height_font_size_75,
+            Size::M => t.line_height_font_size_100,
+            Size::L => t.line_height_font_size_200,
+            Size::XL => t.line_height_font_size_300,
+        };
         // No minimum height and no block padding: the component is as tall as its lines, and the dot is
         // centred on the first one.
         let fit = Fit::new(
