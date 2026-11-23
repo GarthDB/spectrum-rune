@@ -9,7 +9,7 @@ pub mod adapters;
 pub mod model;
 pub mod oracle;
 
-use crate::adapters::{Adapter, Choice, WRAPPED};
+use crate::adapters::{Adapter, Choice, ExtraKind};
 use crate::model::{Env, Library, Lit, OptionDef, OptionValue, Severity};
 use rune::{col, el, row, text, El};
 use rune_kit::{Kit, Switch};
@@ -95,6 +95,11 @@ fn extra(s: &Play, comp: &str, opt: &str) -> String {
     pick(s, comp, opt, list[0].0).to_owned()
 }
 
+fn extra_kind(s: &Play, comp: &str, opt: &str) -> ExtraKind {
+    s.adapter(comp)
+        .map_or(ExtraKind::Request, |a| a.extra_kind(opt))
+}
+
 /// The chosen values under the catalog's option names, with `over` (option, value) replacing one choice.
 pub fn options(s: &Play, comp: &str, over: Option<(&str, &str)>) -> Opts {
     let mut o: Opts = Vec::new();
@@ -107,11 +112,13 @@ pub fn options(s: &Play, comp: &str, over: Option<(&str, &str)>) -> Opts {
             o.push((def.name, l.into()));
         }
     }
-    for opt in ["label", "icon"] {
+    for (opt, _) in extras(s, comp) {
+        if extra_kind(s, comp, opt) != ExtraKind::FreeForm {
+            continue;
+        }
         let chosen = match over {
             Some((n, v)) if n == opt => v.to_owned(),
-            _ if extras(s, comp).iter().any(|(e, _)| *e == opt) => extra(s, comp, opt),
-            _ => continue,
+            _ => extra(s, comp, opt),
         };
         if chosen != "none" {
             o.push((opt, OptionValue::Present));
@@ -468,12 +475,17 @@ fn report_view(k: &Kit, r: &Report) -> El {
 
 /// An option's value for the panel: free-form ones (`label`, `icon`) as what the preview shows.
 pub fn shown_value(s: &Play, comp: &str, name: &str, v: &OptionValue) -> String {
-    match (name, v) {
-        ("label", OptionValue::Present) => match extra(s, comp, "label").as_str() {
-            "long" => WRAPPED.to_owned(),
-            _ => "Label".to_owned(),
-        },
-        ("icon", OptionValue::Present) => extra(s, comp, "icon"),
+    match v {
+        // A free-form option shows as the preset chosen for it.
+        OptionValue::Present => {
+            let chosen = extra(s, comp, name);
+            extras(s, comp)
+                .iter()
+                .find(|(o, _)| *o == name)
+                .and_then(|(_, list)| list.iter().find(|(id, _)| *id == chosen))
+                .map_or("(set)", |(_, shown)| shown)
+                .to_owned()
+        }
         _ => fmt(v),
     }
 }
@@ -612,7 +624,7 @@ pub fn menu_order(s: &Play) -> Vec<(&'static str, &'static str)> {
 }
 
 pub fn selected(s: &Play) -> &'static str {
-    let want = pick(s, "", "component", "badge");
+    let want = pick(s, "", "component", s.lib.default_component());
     let all = s.lib.components();
     all.iter().copied().find(|c| *c == want).unwrap_or(all[0])
 }
@@ -711,7 +723,7 @@ fn parts<H: Host>(s: &Play, k: &Kit, env: Env) -> Parts {
             .map(|(id, shown)| (id.to_string(), shown.to_string()))
             .collect();
         let c = control::<H>(k, comp, opt, values, &current, None, |v| {
-            if opt == "width" || opt == "state" {
+            if extra_kind(s, comp, opt) != ExtraKind::FreeForm {
                 Vec::new()
             } else {
                 inherit(
@@ -720,7 +732,7 @@ fn parts<H: Host>(s: &Play, k: &Kit, env: Env) -> Parts {
                 )
             }
         });
-        if opt == "state" {
+        if extra_kind(s, comp, opt) == ExtraKind::Oracle {
             state_control = Some(c);
         } else {
             controls = controls.child(c);
@@ -935,21 +947,18 @@ pub fn side_view<H: Host>(h: &H, cx: &mut rune::Cx<H>) -> El {
     let (k, env) = kit_env(s, cx);
     let mobile = s.mobile;
     let p = parts::<H>(s, &k, env);
-    let mut c = col()
-        .w_full()
-        .gap(16.0)
-        .child(p.compare)
-        .child(
+    let mut c = col().w_full().gap(16.0).child(p.compare);
+    if s.lib.touch_scale() {
+        c = c.child(
             Switch::new(mobile)
                 .label("Mobile scale")
                 .on_toggle(move |g: &mut H| {
                     g.play_mut().mobile = !mobile;
                 })
                 .build(&k),
-        )
-        .child(p.controls)
-        .child(p.panel)
-        .child(p.rules);
+        );
+    }
+    c = c.child(p.controls).child(p.panel).child(p.rules);
     if let Some(o) = p.oracle {
         c = c.child(col().gap(2.0).child(heading(&k, "Oracle")).child(o));
     }

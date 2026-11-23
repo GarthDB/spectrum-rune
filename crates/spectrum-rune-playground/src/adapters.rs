@@ -3,7 +3,7 @@
 
 use crate::tokens_of;
 use rune::{col, El};
-use rune_options_playground::adapters::{Adapter, Choice, Extras, Opts, WRAPPED};
+use rune_options_playground::adapters::{Adapter, Choice, ExtraKind, Extras, Opts};
 use rune_options_playground::model::{Env, OptionValue};
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::button::{self, Button};
@@ -29,6 +29,37 @@ fn conv(o: Vec<(&'static str, c::OptionValue<'static>)>) -> Opts {
             )
         })
         .collect()
+}
+
+const WRAPPED: &str = "Wrapped label text goes here";
+
+/// The label and width extras every Spectrum adapter shares.
+trait SpectrumChoice {
+    /// The label preset as text: `Label`, the wrapping one, or empty for `none`.
+    fn label(&self) -> &'static str;
+    fn width(&self) -> Option<f32>;
+}
+
+impl SpectrumChoice for Choice {
+    fn label(&self) -> &'static str {
+        match self.extra("label") {
+            "short" => "Label",
+            "long" => WRAPPED,
+            _ => "",
+        }
+    }
+    fn width(&self) -> Option<f32> {
+        self.extra("width").parse().ok()
+    }
+}
+
+/// `label` and `icon` are options the rules can name; `state` is an oracle state.
+fn kind(opt: &str) -> ExtraKind {
+    match opt {
+        "label" | "icon" => ExtraKind::FreeForm,
+        "state" => ExtraKind::Oracle,
+        _ => ExtraKind::Request,
+    }
 }
 
 /// The catalog `size` as a [`Size`].
@@ -65,6 +96,9 @@ impl Adapter for BadgeA {
     }
     fn name(&self) -> &'static str {
         "Badge"
+    }
+    fn extra_kind(&self, opt: &str) -> ExtraKind {
+        kind(opt)
     }
     fn extras(&self) -> Extras {
         vec![
@@ -141,6 +175,9 @@ impl Adapter for ButtonA {
             .padding(t.spacing_300)
             .fill(if on { dark_surface } else { light_surface })
             .child(built)
+    }
+    fn extra_kind(&self, opt: &str) -> ExtraKind {
+        kind(opt)
     }
     fn extras(&self) -> Extras {
         vec![
@@ -231,6 +268,9 @@ impl Adapter for PickerA {
     fn name(&self) -> &'static str {
         "Picker"
     }
+    fn extra_kind(&self, opt: &str) -> ExtraKind {
+        kind(opt)
+    }
     fn extras(&self) -> Extras {
         vec![
             ("label", [label_presets(), vec![("none", "none")]].concat()),
@@ -285,6 +325,9 @@ impl Adapter for StatusLightA {
     }
     fn name(&self) -> &'static str {
         "Status light"
+    }
+    fn extra_kind(&self, opt: &str) -> ExtraKind {
+        kind(opt)
     }
     fn extras(&self) -> Extras {
         vec![("label", label_presets()), ("width", width_presets())]

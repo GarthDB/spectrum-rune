@@ -449,7 +449,9 @@ comparison (debounced).
 
 - `crates/rune-options-playground` (unpublished) knows no design system. A component library implements `model::Library` (its
   options, values, rules and `check`, plus an `adapters::Adapter` per previewable component and optionally an `oracle::Oracle`)
-  and gives `stories(&library)` to `Playground::story`. Its chrome is `rune-kit`'s neutral theme. `examples/toy.rs` is a whole
+  and gives `stories(&library)` to `Playground::story`. A library also says what its adapters' extras are (`ExtraKind`: a free-form
+  option a rule can name, a plain request such as a width, or an oracle state), whether it has a touch scale
+  (`touch_scale`, which adds the side column's Mobile scale switch) and which component opens first (`default_component`). Its chrome is `rune-kit`'s neutral theme. `examples/toy.rs` is a whole
   non-Spectrum library (a chip and a toggle, one rule each, no oracle): `cargo run -p rune-options-playground --example toy --
   --playground "Components/Chip"`.
 - `crates/spectrum-rune-playground` (unpublished) is the Spectrum library: the generated catalog constraints, adapters for the

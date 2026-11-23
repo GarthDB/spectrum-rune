@@ -583,6 +583,10 @@ mod tests {
     /// One story per catalog component, each under its own path and opening on its own component.
     #[test]
     fn there_is_one_story_per_catalog_component() {
+        // Spectrum has a touch scale, so the side column offers it.
+        let mut rt = rune::Runtime::new(init(), view, (1000.0, 800.0), rune::Env::new(false, 1.0));
+        rt.frame(0.05);
+        assert!(rt.accessibility_json().to_string().contains("Mobile scale"));
         assert_eq!(
             spectrum_rune_playground::stories().len(),
             menu_order(&play()).len()

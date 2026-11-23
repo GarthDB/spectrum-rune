@@ -8,7 +8,7 @@
 
 use rune::{col, el, row, text, App, AppSpec, Cx, El, Playground};
 use rune_kit::{Kit, Switch};
-use rune_options_playground::adapters::{Adapter, Choice, Extras, Opts};
+use rune_options_playground::adapters::{Adapter, Choice, ExtraKind, Extras, Opts};
 use rune_options_playground::model::{
     Env, Library, Lit, OptionDef, OptionValue, Rule, Severity, Violation,
 };
@@ -99,6 +99,9 @@ impl Adapter for ChipA {
     fn name(&self) -> &'static str {
         "Chip"
     }
+    fn extra_kind(&self, _opt: &str) -> ExtraKind {
+        ExtraKind::FreeForm
+    }
     fn extras(&self) -> Extras {
         vec![(
             "label",
@@ -123,11 +126,16 @@ impl Adapter for ChipA {
             .pr(pad)
             .radius(pad * 2.0)
             .fill(fill)
-            .child(text(c.label().to_owned()).font(style).color(ink));
-        let mut opts: Opts = c.options.clone();
-        opts.push(("label", OptionValue::Present));
+            .child(
+                text(match c.extra("label") {
+                    "long" => "A much longer label",
+                    _ => "Label",
+                })
+                .font(style)
+                .color(ink),
+            );
         // A row around it keeps the chip at its own width instead of the stage's.
-        (opts, row().child(chip))
+        (c.options.clone(), row().child(chip))
     }
 }
 
@@ -201,6 +209,8 @@ mod tests {
         let tree = page("chip", &[]).accessibility_json().to_string();
         assert!(tree.contains("Catalog rules"), "{tree}");
         assert!(!tree.contains("Oracle"), "{tree}");
+        // The toy has no touch scale, so no switch for one.
+        assert!(!tree.contains("Mobile scale"), "{tree}");
     }
 
     #[test]
