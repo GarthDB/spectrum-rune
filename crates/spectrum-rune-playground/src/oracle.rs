@@ -2,6 +2,9 @@
 //! part of the current Playground selection reads. Rune does not record that itself (plain `Tokens`).
 //! The CLI is `$DESIGN_DATA` or `design-data` on the PATH, run from the repo root (`.design-data.toml`).
 
+use rune_options_playground::adapters::Choice;
+use rune_options_playground::model::{Env, OptionValue};
+use rune_options_playground::oracle::{Oracle, Part, Tok};
 use serde_json::Value;
 use std::process::Command;
 
@@ -28,26 +31,8 @@ fn root() -> &'static str {
     concat!(env!("CARGO_MANIFEST_DIR"), "/../..")
 }
 
-/// A token a part reads: the property, the token name, and its resolved value.
-#[derive(Clone, Debug)]
-pub struct Tok {
-    pub prop: String,
-    pub token: String,
-    pub value: String,
-}
-
-/// One part of the oracle's scene: its box, resolved fill, corner radius and text colour (as the CLI
-/// prints them, e.g. `rgb(59, 99, 251)`), and the tokens it reads.
-#[derive(Clone, Debug)]
-pub struct Part {
-    pub name: String,
-    pub rect: [f32; 4],
-    pub radius: f32,
-    pub tokens: Vec<Tok>,
-}
-
 /// Runs `design-data render <component> <args> --format scene`: the CLI version and the scene's parts.
-pub fn run(component: &str, args: &[String]) -> Result<(String, Vec<Part>), String> {
+fn run(component: &str, args: &[String]) -> Result<(String, Vec<Part>), String> {
     let bin = cli();
     let out = Command::new(&bin).arg("--version").output().map_err(|e| {
         format!("cannot run `{bin}`: {e} (set DESIGN_DATA to a binary in the oracle.toml range)")
@@ -95,4 +80,46 @@ pub fn run(component: &str, args: &[String]) -> Result<(String, Vec<Part>), Stri
         })
         .collect();
     Ok((v, parts))
+}
+
+/// The design-data CLI as the playground's oracle.
+pub struct DesignData;
+
+impl Oracle for DesignData {
+    /// The `design-data render` arguments for the chosen values (the catalog option names, `--size`, scheme, scale),
+    /// then what the component's adapter adds (label, icon, state) and the width.
+    fn args(&self, comp: &str, c: &Choice, env: Env) -> Vec<String> {
+        let mut a: Vec<String> = vec![
+            "--color-scheme".into(),
+            if env.dark { "dark" } else { "light" }.into(),
+            "--scale".into(),
+            if env.mobile { "mobile" } else { "desktop" }.into(),
+        ];
+        let mut size = None;
+        for (n, v) in &c.options {
+            let mut opt = |kv: String| a.extend(["--option".to_owned(), kv]);
+            match (*n, v) {
+                ("size", OptionValue::Str(x)) => size = Some(*x),
+                // The free-form options the adapter names itself.
+                ("icon" | "label", _) => {}
+                (n, OptionValue::Str(x)) => opt(format!("{n}=\"{x}\"")),
+                (n, OptionValue::Bool(b)) => opt(format!("{n}={b}")),
+                (n, OptionValue::Num(x)) => opt(format!("{n}={x}")),
+                (_, OptionValue::Present) => {}
+            }
+        }
+        if let Some(ad) = crate::adapters::ADAPTERS.iter().find(|a| a.id() == comp) {
+            a.extend(ad.oracle_args(c));
+        }
+        if let Some(x) = size {
+            a.extend(["--size".to_owned(), x.to_owned()]);
+        }
+        if let Ok(w) = c.extra("width").parse::<f32>() {
+            a.extend(["--width".to_owned(), w.to_string()]);
+        }
+        a
+    }
+    fn run(&self, comp: &str, args: &[String]) -> Result<(String, Vec<Part>), String> {
+        run(comp, args)
+    }
 }

@@ -2650,6 +2650,14 @@ version = "0.1.0"
 source = "git+https://github.com/anomalyco/rune?rev=d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0#d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0"
 
 [[package]]
+name = "rune-options-playground"
+version = "0.0.0"
+dependencies = [
+ "rune",
+ "rune-kit",
+]
+
+[[package]]
 name = "rune-ref"
 version = "0.0.1"
 source = "git+https://github.com/anomalyco/rune?rev=d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0#d6d04d3e64180ba34ed4a976bb5fec9ff6769ad0"
@@ -2964,6 +2972,7 @@ dependencies = [
  "png 0.18.1",
  "rune",
  "rune-kit",
+ "rune-options-playground",
  "rune-ref",
  "serde_json",
  "spectrum-rune-playground",
@@ -2974,6 +2983,7 @@ name = "spectrum-rune-playground"
 version = "0.0.0"
 dependencies = [
  "rune",
+ "rune-options-playground",
  "serde_json",
  "spectrum-rune",
 ]

@@ -9,6 +9,7 @@ rune.workspace = true
 rune-kit.workspace = true
 
 [dev-dependencies]
+rune-options-playground = { path = "../rune-options-playground" }
 spectrum-rune-playground = { path = "../spectrum-rune-playground" }
 serde_json = "1.0.154"
 rune-ref.workspace = true

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/spectrum-rune", "crates/spectrum-rune-playground", "xtask"]
+members = ["crates/spectrum-rune", "crates/rune-options-playground", "crates/spectrum-rune-playground", "xtask"]
 
 [workspace.dependencies]
 # Pre-release: pin a dev rev. Swap for a path to ~/repos/rune while hacking on the fork.
