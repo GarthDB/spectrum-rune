@@ -12,6 +12,7 @@ use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::constraints::{check, OptionValue, Severity};
 use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
+use spectrum_rune::menu::{Menu, MenuItem, Selection};
 use spectrum_rune::picker::Picker;
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
@@ -49,6 +50,7 @@ stories! {
     "action-button" => "Action button", action_button;
     "badge" => "Badge", badge;
     "picker" => "Picker", picker;
+    "menu" => "Menu", menu;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -197,6 +199,53 @@ fn checkbox(s: &G, t: &'static Tokens) -> El {
                     .width(150.0)
                     .build(t)
             })),
+        ),
+    ])
+}
+
+fn menu(s: &G, t: &'static Tokens) -> El {
+    // The chosen item per menu is kept in `picked`; the first is chosen until another is pressed.
+    let items = |id: &str, selection: Selection, size: Size| {
+        let key = format!("menu/{id}");
+        let chosen = s.picked.get(&key).map_or("copy", String::as_str).to_owned();
+        let k = key.clone();
+        let item = |v: &str, label: &str| {
+            MenuItem::new(v, label).selected(selection == Selection::Single && chosen == v)
+        };
+        // A menu has no surface of its own (the recipe's container is not visual): a layer behind it.
+        el().fill(t.background_layer_2_color)
+            .padding(t.spacing_100)
+            .radius(t.corner_radius_500)
+            .child(
+                Menu::new(key)
+                    .label("Edit")
+                    .size(size)
+                    .selection(selection)
+                    .item(item("copy", "Copy").value("⌘C"))
+                    .item(item("paste", "Paste").value("⌘V"))
+                    .item(item("cut", "Cut"))
+                    .item(MenuItem::new("delete", "Delete").disabled(true))
+                    .on_choose(move |s: &mut G, v: &str| {
+                        s.picked.insert(k.clone(), v.to_owned());
+                    })
+                    .build(t),
+            )
+    };
+    page(vec![
+        section(
+            t,
+            "Plain, with values and a disabled item",
+            flow().child(items("plain", Selection::None, Size::M)),
+        ),
+        section(
+            t,
+            "Single selection (click to choose)",
+            flow().child(items("single", Selection::Single, Size::M)),
+        ),
+        section(
+            t,
+            "Sizes",
+            flow().children(SIZES.map(|(z, n)| items(&format!("size-{n}"), Selection::Single, z))),
         ),
     ])
 }

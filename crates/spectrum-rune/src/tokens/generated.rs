@@ -1543,6 +1543,13 @@ pub struct Tokens {
     pub width_field_200: f32,
     pub width_field_300: f32,
     pub width_field_75: f32,
+    // Recipe-scoped colours `export` omits (per scheme and state).
+    pub body_color: Color,
+    pub heading_color: Color,
+    pub menu_item_background_color_disabled: Color,
+    pub menu_item_background_color_down: Color,
+    pub menu_item_background_color_hover: Color,
+    pub menu_item_background_color_keyboard_focus: Color,
 }
 
 pub static LIGHT_DESKTOP: Tokens = Tokens {
@@ -7291,6 +7298,42 @@ pub static LIGHT_DESKTOP: Tokens = Tokens {
     width_field_200: 224.0,
     width_field_300: 240.0,
     width_field_75: 192.0,
+    body_color: Color {
+        r: 0.022173885,
+        g: 0.022173885,
+        b: 0.022173885,
+        a: 1.0,
+    },
+    heading_color: Color {
+        r: 0.0065120906,
+        g: 0.0065120906,
+        b: 0.0065120906,
+        a: 1.0,
+    },
+    menu_item_background_color_disabled: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
+    menu_item_background_color_down: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
+    menu_item_background_color_hover: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
+    menu_item_background_color_keyboard_focus: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
 };
 
 pub static LIGHT_MOBILE: Tokens = Tokens {
@@ -13039,6 +13082,42 @@ pub static LIGHT_MOBILE: Tokens = Tokens {
     width_field_200: 272.0,
     width_field_300: 288.0,
     width_field_75: 240.0,
+    body_color: Color {
+        r: 0.022173885,
+        g: 0.022173885,
+        b: 0.022173885,
+        a: 1.0,
+    },
+    heading_color: Color {
+        r: 0.0065120906,
+        g: 0.0065120906,
+        b: 0.0065120906,
+        a: 1.0,
+    },
+    menu_item_background_color_disabled: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
+    menu_item_background_color_down: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
+    menu_item_background_color_hover: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
+    menu_item_background_color_keyboard_focus: Color {
+        r: 0.8148466,
+        g: 0.8148466,
+        b: 0.8148466,
+        a: 1.0,
+    },
 };
 
 pub static DARK_DESKTOP: Tokens = Tokens {
@@ -18787,6 +18866,42 @@ pub static DARK_DESKTOP: Tokens = Tokens {
     width_field_200: 224.0,
     width_field_300: 240.0,
     width_field_75: 192.0,
+    body_color: Color {
+        r: 0.70837575,
+        g: 0.70837575,
+        b: 0.70837575,
+        a: 1.0,
+    },
+    heading_color: Color {
+        r: 0.8879231,
+        g: 0.8879231,
+        b: 0.8879231,
+        a: 1.0,
+    },
+    menu_item_background_color_disabled: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
+    menu_item_background_color_down: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
+    menu_item_background_color_hover: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
+    menu_item_background_color_keyboard_focus: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
 };
 
 pub static DARK_MOBILE: Tokens = Tokens {
@@ -24535,6 +24650,42 @@ pub static DARK_MOBILE: Tokens = Tokens {
     width_field_200: 272.0,
     width_field_300: 288.0,
     width_field_75: 240.0,
+    body_color: Color {
+        r: 0.70837575,
+        g: 0.70837575,
+        b: 0.70837575,
+        a: 1.0,
+    },
+    heading_color: Color {
+        r: 0.8879231,
+        g: 0.8879231,
+        b: 0.8879231,
+        a: 1.0,
+    },
+    menu_item_background_color_disabled: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
+    menu_item_background_color_down: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
+    menu_item_background_color_hover: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
+    menu_item_background_color_keyboard_focus: Color {
+        r: 0.031896032,
+        g: 0.031896032,
+        b: 0.031896032,
+        a: 1.0,
+    },
 };
 
 pub fn tokens(scheme: ColorScheme, scale: Scale) -> &'static Tokens {
