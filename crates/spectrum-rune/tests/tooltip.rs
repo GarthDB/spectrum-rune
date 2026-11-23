@@ -132,9 +132,18 @@ fn matches_oracle_scene() {
         );
         let tip = part(&rt, "tip").unwrap();
         let w = &c["tip"];
+        // The tip follows the container's width, which is the label's text width: the installed font's, not the oracle's
+        // (CI has no Adobe font). Shift the oracle's x by the difference: the middle for top and bottom, the far edge for left.
+        let k = match c["placement"].as_str().unwrap() {
+            "top" | "bottom" => 0.5,
+            "left" => 1.0,
+            _ => 0.0,
+        };
+        let dw = ct.target[2] as f64 - c["container"]["w"].as_f64().unwrap();
+        let want_x = serde_json::json!(w["x"].as_f64().unwrap() + dw * k);
         near(
             tip.target[0] - ct.target[0],
-            &w["x"],
+            &want_x,
             &format!("{what} tip x"),
         );
         near(
