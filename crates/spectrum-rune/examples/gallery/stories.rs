@@ -7,6 +7,7 @@ use spectrum_rune::accordion::{AccordionItem, Density};
 use spectrum_rune::accordion_group::AccordionGroup;
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::badge::{self, Badge};
+use spectrum_rune::breadcrumbs::{self, BreadcrumbItem, Breadcrumbs};
 use spectrum_rune::button::{self, Button, StaticColor};
 use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::constraints::{check, OptionValue, Severity};
@@ -72,6 +73,7 @@ stories! {
     "menu" => "Menu", menu;
     "popover" => "Popover", popover;
     "tooltip" => "Tooltip", tooltip;
+    "breadcrumbs" => "Breadcrumbs", breadcrumbs;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
     "accordion-group" => "Accordion", accordion_group;
@@ -261,6 +263,57 @@ fn popover(_: &G, t: &'static Tokens) -> El {
                 .child(one("hide", Placement::Top, true, 140.0, 64.0))
                 .child(one("small", Placement::Top, false, 90.0, 40.0))
                 .child(one("large", Placement::Top, false, 220.0, 110.0)),
+        ),
+    ])
+}
+
+fn breadcrumbs(s: &G, t: &'static Tokens) -> El {
+    use breadcrumbs::{Separator as Sep, Size as Z};
+    // The trail ends at the page chosen by pressing a link: the links after it drop away.
+    let trail = |key: &str, size: Z, sep: Sep| {
+        let names = ["Home", "Docs", "Components", "Breadcrumbs"];
+        let current = s
+            .picked
+            .get(key)
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(2)
+            .min(names.len() - 1);
+        let k = key.to_owned();
+        let mut b =
+            Breadcrumbs::new(key)
+                .size(size)
+                .separator(sep)
+                .on_navigate(move |g: &mut G, i| {
+                    g.picked.insert(k.clone(), i.to_string());
+                });
+        for (i, n) in names.iter().enumerate().take(current + 1) {
+            b = b.item(BreadcrumbItem::new(*n).current(i == current));
+        }
+        b.build(t)
+    };
+    page(vec![
+        section(
+            t,
+            "Sizes (press a link: the trail ends there)",
+            flow()
+                .child(trail("breadcrumbs/m", Z::M, Sep::Chevron))
+                .child(trail("breadcrumbs/l", Z::L, Sep::Chevron)),
+        ),
+        section(
+            t,
+            "No separator",
+            flow().child(trail("breadcrumbs/none", Z::M, Sep::None)),
+        ),
+        section(
+            t,
+            "States: current, disabled",
+            flow().child(
+                Breadcrumbs::new("breadcrumbs/states")
+                    .item(BreadcrumbItem::new("Home"))
+                    .item(BreadcrumbItem::new("Archive").disabled(true))
+                    .item(BreadcrumbItem::new("Report").current(true))
+                    .build(t),
+            ),
         ),
     ])
 }
