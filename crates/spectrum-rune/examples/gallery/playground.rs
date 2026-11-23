@@ -6,12 +6,13 @@
 
 use crate::adapters::{adapter, Choice, ADAPTERS, WRAPPED};
 use crate::G;
-use rune::{col, row, text, El};
+use rune::{col, el, row, text, El};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::constraints::{
     check, component, Lit, OptionDef, OptionValue, Severity, COMPONENTS as CATALOG,
 };
 use spectrum_rune::font;
+use spectrum_rune::menu::{Menu, MenuItem, Selection};
 use spectrum_rune::picker::Picker;
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
@@ -563,6 +564,20 @@ fn backdrop(s: &G, comp: &str, t: &Tokens, built: El) -> El {
         .child(built)
 }
 
+/// The component list's items in order: the previewed components, then the catalog-only ones, as (id, shown).
+fn menu_order() -> Vec<(&'static str, &'static str)> {
+    ADAPTERS
+        .iter()
+        .map(|a| (a.id(), a.name()))
+        .chain(
+            CATALOG
+                .iter()
+                .filter(|c| !previewed(c.name))
+                .map(|c| (c.name, c.name)),
+        )
+        .collect()
+}
+
 fn selected(s: &G) -> &'static str {
     CATALOG
         .iter()
@@ -619,17 +634,6 @@ pub fn poll(s: &mut G, t: f64, tx: &mut rune::Tx) -> bool {
 pub fn playground(s: &G, t: &'static Tokens) -> El {
     let comp = selected(s);
     let open = pick(s, "", "picker", "closed") == "open";
-    let pick_button = |id: &'static str, name: &str| {
-        ActionButton::new(format!("playground/pick/{id}"))
-            .label(name.to_owned())
-            .quiet(true)
-            .selected(id == comp)
-            .on_press(move |g: &mut G| {
-                g.play.insert("/component".into(), id.into());
-                g.play.insert("/picker".into(), "closed".into());
-            })
-            .build(t)
-    };
     let shown_name = adapter(comp).map_or(comp, |a| a.name());
     let mut picker = col()
         .gap(t.spacing_75)
@@ -648,35 +652,33 @@ pub fn playground(s: &G, t: &'static Tokens) -> El {
                 .build(t),
         );
     if open {
-        // shortcut: Spectrum has no Menu or Popover recipe yet (a14.56), so the list is composed of quiet Action
-        // buttons on a layer surface, shown in the page flow rather than as an overlay.
-        let list = col()
-            .gap(t.spacing_75)
-            .padding(t.spacing_200)
-            .fill(t.background_layer_1_color)
-            .child(caption(t, "previewed here"))
-            .child(
-                row()
-                    .gap(t.spacing_75)
-                    .flex_wrap()
-                    .children(ADAPTERS.iter().map(|a| pick_button(a.id(), a.name()))),
-            )
-            .child(caption(
-                t,
-                format!(
-                    "catalog only, options and rules without a preview ({})",
-                    CATALOG.len() - ADAPTERS.len()
-                ),
-            ))
-            .child(
-                row().gap(t.spacing_75).flex_wrap().children(
-                    CATALOG
-                        .iter()
-                        .filter(|c| !previewed(c.name))
-                        .map(|c| pick_button(c.name, c.name)),
-                ),
-            );
-        picker = picker.child(list);
+        // The list is the Spectrum Menu in the page flow (not an overlay), scrolling: the previewed components
+        // first, then the catalog-only ones. A menu has no surface of its own: a layer behind it.
+        let mut menu = Menu::new("playground/pick-menu")
+            .label("Component")
+            .selection(Selection::Single)
+            .on_choose(|g: &mut G, id: &str| {
+                g.play.insert("/component".into(), id.to_owned());
+                g.play.insert("/picker".into(), "closed".into());
+            })
+            .on_dismiss(|g: &mut G| {
+                g.play.insert("/picker".into(), "closed".into());
+            });
+        for (id, name) in menu_order() {
+            menu = menu.item(MenuItem::new(id, name).selected(id == comp));
+        }
+        picker = picker.child(
+            el().key("playground/pick-list")
+                .w(280.0)
+                .h(320.0)
+                .fill(t.background_layer_1_color)
+                .radius(t.corner_radius_500)
+                .padding(t.spacing_100)
+                .scroll(rune::ScrollSpec {
+                    stick_bottom: false,
+                })
+                .child(menu.build(t)),
+        );
     }
     let now_reasons = reasons(comp, &options(s, comp, None));
     let mut controls = col().gap(t.spacing_200).child(heading(t, "Options"));
@@ -1337,18 +1339,21 @@ mod tests {
         let mut rt = Runtime::new(s, crate::view, (1100.0, 1400.0), Env::new(false, 1.0));
         rt.frame(0.05);
         assert!(
-            rt.find("playground/pick/tabs/container").is_none(),
+            rt.find("playground/pick-menu/container").is_none(),
             "closed: no list"
         );
         press(&mut rt, "playground/pick/field");
         assert!(
-            rt.find("playground/pick/tabs/container").is_some(),
+            rt.find("playground/pick-menu/container").is_some(),
             "open: the catalog is listed"
         );
-        press(&mut rt, "playground/pick/tabs/container");
-        assert_eq!(rt.state.play["/component"], "tabs");
+        // The first catalog-only component: the list scrolls, so a far one is out of reach of a press.
+        let (id, _) = menu_order()[ADAPTERS.len()];
+        let n = ADAPTERS.len() + 1;
+        press(&mut rt, &format!("playground/pick-menu/menu-item-{n}"));
+        assert_eq!(rt.state.play["/component"], id);
         assert!(
-            rt.find("playground/pick/tabs/container").is_none(),
+            rt.find("playground/pick-menu/container").is_none(),
             "closed again"
         );
         let tree = rt.accessibility_json().to_string();
