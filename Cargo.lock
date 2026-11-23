@@ -2966,6 +2966,16 @@ dependencies = [
  "rune-kit",
  "rune-ref",
  "serde_json",
+ "spectrum-rune-playground",
+]
+
+[[package]]
+name = "spectrum-rune-playground"
+version = "0.0.0"
+dependencies = [
+ "rune",
+ "serde_json",
+ "spectrum-rune",
 ]
 
 [[package]]
