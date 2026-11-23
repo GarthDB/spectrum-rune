@@ -79,6 +79,9 @@ impl m::Library for Spectrum {
     fn adapters(&self) -> &'static [&'static dyn Adapter] {
         &ADAPTERS
     }
+    fn touch_scale(&self) -> bool {
+        true
+    }
     fn oracle(&self) -> Option<&dyn Oracle> {
         Some(&crate::oracle::DesignData)
     }

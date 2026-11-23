@@ -82,6 +82,19 @@ pub trait Library: Sync {
     fn check(&self, comp: &str, options: &[(&str, OptionValue)]) -> Vec<Violation>;
     /// The components that can be previewed.
     fn adapters(&self) -> &'static [&'static dyn Adapter];
+    /// The component the playground opens on: the first previewable one by default.
+    fn default_component(&self) -> &'static str {
+        self.adapters()
+            .first()
+            .map(|a| a.id())
+            .or_else(|| self.components().first().copied())
+            .unwrap_or("")
+    }
+    /// Whether the library has a touch (mobile) scale: the side column then offers a switch for it, and `Env::mobile`
+    /// says which one a preview is built for.
+    fn touch_scale(&self) -> bool {
+        false
+    }
     /// What the previews are compared with, if the library has one: the oracle panel shows only then.
     fn oracle(&self) -> Option<&dyn Oracle> {
         None
