@@ -14,6 +14,7 @@ use spectrum_rune::font;
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
 use spectrum_rune::picker::Picker;
 use spectrum_rune::radio_button::RadioButton;
+use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tokens::Tokens;
@@ -43,6 +44,7 @@ stories! {
     "switch" => "Switch", switch;
     "checkbox" => "Checkbox", checkbox;
     "radio-button" => "Radio button", radio_button;
+    "radio-group" => "Radio group", radio_group;
     "button" => "Button", button;
     "action-button" => "Action button", action_button;
     "badge" => "Badge", badge;
@@ -195,6 +197,42 @@ fn checkbox(s: &G, t: &'static Tokens) -> El {
                     .width(150.0)
                     .build(t)
             })),
+        ),
+    ])
+}
+
+fn radio_group(s: &G, t: &'static Tokens) -> El {
+    // The chosen value per group is kept in `picked`; nothing is chosen until one is pressed.
+    let group = |id: &str, size: Size, orientation: Orientation| {
+        let key = format!("radio-group/{id}");
+        let k = key.clone();
+        let mut g = RadioGroup::new(key.clone())
+            .label("Fruit")
+            .item("apple", "Apple")
+            .item("pear", "Pear")
+            .item("plum", "Plum")
+            .size(size)
+            .orientation(orientation)
+            .on_change(move |s: &mut G, v: &str| {
+                s.picked.insert(k.clone(), v.to_owned());
+            });
+        if let Some(v) = s.picked.get(&key) {
+            g = g.value(v.clone());
+        }
+        g.build(t)
+    };
+    page(vec![
+        section(
+            t,
+            "Vertical (no gap: the radio buttons' height spaces them)",
+            flow().children(SIZES.map(|(z, n)| group(&format!("v-{n}"), z, Orientation::Vertical))),
+        ),
+        section(
+            t,
+            "Horizontal (spacing-300 between)",
+            col()
+                .gap(t.spacing_200)
+                .children(SIZES.map(|(z, n)| group(&format!("h-{n}"), z, Orientation::Horizontal))),
         ),
     ])
 }

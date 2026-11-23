@@ -8,9 +8,8 @@ manifest.
 - `extensions/implementations/`: the `spectrum_rune::` type behind each component.
 - Status light has no extension any more: foundation 4.2.0 ships its own component and recipe (the promotion
   trial of bead 4qa.7, adobe/spectrum-design-data#1761, landed), and `StatusLight` is checked against that.
-- `extensions/components/radio-group.json`: the foundation's radio-group with three `item-N` anatomy parts (each a `radio-button`) added, which the recipe below nests. Since data 4.2.0 a recipe part reads its `component` from the anatomy. Re-sync it when the pin moves.
-- `extensions/visuals/radio-group.json`: a recipe the foundation does not have yet. It is the oracle for
-  `RadioGroup` and a candidate to promote (artifact move, `platforms/README.md` in spectrum-design-data).
+- Radio group has no extension any more either: foundation 4.2.0 ships its own recipe (adobe/spectrum-design-data #2067, an
+  `options` slot named `default`, vertical and horizontal), and `RadioGroup` is checked against that.
 
 `.design-data.toml` at the repo root selects it (`default_platform = "rune"`):
 
@@ -29,5 +28,5 @@ No token overrides: every value comes from the foundation.
 
 - Where Rune cannot draw what a recipe says (focus-visible stroke colour, hover-vs-focus precedence, busy state, font
   family) the manifest has nowhere to say so; those are tracked in beads (a14.14, wav), not in the manifest.
-- The `radio-group` recipe's nested radio buttons carry no label (nested parts get none), so `RadioGroup` is checked
-  for gap and item geometry only.
+- `RadioGroup` is checked for gap and item geometry only: the fixture's radio buttons carry no label (data 4.2.0's
+  `with.label` could add them, not done), and the recipe's field label and help text are not built.

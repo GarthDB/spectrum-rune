@@ -1,11 +1,11 @@
-//! Spectrum Radio-group: radio buttons that choose one value, from the `radio-group` recipe in
-//! `platforms/rune/extensions/visuals/radio-group.json` (the foundation has none yet): a column, or a row
-//! when horizontal, of radio buttons `group-gap` apart. Rune's `focus_group` roves focus with the arrow
+//! Spectrum Radio-group: radio buttons that choose one value, from the foundation's `radio-group` recipe
+//! (data 4.2.0, visuals/radio-group.json, `options` slot): a column with no gap (the radio buttons' own
+//! height spaces them), or a row of radio buttons `spacing-300` apart when horizontal. Rune's `focus_group` roves focus with the arrow
 //! keys and a radio takes its press on arrival, so an arrow moves the selection; `focus_selected` makes
 //! Tab land on the selected item.
 //!
 //! Verification: the gap and item heights against the oracle (`tests/radio_group.rs`); keyboard
-//! behaviour in the same test. Not drawn: the group label (the recipe has none; it is the accessible
+//! behaviour in the same test. Not drawn: the group label (the recipe draws a field label, not built here; it is the accessible
 //! name only), description, required and error message.
 
 use crate::radio_button::RadioButton;
@@ -98,11 +98,10 @@ impl RadioGroup {
     }
 
     pub fn build(self, t: &Tokens) -> El {
-        let gap = match self.size {
-            Size::S => t.group_gap_small,
-            Size::M => t.group_gap_medium,
-            Size::L => t.group_gap_large,
-            Size::XL => t.group_gap_extra_large,
+        // The recipe binds a gap only for the row: spacing-300 at every size.
+        let gap = match self.orientation {
+            Orientation::Vertical => 0.0,
+            Orientation::Horizontal => t.spacing_300,
         };
         let mut root = match self.orientation {
             Orientation::Vertical => col(),
