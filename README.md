@@ -440,18 +440,26 @@ the test fixtures are derived from [Spectrum Design Data](https://github.com/ado
 (Apache-2.0, Adobe). Rune is MIT. The Adobe Clean Spectrum typeface is not part of this repository and
 is licensed separately; never commit it.
 
-## The playground crate
+## The playground crates
 
-`crates/spectrum-rune-playground` (unpublished) is an option playground hosted in Rune's own `App::playground` (⌘⇧D, or
-`--playground "Components/Button"` headless): one story per catalog component, the live preview on the stage, and in the side
-column a control per catalog option (values an `error` rule excludes are greyed with the reason), the builder's options, the
-catalog's rules and an oracle comparison (`design-data render`, debounced). The gallery shows it:
+An options playground hosted in Rune's own `App::playground` (⌘⇧D, or `--playground "Components/Button"` headless): one story
+per catalog component, the live preview on the stage, and in the side column a control per catalog option (a value an `error`
+rule excludes is greyed with the reason), the builder's options, the catalog's rules and, when the library has one, an oracle
+comparison (debounced).
+
+- `crates/rune-options-playground` (unpublished) knows no design system. A component library implements `model::Library` (its
+  options, values, rules and `check`, plus an `adapters::Adapter` per previewable component and optionally an `oracle::Oracle`)
+  and gives `stories(&library)` to `Playground::story`. Its chrome is `rune-kit`'s neutral theme.
+- `crates/spectrum-rune-playground` (unpublished) is the Spectrum library: the generated catalog constraints, adapters for the
+  components here, and the design-data CLI as the oracle. `stories()` is what the gallery gives to Rune:
 
 ```rust,ignore
 App::new(spec).playground(
-    stories(&Spectrum).into_iter().fold(Playground::<State>::new().enabled(true), |p, s| p.story(s)),
+    spectrum_rune_playground::stories()
+        .into_iter()
+        .fold(Playground::<State>::new().enabled(true), |p, s| p.story(s)),
 )
 ```
 
-`enabled(true)` because Rune offers its playground in debug builds only. Components are added with an `Adapter`
-(`adapters.rs`); the stories keep their own state (`Page`), apart from the app's.
+`enabled(true)` because Rune offers its playground in debug builds only. The stories keep their own state (`Page`), apart from the
+app's.

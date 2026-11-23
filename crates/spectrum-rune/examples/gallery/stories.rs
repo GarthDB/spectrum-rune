@@ -31,11 +31,11 @@ macro_rules! stories {
             ($id, |s: &mut G| s.story = $id),
             (concat!($id, "-dark"), |s: &mut G| {
                 s.story = $id;
-                s.play.scheme = Some(spectrum_rune::tokens::ColorScheme::Dark);
+                s.scheme = Some(spectrum_rune::tokens::ColorScheme::Dark);
             }),
             (concat!($id, "-mobile"), |s: &mut G| {
                 s.story = $id;
-                s.play.scale = spectrum_rune::tokens::Scale::Mobile;
+                s.scale = spectrum_rune::tokens::Scale::Mobile;
             }),
         )*];
     };

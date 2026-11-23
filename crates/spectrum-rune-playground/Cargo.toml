@@ -4,9 +4,10 @@ version = "0.0.0"
 edition = "2021"
 license = "Apache-2.0"
 publish = false
-description = "An option playground for Rune apps on design-data platforms: a control per catalog option, a live preview, the catalog's rules and an oracle comparison. Dev-only."
+description = "The Spectrum library for rune-options-playground: the catalog constraints, adapters for the spectrum-rune components, and the design-data oracle. Dev-only."
 
 [dependencies]
 rune.workspace = true
+rune-options-playground = { path = "../rune-options-playground" }
 spectrum-rune = { path = "../spectrum-rune" }
 serde_json = "1.0.154"

@@ -15,23 +15,22 @@ mod tests {
     }
 
     fn poll(s: &mut Page, t: f64, tx: &mut rune::Tx) -> bool {
-        spectrum_rune_playground::poll(&mut s.play, t, tx)
+        rune_options_playground::poll(&mut s.play, t, tx)
     }
-    use spectrum_rune_playground::model::*;
-    use spectrum_rune_playground::spectrum::Spectrum;
+    use rune_options_playground::model::*;
+    use spectrum_rune_playground::Spectrum;
 
     fn play() -> Play {
         Play::new(&Spectrum)
     }
-    use spectrum_rune::tokens::{tokens, ColorScheme, Scale};
-    use spectrum_rune_playground::adapters::*;
-    use spectrum_rune_playground::*;
+    use rune_options_playground::adapters::*;
+    use rune_options_playground::*;
 
     /// The options derived from the catalog (what the controls grey out by) equal what each builder reports,
     /// for every value of every enumerated option, so the adapter and the catalog cannot drift apart.
     #[test]
     fn catalog_options_match_builder_options() {
-        let t = tokens(ColorScheme::Light, Scale::Desktop);
+        let env = Env::default();
         for ad in Spectrum.adapters() {
             let comp = ad.id();
             for def in Spectrum
@@ -50,7 +49,7 @@ mod tests {
                     };
                     let mut derived = sorted(options(&s.play, comp, None));
                     if errors(&play(), comp, &derived).is_empty() {
-                        let reported = sorted(preview(&s.play, comp, t).0);
+                        let reported = sorted(preview(&s.play, comp, env).0);
                         // A builder may leave out options with no visual effect (Button's size, isDisabled).
                         derived.retain(|(n, _)| reported.iter().any(|(r, _)| r == n));
                         assert_eq!(derived, reported, "{comp} {} = {}", def.name, lit_str(l));
@@ -63,7 +62,7 @@ mod tests {
     /// The label and icon presets (not catalog values) must reach the builder too.
     #[test]
     fn extras_match_builder_options() {
-        let t = tokens(ColorScheme::Light, Scale::Desktop);
+        let env = Env::default();
         for ad in Spectrum.adapters() {
             let comp = ad.id();
             for (opt, presets) in extras(&play(), comp) {
@@ -74,7 +73,7 @@ mod tests {
                     if !errors(&play(), comp, &derived).is_empty() {
                         continue;
                     }
-                    let reported = preview(&s.play, comp, t).0;
+                    let reported = preview(&s.play, comp, env).0;
                     for name in ["label", "icon"] {
                         let has = |o: &Opts| o.iter().any(|(n, _)| *n == name);
                         // Button and Picker builders do not report their label (no visual option of their own).
@@ -92,7 +91,7 @@ mod tests {
     /// presets, skipping what `errors()` excludes (the UI shows a message for those instead).
     #[test]
     fn every_reachable_combination_builds() {
-        let t = tokens(ColorScheme::Light, Scale::Desktop);
+        let env = Env::default();
         for ad in Spectrum.adapters() {
             let comp = ad.id();
             let mut controls: Vec<(String, Vec<String>)> = Vec::new();
@@ -122,7 +121,7 @@ mod tests {
                     n /= values.len();
                 }
                 if errors(&play(), comp, &options(&s.play, comp, None)).is_empty() {
-                    preview(&s.play, comp, t);
+                    preview(&s.play, comp, env);
                     built += 1;
                 }
             }
@@ -179,9 +178,7 @@ mod tests {
             ),
             "{tree}"
         );
-        let (x, y) = rt
-            .find("playground/button/style/outline/container")
-            .unwrap();
+        let (x, y) = rt.find("playground/button/style/outline").unwrap();
         rt.pointer_move(x, y);
         rt.pointer_down(x, y);
         rt.pointer_up(x, y);
@@ -266,11 +263,6 @@ mod tests {
         for (name, play) in shots {
             for dark in [false, true] {
                 let mut s = init();
-                s.play.scheme = Some(if dark {
-                    ColorScheme::Dark
-                } else {
-                    ColorScheme::Light
-                });
                 for (k, v) in play {
                     s.play.values.insert((*k).into(), (*v).into());
                 }
@@ -356,11 +348,6 @@ mod tests {
             ("black", true),
         ] {
             let mut s = init();
-            s.play.scheme = Some(if dark {
-                ColorScheme::Dark
-            } else {
-                ColorScheme::Light
-            });
             s.play.values.insert("/component".into(), "button".into());
             s.play
                 .values
@@ -392,11 +379,6 @@ mod tests {
         use rune::{Env, Runtime};
         for dark in [false, true] {
             let mut s = init();
-            s.play.scheme = Some(if dark {
-                ColorScheme::Dark
-            } else {
-                ColorScheme::Light
-            });
             s.play.values.insert("/component".into(), "button".into());
             s.play.values.insert("/compare".into(), "on".into());
             let mut rt = Runtime::new(s, view, (1100.0, 1500.0), Env::new(dark, 1.0));
@@ -510,7 +492,7 @@ mod tests {
         let s = init();
         let mut rt = Runtime::new(s, view, (1100.0, 1400.0), Env::new(false, 1.0));
         rt.frame(0.05);
-        let (x, y) = rt.find("playground/oracle/run/container").unwrap();
+        let (x, y) = rt.find("playground/oracle/run").unwrap();
         rt.pointer_move(x, y);
         rt.pointer_down(x, y);
         rt.pointer_up(x, y);
@@ -590,7 +572,7 @@ mod tests {
         let s = init();
         let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(false, 1.0));
         rt.frame(0.05);
-        let (x, y) = rt.find("playground/badge/style/subtle/container").unwrap();
+        let (x, y) = rt.find("playground/badge/style/subtle").unwrap();
         rt.pointer_move(x, y);
         rt.pointer_down(x, y);
         rt.pointer_up(x, y);
@@ -601,7 +583,10 @@ mod tests {
     /// One story per catalog component, each under its own path and opening on its own component.
     #[test]
     fn there_is_one_story_per_catalog_component() {
-        assert_eq!(stories(&Spectrum).len(), menu_order(&play()).len());
+        assert_eq!(
+            spectrum_rune_playground::stories().len(),
+            menu_order(&play()).len()
+        );
         assert_eq!(
             Page::of(&Spectrum, "button").play.values["/component"],
             "button"

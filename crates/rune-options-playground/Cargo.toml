@@ -1,0 +1,11 @@
+[package]
+name = "rune-options-playground"
+version = "0.0.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+description = "An options playground for Rune component libraries: a control per catalog option with rule-excluded values greyed out and explained, a live preview, and an optional oracle comparison. Hosted in Rune's App::playground. Dev-only."
+
+[dependencies]
+rune.workspace = true
+rune-kit.workspace = true

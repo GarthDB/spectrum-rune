@@ -1,10 +1,10 @@
-//! Per-component adapters for the Playground: what each previewed component adds to the catalog (free-form
-//! presets such as a label or an icon), how the chosen values build it, and what it passes to the oracle
-//! besides its catalog options. Nothing here reads the gallery's state: an adapter sees a [`Choice`], so it
-//! can move into a shared playground crate (Stage 3, a14.44) unchanged.
+//! The previewed Spectrum components: what each adds to the catalog (free-form presets), how the chosen values
+//! build it, and what it passes to the oracle besides its catalog options.
 
-use crate::model::OptionValue;
-use rune::El;
+use crate::tokens_of;
+use rune::{col, El};
+use rune_options_playground::adapters::{Adapter, Choice, Extras, Opts, WRAPPED};
+use rune_options_playground::model::{Env, OptionValue};
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::button::{self, Button};
 use spectrum_rune::constraints as c;
@@ -12,7 +12,6 @@ use spectrum_rune::icons::CHECKMARK_100;
 use spectrum_rune::interaction::State;
 use spectrum_rune::picker::Picker;
 use spectrum_rune::status_light::{self, StatusLight};
-use spectrum_rune::tokens::Tokens;
 use spectrum_rune::Size;
 
 /// A Spectrum builder's `options()` as the playground's values.
@@ -32,74 +31,15 @@ fn conv(o: Vec<(&'static str, c::OptionValue<'static>)>) -> Opts {
         .collect()
 }
 
-pub type Opts = Vec<(&'static str, OptionValue<'static>)>;
-/// Option name and its presets as (id, shown); the first preset is the default.
-pub type Extras = Vec<(&'static str, Vec<(&'static str, &'static str)>)>;
-
-pub const WRAPPED: &str = "Wrapped label text goes here";
-
-/// The chosen values of one component: its catalog options (defaults filled in) and the preset id chosen for
-/// each of its extras.
-pub struct Choice {
-    pub options: Opts,
-    pub extras: Vec<(&'static str, String)>,
-}
-
-impl Choice {
-    /// A catalog option's value as a string (`""` when unset).
-    pub fn v(&self, opt: &str) -> String {
-        match self.options.iter().find(|(n, _)| *n == opt) {
-            Some((_, OptionValue::Str(x))) => (*x).to_owned(),
-            Some((_, OptionValue::Bool(b))) => b.to_string(),
-            Some((_, OptionValue::Num(n))) => n.to_string(),
-            _ => String::new(),
-        }
+/// The catalog `size` as a [`Size`].
+fn size(c: &Choice) -> Size {
+    match c.v("size").as_str() {
+        "s" => Size::S,
+        "l" => Size::L,
+        "xl" => Size::XL,
+        "m" => Size::M,
+        other => panic!("catalog size `{other}` is not a Size"),
     }
-    fn on(&self, opt: &str) -> bool {
-        self.v(opt) == "true"
-    }
-    /// The chosen preset id of an extra (`""` when the component has no such extra).
-    pub fn extra(&self, opt: &str) -> &str {
-        self.extras
-            .iter()
-            .find(|(n, _)| *n == opt)
-            .map_or("", |(_, v)| v.as_str())
-    }
-    /// The label preset as text: `Label`, the wrapping one, or empty for `none`.
-    pub fn label(&self) -> &'static str {
-        match self.extra("label") {
-            "short" => "Label",
-            "long" => WRAPPED,
-            _ => "",
-        }
-    }
-    pub fn width(&self) -> Option<f32> {
-        self.extra("width").parse().ok()
-    }
-    fn size(&self) -> Size {
-        match self.v("size").as_str() {
-            "s" => Size::S,
-            "l" => Size::L,
-            "xl" => Size::XL,
-            "m" => Size::M,
-            other => panic!("catalog size `{other}` is not a Size"),
-        }
-    }
-}
-
-/// One previewed component.
-pub trait Adapter: Sync {
-    /// The catalog name, e.g. `"button"`.
-    fn id(&self) -> &'static str;
-    /// The name shown in the playground.
-    fn name(&self) -> &'static str;
-    /// Free-form options and the request width: they have no catalog values, so a few presets each.
-    fn extras(&self) -> Extras;
-    /// The built component under `key` (its parts are `<key>/container`, ...) and the builder's own `options()`.
-    fn build(&self, c: &Choice, t: &Tokens, key: &str) -> (Opts, El);
-    /// `design-data render` arguments beyond the catalog options, `--size`, scheme, scale and width (which the
-    /// playground adds itself): the label, the icon, a state.
-    fn oracle_args(&self, c: &Choice) -> Vec<String>;
 }
 
 /// The previewed components, in the order the playground lists them.
@@ -133,7 +73,8 @@ impl Adapter for BadgeA {
             ("width", width_presets()),
         ]
     }
-    fn build(&self, c: &Choice, t: &Tokens, key: &str) -> (Opts, El) {
+    fn build(&self, c: &Choice, env: Env, key: &str) -> (Opts, El) {
+        let t = tokens_of(env);
         let mut b = Badge::new(key)
             .label(c.label())
             .variant(
@@ -148,7 +89,7 @@ impl Adapter for BadgeA {
                     .find(|x| x.as_str() == c.v("style"))
                     .expect("catalog style missing from badge::Style::ALL"),
             )
-            .size(c.size());
+            .size(size(c));
         if c.extra("icon") == "check" {
             b = b.icon(&CHECKMARK_100);
         }
@@ -180,6 +121,27 @@ impl Adapter for ButtonA {
     fn name(&self) -> &'static str {
         "Button"
     }
+    /// A static white or black Button is invisible on the stage's own surface, so it sits on a contrasting one:
+    /// the darker of the two tokens behind white, the lighter behind black, in either scheme.
+    /// shortcut: Spectrum has no backdrop token for static colours; these are stand-ins, see a14.56.
+    fn stage(&self, c: &Choice, env: Env, built: El) -> El {
+        let on = match c.v("staticColor").as_str() {
+            "white" => true,
+            "black" => false,
+            _ => return built,
+        };
+        let t = tokens_of(env);
+        let (dark_surface, light_surface) = if env.dark {
+            (t.background_layer_2_color, t.neutral_content_color_default)
+        } else {
+            (t.neutral_content_color_default, t.background_layer_2_color)
+        };
+        col()
+            .key("playground/stage/backdrop")
+            .padding(t.spacing_300)
+            .fill(if on { dark_surface } else { light_surface })
+            .child(built)
+    }
     fn extras(&self) -> Extras {
         vec![
             ("label", label_presets()),
@@ -197,7 +159,8 @@ impl Adapter for ButtonA {
             ),
         ]
     }
-    fn build(&self, c: &Choice, t: &Tokens, key: &str) -> (Opts, El) {
+    fn build(&self, c: &Choice, env: Env, key: &str) -> (Opts, El) {
+        let t = tokens_of(env);
         let mut b = Button::new(key)
             .label(c.label())
             .variant(match c.v("variant").as_str() {
@@ -210,7 +173,7 @@ impl Adapter for ButtonA {
                 "outline" => button::Style::Outline,
                 _ => button::Style::Fill,
             })
-            .size(c.size())
+            .size(size(c))
             .label_hidden(c.on("isLabelHidden"))
             .disabled(c.on("isDisabled"))
             .pending(c.on("isPending"));
@@ -277,10 +240,11 @@ impl Adapter for PickerA {
             ("width", width_presets()),
         ]
     }
-    fn build(&self, c: &Choice, t: &Tokens, key: &str) -> (Opts, El) {
+    fn build(&self, c: &Choice, env: Env, key: &str) -> (Opts, El) {
+        let t = tokens_of(env);
         let mut p = Picker::new(key)
             .label(c.label())
-            .size(c.size())
+            .size(size(c))
             .quiet(c.on("isQuiet"))
             .disabled(c.on("isDisabled"))
             .error(c.on("isError"))
@@ -325,7 +289,8 @@ impl Adapter for StatusLightA {
     fn extras(&self) -> Extras {
         vec![("label", label_presets()), ("width", width_presets())]
     }
-    fn build(&self, c: &Choice, t: &Tokens, key: &str) -> (Opts, El) {
+    fn build(&self, c: &Choice, env: Env, key: &str) -> (Opts, El) {
+        let t = tokens_of(env);
         let mut b = StatusLight::new(key, c.label())
             .variant(
                 *status_light::Variant::ALL
@@ -333,7 +298,7 @@ impl Adapter for StatusLightA {
                     .find(|x| x.as_str() == c.v("variant"))
                     .expect("catalog variant missing from status_light::Variant::ALL"),
             )
-            .size(c.size());
+            .size(size(c));
         if let Some(w) = c.width() {
             b = b.width(w);
         }

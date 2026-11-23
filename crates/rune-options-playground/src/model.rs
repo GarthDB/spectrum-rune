@@ -3,6 +3,14 @@
 //! previewed ones. A library implements [`Library`]; `spectrum.rs` is the Spectrum one.
 
 use crate::adapters::Adapter;
+use crate::oracle::Oracle;
+
+/// What the playground shows a component in: the appearance and whether it is the compact/touch scale.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Env {
+    pub dark: bool,
+    pub mobile: bool,
+}
 
 /// An option value in the catalog.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -74,4 +82,8 @@ pub trait Library: Sync {
     fn check(&self, comp: &str, options: &[(&str, OptionValue)]) -> Vec<Violation>;
     /// The components that can be previewed.
     fn adapters(&self) -> &'static [&'static dyn Adapter];
+    /// What the previews are compared with, if the library has one: the oracle panel shows only then.
+    fn oracle(&self) -> Option<&dyn Oracle> {
+        None
+    }
 }

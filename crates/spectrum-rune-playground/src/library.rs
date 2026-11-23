@@ -1,8 +1,10 @@
 //! Spectrum as a [`Library`]: the generated catalog constraints (`spectrum_rune::constraints`) and the adapters
 //! for the components `spectrum-rune` builds.
 
-use crate::adapters::{Adapter, ADAPTERS};
-use crate::model as m;
+use crate::adapters::ADAPTERS;
+use rune_options_playground::adapters::Adapter;
+use rune_options_playground::model as m;
+use rune_options_playground::oracle::Oracle;
 use spectrum_rune::constraints as c;
 
 pub struct Spectrum;
@@ -76,5 +78,8 @@ impl m::Library for Spectrum {
     }
     fn adapters(&self) -> &'static [&'static dyn Adapter] {
         &ADAPTERS
+    }
+    fn oracle(&self) -> Option<&dyn Oracle> {
+        Some(&crate::oracle::DesignData)
     }
 }

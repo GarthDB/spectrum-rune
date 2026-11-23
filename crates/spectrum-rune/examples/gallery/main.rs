@@ -73,8 +73,9 @@ pub struct G {
     pub picked: HashMap<String, String>,
     /// The open items per accordion group.
     pub open: HashMap<String, Vec<String>>,
-    /// The playground's state (its chosen values, scheme, scale and oracle run).
-    pub play: spectrum_rune_playground::Play,
+    /// `None` follows the system (`--theme`) until the header switch is used.
+    pub scheme: Option<ColorScheme>,
+    pub scale: Scale,
 }
 
 impl G {
@@ -95,13 +96,13 @@ fn init() -> G {
         flipped: HashSet::new(),
         picked: HashMap::new(),
         open: HashMap::new(),
-        play: spectrum_rune_playground::Play::new(&spectrum_rune_playground::spectrum::Spectrum),
+        scheme: None,
+        scale: Scale::Desktop,
     }
 }
 
 fn view(s: &G, cx: &mut Cx<G>) -> El {
-    s.play.system_dark.set(cx.system_dark());
-    let scheme = s.play.scheme.unwrap_or(if cx.system_dark() {
+    let scheme = s.scheme.unwrap_or(if cx.system_dark() {
         ColorScheme::Dark
     } else {
         ColorScheme::Light
@@ -110,9 +111,9 @@ fn view(s: &G, cx: &mut Cx<G>) -> El {
 }
 
 fn build(s: &G, scheme: ColorScheme) -> El {
-    let t = tokens(scheme, s.play.scale);
+    let t = tokens(scheme, s.scale);
     let dark = scheme == ColorScheme::Dark;
-    let mobile = s.play.scale == Scale::Mobile;
+    let mobile = s.scale == Scale::Mobile;
 
     let nav = row()
         .gap(4.0)
@@ -140,7 +141,7 @@ fn build(s: &G, scheme: ColorScheme) -> El {
                 .label("Dark")
                 .selected(dark)
                 .on_toggle(move |g: &mut G| {
-                    g.play.scheme = Some(if dark {
+                    g.scheme = Some(if dark {
                         ColorScheme::Light
                     } else {
                         ColorScheme::Dark
@@ -153,7 +154,7 @@ fn build(s: &G, scheme: ColorScheme) -> El {
                 .label("Mobile scale")
                 .selected(mobile)
                 .on_toggle(move |g: &mut G| {
-                    g.play.scale = if mobile {
+                    g.scale = if mobile {
                         Scale::Desktop
                     } else {
                         Scale::Mobile
@@ -208,14 +209,12 @@ fn main() {
         ..AppSpec::new("Spectrum for Rune", (1100.0, 900.0), init, view)
     })
     .playground(
-        spectrum_rune_playground::stories(&spectrum_rune_playground::spectrum::Spectrum)
-            .into_iter()
-            .fold(
-                rune::Playground::<G>::new()
-                    .enabled(true)
-                    .group_order(&["Components"]),
-                |p, s| p.story(s),
-            ),
+        spectrum_rune_playground::stories().into_iter().fold(
+            rune::Playground::<G>::new()
+                .enabled(true)
+                .group_order(&["Components"]),
+            |p, s| p.story(s),
+        ),
     )
     .font_smoothing(FontSmoothing::Off)
     .run();
@@ -273,9 +272,9 @@ mod tests {
                 for (id, setup) in stories::SCENES {
                     let mut s = init();
                     setup(&mut s);
-                    s.play.scale = scale;
+                    s.scale = scale;
                     let dark = scheme == ColorScheme::Dark;
-                    s.play.scheme = Some(scheme);
+                    s.scheme = Some(scheme);
                     let story = s.story;
                     let mut rt = Runtime::new(s, view, (1100.0, 900.0), Env::new(dark, 1.0));
                     rt.frame(0.05);
