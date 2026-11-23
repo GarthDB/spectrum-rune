@@ -18,8 +18,8 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Action button | `action_button` | `selected` for a toggle |
 | Badge | `badge` | none (static) |
 | Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
-| Picker (the closed field only; no menu) | `picker` | `value`, `open` (calls `on_open`) |
-| Menu (items with a checkmark selection; no popover) | `menu` | the chosen id (`on_choose`) |
+| Picker (the closed field; its menu is `PickerMenu`, a `Menu` in a modal `Popover` under it) | `picker`, `picker_menu` | `value`, `open` (calls `on_open`); the menu: the chosen id, close |
+| Menu (items with a checkmark selection; `PickerMenu` and `Popover` give it a surface) | `menu` | the chosen id (`on_choose`) |
 | Popover (surface and tip; six placements, optional `anchor` to a trigger) | `popover` | none (the app shows it; `on_dismiss` on Escape) |
 | Radio group | `radio_group` | `value` |
 | Accordion item (one item) | `accordion` | `open` |
@@ -369,7 +369,7 @@ dataset changes nothing.
   the recipe nor in the tokens. A picker without a label omits the label row, which the oracle still reserves
   (a field-label of 0 width and the full control height).
   `picker_model::PickerModel` is the list's keyboard and selection behaviour (select-only combobox keys, type-ahead, no
-  drawing), tested without a window; nothing uses it yet (the playground's list is the `Menu`, which has its own focus handling).
+  drawing), tested without a window; nothing uses it yet (`PickerMenu` builds on `Menu`'s own focus handling and a modal `Popover`).
 - **Accordion group.** The recipe has no group part (`items` and `isMultiple` are not visual), so the
   group's layout (gap 0, each item keeping its divider) has no oracle: only the stacked item heights are
   checked against the item oracle. Per-item `disabled` is a Rune-side convenience; the catalog's

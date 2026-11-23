@@ -26,6 +26,7 @@ pub mod icons;
 pub mod interaction;
 pub mod menu;
 pub mod picker;
+pub mod picker_menu;
 pub mod picker_model;
 pub mod popover;
 pub mod radio_button;
