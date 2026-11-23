@@ -20,6 +20,8 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
 | Picker (the closed field; its menu is `PickerMenu`, a `Menu` in a modal `Popover` under it) | `picker`, `picker_menu` | `value`, `open` (calls `on_open`); the menu: the chosen id, close |
 | Menu (items with a checkmark selection; `PickerMenu` and `Popover` give it a surface) | `menu` | the chosen id (`on_choose`) |
+| Progress bar, Meter (label, value, track and fill; Meter has four status colours and help text) | `progress_bar`, `meter` | none (static) |
+| Progress circle (a ring and a clockwise arc) | `progress_circle` | none (static) |
 | Breadcrumbs (a trail of links; sizes m and l, chevron separators; no collapsed menu) | `breadcrumbs` | the pressed index (`on_navigate`) |
 | Tooltip (label on a surface with a tip; hover to show via `Tooltip::bind`, or `anchor` to a trigger) | `tooltip` | none (the app shows it) |
 | Popover (surface and tip; six placements, optional `anchor` to a trigger) | `popover` | none (the app shows it; `on_dismiss` on Escape) |
