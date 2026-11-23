@@ -41,6 +41,7 @@ pub mod radio_group;
 pub mod size;
 pub mod status_light;
 pub mod switch;
+pub mod tag;
 pub mod tokens;
 pub mod tooltip;
 mod wrap;

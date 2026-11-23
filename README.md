@@ -20,6 +20,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Status light (recipe from the platform manifest, not upstream yet) | `status_light` | none (static) |
 | Picker (the closed field; its menu is `PickerMenu`, a `Menu` in a modal `Popover` under it) | `picker`, `picker_menu` | `value`, `open` (calls `on_open`); the menu: the chosen id, close |
 | Menu (items with a checkmark selection; `PickerMenu` and `Popover` give it a surface) | `menu` | the chosen id (`on_choose`) |
+| Tag (a label on a pill; selected, emphasized, disabled; no remove button, avatar or icon) | `tag` | none (`on_press`; the app keeps `selected`) |
 | Divider (a line in three sizes, horizontal or vertical) | `divider` | none (static) |
 | Link (primary and secondary, quiet, inline; the underline is Rune's) | `link` | none (`on_press` on press and Enter) |
 | Progress bar, Meter (label, value, track and fill; Meter has four status colours and help text) | `progress_bar`, `meter` | none (static) |
