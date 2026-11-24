@@ -51,6 +51,7 @@ pub mod steplist;
 pub mod switch;
 pub mod tabs;
 pub mod tag;
+pub mod text_field;
 pub mod tokens;
 pub mod tooltip;
 mod wrap;
