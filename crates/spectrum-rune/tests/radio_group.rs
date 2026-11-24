@@ -1,7 +1,8 @@
 //! Checks the RadioGroup against the foundation's `radio-group` recipe oracle (regenerate the fixture with
 //! `tests/fixtures/regen-radio-group.sh`) and the keyboard behaviour of a radio group.
 //!
-//! The oracle's radio buttons have no label, so what is compared is the gap between items and the item height.
+//! The oracle's radio buttons have no label, so what is compared is the gap between items and the item height, and (for the
+//! `labeled` and `error` cases) where the group's label, options and help text sit in the container.
 
 use rune::{Cx, El, ElementInfo, Env, Key, KeyEvent, Runtime};
 use serde_json::Value;
@@ -15,6 +16,8 @@ struct App {
     size: Size,
     horizontal: bool,
     disabled: bool,
+    /// `labeled` or `error`: a required label and a description (the error message when `error`).
+    kind: Option<String>,
     value: Option<String>,
     changes: Vec<String>,
 }
@@ -28,6 +31,7 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
             Scale::Desktop
         },
     );
+    let kind = a.kind.as_deref();
     let mut g = RadioGroup::new("g")
         .label("Pick one")
         .item("a", "Alpha")
@@ -44,6 +48,12 @@ fn view(a: &App, _: &mut Cx<App>) -> El {
             s.value = Some(v.to_string());
             s.changes.push(v.to_string());
         });
+    if let Some(k) = kind {
+        g = g
+            .required(true)
+            .description("Choose carefully")
+            .error(k == "error");
+    }
     if let Some(v) = &a.value {
         g = g.value(v.clone());
     }
@@ -83,8 +93,8 @@ fn focused_item(rt: &Runtime<App>) -> Option<char> {
 fn matches_oracle_gap_and_item_height() {
     let cases: Vec<Value> =
         serde_json::from_str(include_str!("fixtures/radio_group_scene.json")).unwrap();
-    assert_eq!(cases.len(), 16);
-    for c in &cases {
+    assert_eq!(cases.len(), 48);
+    for c in cases.iter().filter(|c| c.get("kind").is_none()) {
         let horizontal = c["orientation"] == "horizontal";
         let what = format!("{} {} {}", c["scale"], c["size"], c["orientation"]);
         let items = c["items"].as_array().unwrap();
@@ -124,6 +134,58 @@ fn matches_oracle_gap_and_item_height() {
             );
         }
         rt.frame(0.0);
+    }
+}
+
+#[test]
+fn label_options_and_help_text_sit_where_the_oracle_puts_them() {
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/radio_group_scene.json")).unwrap();
+    for c in cases.iter().filter(|c| c.get("kind").is_some()) {
+        let what = format!(
+            "{} {} {} {}",
+            c["scale"], c["size"], c["orientation"], c["kind"]
+        );
+        let rt = runtime(App {
+            mobile: c["scale"] == "mobile",
+            size: match c["size"].as_str().unwrap() {
+                "s" => Size::S,
+                "m" => Size::M,
+                "l" => Size::L,
+                _ => Size::XL,
+            },
+            horizontal: c["orientation"] == "horizontal",
+            kind: c["kind"].as_str().map(str::to_owned),
+            ..App::default()
+        });
+        let root = el(&rt, "g").unwrap().target;
+        let near = |got: f32, want: &Value, what2: &str| {
+            let w = want.as_f64().unwrap() as f32;
+            assert!(
+                (got - w).abs() <= 1.0,
+                "{what}: {what2}: got {got}, want {w}"
+            );
+        };
+        near(root[3], &c["container"]["h"], "container h");
+        let label = el(&rt, "g/field-label/container").unwrap().target;
+        near(label[1] - root[1], &c["label"]["y"], "label y");
+        near(label[3], &c["label"]["h"], "label h");
+        let options = el(&rt, "g/options").unwrap().target;
+        near(options[1] - root[1], &c["options"]["y"], "options y");
+        near(options[3], &c["options"]["h"], "options h");
+        let help = el(&rt, "g/help-text/container").unwrap().target;
+        near(help[1] - root[1], &c["help"]["y"], "help y");
+        near(help[3], &c["help"]["h"], "help h");
+        assert_eq!(
+            el(&rt, "g/field-label/necessity-indicator").is_some(),
+            c["indicator"].as_bool().unwrap(),
+            "{what}: asterisk"
+        );
+        assert_eq!(
+            el(&rt, "g/help-text/icon").is_some(),
+            c["help_icon"].as_bool().unwrap(),
+            "{what}: help icon"
+        );
     }
 }
 
