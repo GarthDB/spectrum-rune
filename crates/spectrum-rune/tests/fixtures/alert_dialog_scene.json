@@ -1,0 +1,470 @@
+[
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "variant": "confirmation",
+    "container": {
+      "w": 512.0,
+      "h": 180.6,
+      "radius": 16.0,
+      "fill": "255,255,255"
+    },
+    "header": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6
+    },
+    "title": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "19,19,19"
+    },
+    "description": {
+      "x": 32,
+      "y": 76.6,
+      "h": 24.0,
+      "size": 16.0,
+      "color": "41,41,41"
+    },
+    "footer": {
+      "y": 116.6,
+      "h": 32.0
+    },
+    "group_right_inset": 32
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "variant": "warning",
+    "container": {
+      "w": 512.0,
+      "h": 180.6,
+      "radius": 16.0,
+      "fill": "255,255,255"
+    },
+    "header": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6
+    },
+    "title": {
+      "x": 58,
+      "y": 32,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "19,19,19"
+    },
+    "description": {
+      "x": 32,
+      "y": 76.6,
+      "h": 24.0,
+      "size": 16.0,
+      "color": "41,41,41"
+    },
+    "footer": {
+      "y": 116.6,
+      "h": 32.0
+    },
+    "group_right_inset": 32,
+    "icon": {
+      "x": 32,
+      "y": 37.3,
+      "w": 18.0,
+      "color": "212,91,0"
+    }
+  },
+  {
+    "scheme": "light",
+    "scale": "desktop",
+    "variant": "error",
+    "container": {
+      "w": 512.0,
+      "h": 180.6,
+      "radius": 16.0,
+      "fill": "255,255,255"
+    },
+    "header": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6
+    },
+    "title": {
+      "x": 58,
+      "y": 32,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "19,19,19"
+    },
+    "description": {
+      "x": 32,
+      "y": 76.6,
+      "h": 24.0,
+      "size": 16.0,
+      "color": "41,41,41"
+    },
+    "footer": {
+      "y": 116.6,
+      "h": 32.0
+    },
+    "group_right_inset": 32,
+    "icon": {
+      "x": 32,
+      "y": 37.3,
+      "w": 18.0,
+      "color": "240,56,35"
+    }
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "variant": "confirmation",
+    "container": {
+      "w": 512.0,
+      "h": 176.7,
+      "radius": 16.0,
+      "fill": "255,255,255"
+    },
+    "header": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003
+    },
+    "title": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003,
+      "size": 24.0,
+      "color": "19,19,19"
+    },
+    "description": {
+      "x": 24,
+      "y": 71.2,
+      "h": 25.5,
+      "size": 17.0,
+      "color": "41,41,41"
+    },
+    "footer": {
+      "y": 112.7,
+      "h": 40.0
+    },
+    "group_right_inset": 24
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "variant": "warning",
+    "container": {
+      "w": 512.0,
+      "h": 176.7,
+      "radius": 16.0,
+      "fill": "255,255,255"
+    },
+    "header": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003
+    },
+    "title": {
+      "x": 56,
+      "y": 24,
+      "h": 31.200000000000003,
+      "size": 24.0,
+      "color": "19,19,19"
+    },
+    "description": {
+      "x": 24,
+      "y": 71.2,
+      "h": 25.5,
+      "size": 17.0,
+      "color": "41,41,41"
+    },
+    "footer": {
+      "y": 112.7,
+      "h": 40.0
+    },
+    "group_right_inset": 24,
+    "icon": {
+      "x": 24,
+      "y": 27.6,
+      "w": 24.0,
+      "color": "212,91,0"
+    }
+  },
+  {
+    "scheme": "light",
+    "scale": "mobile",
+    "variant": "error",
+    "container": {
+      "w": 512.0,
+      "h": 176.7,
+      "radius": 16.0,
+      "fill": "255,255,255"
+    },
+    "header": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003
+    },
+    "title": {
+      "x": 56,
+      "y": 24,
+      "h": 31.200000000000003,
+      "size": 24.0,
+      "color": "19,19,19"
+    },
+    "description": {
+      "x": 24,
+      "y": 71.2,
+      "h": 25.5,
+      "size": 17.0,
+      "color": "41,41,41"
+    },
+    "footer": {
+      "y": 112.7,
+      "h": 40.0
+    },
+    "group_right_inset": 24,
+    "icon": {
+      "x": 24,
+      "y": 27.6,
+      "w": 24.0,
+      "color": "240,56,35"
+    }
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "variant": "confirmation",
+    "container": {
+      "w": 512.0,
+      "h": 180.6,
+      "radius": 16.0,
+      "fill": "34,34,34"
+    },
+    "header": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6
+    },
+    "title": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "242,242,242"
+    },
+    "description": {
+      "x": 32,
+      "y": 76.6,
+      "h": 24.0,
+      "size": 16.0,
+      "color": "219,219,219"
+    },
+    "footer": {
+      "y": 116.6,
+      "h": 32.0
+    },
+    "group_right_inset": 32
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "variant": "warning",
+    "container": {
+      "w": 512.0,
+      "h": 180.6,
+      "radius": 16.0,
+      "fill": "34,34,34"
+    },
+    "header": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6
+    },
+    "title": {
+      "x": 58,
+      "y": 32,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "242,242,242"
+    },
+    "description": {
+      "x": 32,
+      "y": 76.6,
+      "h": 24.0,
+      "size": 16.0,
+      "color": "219,219,219"
+    },
+    "footer": {
+      "y": 116.6,
+      "h": 32.0
+    },
+    "group_right_inset": 32,
+    "icon": {
+      "x": 32,
+      "y": 37.3,
+      "w": 18.0,
+      "color": "224,100,0"
+    }
+  },
+  {
+    "scheme": "dark",
+    "scale": "desktop",
+    "variant": "error",
+    "container": {
+      "w": 512.0,
+      "h": 180.6,
+      "radius": 16.0,
+      "fill": "34,34,34"
+    },
+    "header": {
+      "x": 32,
+      "y": 32,
+      "h": 28.6
+    },
+    "title": {
+      "x": 58,
+      "y": 32,
+      "h": 28.6,
+      "size": 22.0,
+      "color": "242,242,242"
+    },
+    "description": {
+      "x": 32,
+      "y": 76.6,
+      "h": 24.0,
+      "size": 16.0,
+      "color": "219,219,219"
+    },
+    "footer": {
+      "y": 116.6,
+      "h": 32.0
+    },
+    "group_right_inset": 32,
+    "icon": {
+      "x": 32,
+      "y": 37.3,
+      "w": 18.0,
+      "color": "252,67,46"
+    }
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "variant": "confirmation",
+    "container": {
+      "w": 512.0,
+      "h": 176.7,
+      "radius": 16.0,
+      "fill": "34,34,34"
+    },
+    "header": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003
+    },
+    "title": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003,
+      "size": 24.0,
+      "color": "242,242,242"
+    },
+    "description": {
+      "x": 24,
+      "y": 71.2,
+      "h": 25.5,
+      "size": 17.0,
+      "color": "219,219,219"
+    },
+    "footer": {
+      "y": 112.7,
+      "h": 40.0
+    },
+    "group_right_inset": 24
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "variant": "warning",
+    "container": {
+      "w": 512.0,
+      "h": 176.7,
+      "radius": 16.0,
+      "fill": "34,34,34"
+    },
+    "header": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003
+    },
+    "title": {
+      "x": 56,
+      "y": 24,
+      "h": 31.200000000000003,
+      "size": 24.0,
+      "color": "242,242,242"
+    },
+    "description": {
+      "x": 24,
+      "y": 71.2,
+      "h": 25.5,
+      "size": 17.0,
+      "color": "219,219,219"
+    },
+    "footer": {
+      "y": 112.7,
+      "h": 40.0
+    },
+    "group_right_inset": 24,
+    "icon": {
+      "x": 24,
+      "y": 27.6,
+      "w": 24.0,
+      "color": "224,100,0"
+    }
+  },
+  {
+    "scheme": "dark",
+    "scale": "mobile",
+    "variant": "error",
+    "container": {
+      "w": 512.0,
+      "h": 176.7,
+      "radius": 16.0,
+      "fill": "34,34,34"
+    },
+    "header": {
+      "x": 24,
+      "y": 24,
+      "h": 31.200000000000003
+    },
+    "title": {
+      "x": 56,
+      "y": 24,
+      "h": 31.200000000000003,
+      "size": 24.0,
+      "color": "242,242,242"
+    },
+    "description": {
+      "x": 24,
+      "y": 71.2,
+      "h": 25.5,
+      "size": 17.0,
+      "color": "219,219,219"
+    },
+    "footer": {
+      "y": 112.7,
+      "h": 40.0
+    },
+    "group_right_inset": 24,
+    "icon": {
+      "x": 24,
+      "y": 27.6,
+      "w": 24.0,
+      "color": "252,67,46"
+    }
+  }
+]
