@@ -14,7 +14,9 @@ use spectrum_rune::checkbox::Checkbox;
 use spectrum_rune::clear_button::ClearButton;
 use spectrum_rune::constraints::{check, OptionValue, Severity};
 use spectrum_rune::divider::{self, Divider};
+use spectrum_rune::field_label::{FieldLabel, NecessityIndicator};
 use spectrum_rune::font;
+use spectrum_rune::help_text::{self, HelpText};
 use spectrum_rune::icons::{ADD_100, CHECKMARK_100};
 use spectrum_rune::link::{self, Link};
 use spectrum_rune::menu::{Menu, MenuItem, Selection};
@@ -96,6 +98,8 @@ stories! {
     "segmented-control" => "Segmented control", segmented_control;
     "alert-dialog" => "Alert dialog", alert_dialog;
     "standard-dialog" => "Standard dialog", standard_dialog;
+    "field-label" => "Field label", field_label;
+    "help-text" => "Help text", help_text;
     "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
@@ -438,6 +442,62 @@ fn standard_dialog(_: &G, t: &'static Tokens) -> El {
         ),
         section(t, "Large", dialog("l", DialogSize::L, false)),
     ])
+}
+
+fn field_label(_: &G, t: &'static Tokens) -> El {
+    let rows = SIZES.map(|(z, n)| {
+        flow().gap(24.0).children([
+            FieldLabel::new(format!("field-label/{n}"), "Name")
+                .size(z)
+                .build(t),
+            FieldLabel::new(format!("field-label/{n}-required"), "Name")
+                .size(z)
+                .required(true)
+                .build(t),
+            FieldLabel::new(format!("field-label/{n}-text"), "Name")
+                .size(z)
+                .required(true)
+                .necessity_indicator(NecessityIndicator::Text)
+                .build(t),
+            FieldLabel::new(format!("field-label/{n}-disabled"), "Name")
+                .size(z)
+                .disabled(true)
+                .build(t),
+        ])
+    });
+    page(vec![section(
+        t,
+        "Sizes: plain, required (asterisk), required with a text indicator (the oracle draws none), disabled",
+        col().gap(t.spacing_200).children(rows),
+    )])
+}
+
+fn help_text(_: &G, t: &'static Tokens) -> El {
+    let rows = SIZES.map(|(z, n)| {
+        flow().gap(24.0).children([
+            HelpText::new(format!("help-text/{n}"), "Enter a name")
+                .size(z)
+                .build(t),
+            HelpText::new(format!("help-text/{n}-negative"), "Name is required")
+                .size(z)
+                .variant(help_text::Variant::Negative)
+                .build(t),
+            HelpText::new(format!("help-text/{n}-hidden"), "Name is required")
+                .size(z)
+                .variant(help_text::Variant::Negative)
+                .hide_icon(true)
+                .build(t),
+            HelpText::new(format!("help-text/{n}-disabled"), "Enter a name")
+                .size(z)
+                .disabled(true)
+                .build(t),
+        ])
+    });
+    page(vec![section(
+        t,
+        "Sizes: neutral, negative, negative without the icon, disabled",
+        col().gap(t.spacing_200).children(rows),
+    )])
 }
 
 fn steplist(s: &G, t: &'static Tokens) -> El {
