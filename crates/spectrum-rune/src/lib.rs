@@ -43,6 +43,7 @@ pub mod side_navigation;
 pub mod size;
 pub mod status_light;
 pub mod switch;
+pub mod tabs;
 pub mod tag;
 pub mod tokens;
 pub mod tooltip;
