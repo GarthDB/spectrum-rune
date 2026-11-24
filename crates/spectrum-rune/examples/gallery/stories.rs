@@ -36,7 +36,7 @@ use spectrum_rune::steplist::{Step, StepState, Steplist};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tabs::{self, TabItem, Tabs};
 use spectrum_rune::tag::Tag;
-use spectrum_rune::text_field::{TextArea, TextField};
+use spectrum_rune::text_field::{SearchField, TextArea, TextField};
 use spectrum_rune::tokens::Tokens;
 use spectrum_rune::tooltip::{self, Tooltip};
 use spectrum_rune::{ActionButtonSize, Size};
@@ -103,6 +103,7 @@ stories! {
     "help-text" => "Help text", help_text;
     "text-field" => "Text field", text_field;
     "text-area" => "Text area", text_area;
+    "search-field" => "Search field", search_field;
     "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
@@ -526,6 +527,41 @@ fn text_area(s: &G, t: &'static Tokens) -> El {
         section(t, "Live (type, press Enter)", live),
         section(t, "Valid, error, disabled", states),
         section(t, "Sizes", sizes),
+    ])
+}
+
+fn search_field(s: &G, t: &'static Tokens) -> El {
+    // The first field is live: type to see the clear button, press it to empty the field.
+    let live = SearchField::new("search-field/live", &s.fields[3])
+        .label("Search")
+        .placeholder("Search")
+        .help_text("Type, then press the clear button")
+        .on_edit(|g: &mut G| &mut g.fields[3])
+        .build(t);
+    let states = flow().gap(24.0).children([
+        SearchField::new("search-field/value", &TextEdit::new("Ada"))
+            .label("Search")
+            .help_text("With text")
+            .clear_button(false)
+            .build(t),
+        SearchField::new("search-field/disabled", &TextEdit::new("Ada"))
+            .label("Search")
+            .disabled(true)
+            .help_text("Disabled")
+            .build(t),
+    ]);
+    let sizes = flow().gap(24.0).children(SIZES.map(|(z, n)| {
+        SearchField::new(format!("search-field/size-{n}"), &TextEdit::new(""))
+            .label("Search")
+            .size(z)
+            .placeholder("Search")
+            .help_text("Size")
+            .build(t)
+    }));
+    page(vec![
+        section(t, "Live", live),
+        section(t, "With text (no clear button), disabled", states),
+        section(t, "Sizes (placeholder)", sizes),
     ])
 }
 
