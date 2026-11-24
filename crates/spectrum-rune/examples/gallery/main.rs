@@ -77,7 +77,7 @@ pub struct G {
     pub scheme: Option<ColorScheme>,
     pub scale: Scale,
     /// The text fields' contents, by field.
-    pub fields: [TextEdit; 2],
+    pub fields: [TextEdit; 3],
 }
 
 impl G {
@@ -100,7 +100,11 @@ fn init() -> G {
         open: HashMap::new(),
         scheme: None,
         scale: Scale::Desktop,
-        fields: [TextEdit::new("Ada Lovelace"), TextEdit::new("")],
+        fields: [
+            TextEdit::new("Ada Lovelace"),
+            TextEdit::new(""),
+            TextEdit::new("First line\nSecond line"),
+        ],
     }
 }
 
