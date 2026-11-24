@@ -28,6 +28,7 @@ use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::segmented_control::{SegmentedControl, SegmentedItem};
 use spectrum_rune::side_navigation::{SideNavigation, SideNavigationItem};
+use spectrum_rune::standard_dialog::{DialogSize, StandardDialog};
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::steplist::{Step, StepState, Steplist};
 use spectrum_rune::switch::Switch;
@@ -94,6 +95,7 @@ stories! {
     "side-navigation" => "Side navigation", side_navigation;
     "segmented-control" => "Segmented control", segmented_control;
     "alert-dialog" => "Alert dialog", alert_dialog;
+    "standard-dialog" => "Standard dialog", standard_dialog;
     "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
@@ -398,6 +400,43 @@ fn alert_dialog(_: &G, t: &'static Tokens) -> El {
             "Error",
             dialog("error", "Delete file", alert_dialog::Variant::Error, true),
         ),
+    ])
+}
+
+fn standard_dialog(_: &G, t: &'static Tokens) -> El {
+    // The dialog is white like the page: sit it on a grey backdrop so its edge shows.
+    let dialog = |name: &str, size: DialogSize, check: bool| {
+        let mut d = StandardDialog::new(format!("standard-dialog/{name}"), "Rename file")
+            .description("Pick a new name for the file.")
+            .size(size)
+            .actions([
+                Button::new(format!("standard-dialog/{name}/cancel"))
+                    .label("Cancel")
+                    .variant(button::Variant::Secondary)
+                    .style(button::Style::Outline)
+                    .build(t),
+                Button::new(format!("standard-dialog/{name}/save"))
+                    .label("Save")
+                    .variant(button::Variant::Accent)
+                    .build(t),
+            ]);
+        if check {
+            d = d.footer_content(
+                Checkbox::new(format!("standard-dialog/{name}/check"))
+                    .label("Don't ask again")
+                    .build(t),
+            );
+        }
+        col().padding(16.0).fill(t.gray_200).child(d.build(t))
+    };
+    page(vec![
+        section(t, "Small", dialog("s", DialogSize::S, false)),
+        section(
+            t,
+            "Medium, with footer content",
+            dialog("m", DialogSize::M, true),
+        ),
+        section(t, "Large", dialog("l", DialogSize::L, false)),
     ])
 }
 
