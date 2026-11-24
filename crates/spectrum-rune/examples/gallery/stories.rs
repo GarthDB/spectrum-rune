@@ -36,7 +36,7 @@ use spectrum_rune::steplist::{Step, StepState, Steplist};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tabs::{self, TabItem, Tabs};
 use spectrum_rune::tag::Tag;
-use spectrum_rune::text_field::TextField;
+use spectrum_rune::text_field::{TextArea, TextField};
 use spectrum_rune::tokens::Tokens;
 use spectrum_rune::tooltip::{self, Tooltip};
 use spectrum_rune::{ActionButtonSize, Size};
@@ -102,6 +102,7 @@ stories! {
     "field-label" => "Field label", field_label;
     "help-text" => "Help text", help_text;
     "text-field" => "Text field", text_field;
+    "text-area" => "Text area", text_area;
     "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
@@ -486,6 +487,44 @@ fn text_field(s: &G, t: &'static Tokens) -> El {
     page(vec![
         section(t, "Live (type, select, copy)", live),
         section(t, "Empty and required, valid, error, disabled", states),
+        section(t, "Sizes", sizes),
+    ])
+}
+
+fn text_area(s: &G, t: &'static Tokens) -> El {
+    // The first area is live: Enter breaks the line and the field grows.
+    let live = TextArea::new("text-area/live", &s.fields[2])
+        .label("Notes")
+        .help_text("Enter adds a line")
+        .on_edit(|g: &mut G| &mut g.fields[2])
+        .build(t);
+    let states = flow().gap(24.0).children([
+        TextArea::new("text-area/valid", &TextEdit::new("Looks good"))
+            .label("Notes")
+            .valid(true)
+            .help_text("Saved")
+            .build(t),
+        TextArea::new("text-area/error", &TextEdit::new("Too short"))
+            .label("Notes")
+            .error(true)
+            .help_text("Write at least ten words")
+            .build(t),
+        TextArea::new("text-area/disabled", &TextEdit::new("Locked"))
+            .label("Notes")
+            .disabled(true)
+            .help_text("Read only")
+            .build(t),
+    ]);
+    let sizes = flow().gap(24.0).children(SIZES.map(|(z, n)| {
+        TextArea::new(format!("text-area/size-{n}"), &TextEdit::new("Hello"))
+            .label("Notes")
+            .size(z)
+            .help_text("Size")
+            .build(t)
+    }));
+    page(vec![
+        section(t, "Live (type, press Enter)", live),
+        section(t, "Valid, error, disabled", states),
         section(t, "Sizes", sizes),
     ])
 }

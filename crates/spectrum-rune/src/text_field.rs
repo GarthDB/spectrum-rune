@@ -38,7 +38,14 @@ pub struct TextField {
     error: bool,
     valid: bool,
     disabled: bool,
+    /// The text area: a multi-line editor, a minimum height, vertical padding, the checkmark at the top.
+    pub(crate) area: Option<AreaOptions>,
     binds: Vec<Bind>,
+}
+
+#[derive(Clone, Copy, Default)]
+pub(crate) struct AreaOptions {
+    pub(crate) min_height: Option<f32>,
 }
 
 impl TextField {
@@ -55,6 +62,7 @@ impl TextField {
             error: false,
             valid: false,
             disabled: false,
+            area: None,
             binds: Vec::new(),
         }
     }
@@ -105,30 +113,34 @@ impl TextField {
     }
 
     pub fn build(self, t: &Tokens) -> El {
-        let (width, height, pad, radius) = match self.size {
+        let (width, height, pad, radius, pad_y) = match self.size {
             Size::S => (
                 t.field_width_small,
                 t.base_height_small,
                 t.base_padding_horizontal_small,
                 t.corner_radius_medium_size_small,
+                t.base_padding_vertical_small,
             ),
             Size::M => (
                 t.field_width_medium,
                 t.base_height_medium,
                 t.base_padding_horizontal_medium,
                 t.corner_radius_medium_size_medium,
+                t.base_padding_vertical_medium,
             ),
             Size::L => (
                 t.field_width_large,
                 t.base_height_large,
                 t.base_padding_horizontal_large,
                 t.corner_radius_medium_size_large,
+                t.base_padding_vertical_large,
             ),
             Size::XL => (
                 t.field_width_extra_large,
                 t.base_height_extra_large,
                 t.base_padding_horizontal_extra_large,
                 t.corner_radius_medium_size_extra_large,
+                t.base_padding_vertical_extra_large,
             ),
         };
         let part = |name: &str| format!("{}/{name}", self.key);
@@ -160,9 +172,11 @@ impl TextField {
             Size::L => t.component_l_regular,
             Size::XL => t.component_xl_regular,
         });
-        let mut value = text_input(&self.edit, style)
-            .key(part("value"))
-            .single_line()
+        let mut value = text_input(&self.edit, style).key(part("value"));
+        if self.area.is_none() {
+            value = value.single_line();
+        }
+        let mut value = value
             .grow(1.0)
             .color(ink)
             .group_color(ink_hover)
@@ -181,9 +195,7 @@ impl TextField {
         }
         let mut field = row()
             .key(field_key)
-            .h(height)
             .px(pad)
-            .center_y()
             .radius(radius)
             .fill(t.gray_25)
             .border(t.border_width_200, stroke)
@@ -194,6 +206,13 @@ impl TextField {
                 t.focus_indicator_color,
             )
             .child(value);
+        field = match self.area {
+            Some(a) => field
+                .min_h(a.min_height.unwrap_or(height))
+                .py(pad_y)
+                .items_start(),
+            None => field.h(height).center_y(),
+        };
         if self.valid && !self.error && !self.disabled {
             field = field.child(
                 icon(&CHECKMARK_100, 16.0)
@@ -230,5 +249,67 @@ impl TextField {
             );
         }
         c
+    }
+}
+
+/// Spectrum Text area: the [`TextField`] as a multi-line editor, from `design-data` visuals/text-area.json. The field is at
+/// least the size's height and grows with the text; its text wraps, with `base-padding-vertical-*` above and below, and the
+/// valid checkmark sits at its top. Everything else (label, help text, states, the editor) is the text field's.
+///
+/// Limits, the oracle's: it draws a single line, truncated, and ignores the `height` option, so only the empty or one-line
+/// field is verified; the wrapped, growing field is Rune's layout, unverified. No drag handle (`hideDragIcon`), character
+/// count, input types or placeholder.
+pub struct TextArea(TextField);
+
+impl TextArea {
+    /// `key` must be unique per instance; the parts are the text field's (`{key}/field`, `{key}/value`, ...).
+    pub fn new(key: impl Into<String>, edit: &TextEdit) -> Self {
+        let mut f = TextField::new(key, edit);
+        f.area = Some(AreaOptions::default());
+        TextArea(f)
+    }
+    pub fn label(self, l: impl Into<String>) -> Self {
+        TextArea(self.0.label(l))
+    }
+    pub fn help_text(self, h: impl Into<String>) -> Self {
+        TextArea(self.0.help_text(h))
+    }
+    pub fn size(self, s: Size) -> Self {
+        TextArea(self.0.size(s))
+    }
+    pub fn required(self, v: bool) -> Self {
+        TextArea(self.0.required(v))
+    }
+    pub fn error(self, v: bool) -> Self {
+        TextArea(self.0.error(v))
+    }
+    pub fn valid(self, v: bool) -> Self {
+        TextArea(self.0.valid(v))
+    }
+    pub fn disabled(self, v: bool) -> Self {
+        TextArea(self.0.disabled(v))
+    }
+    /// The field's minimum height, instead of the size's (the oracle ignores it).
+    pub fn height(mut self, h: f32) -> Self {
+        self.0.area = Some(AreaOptions {
+            min_height: Some(h),
+        });
+        self
+    }
+    /// Routes edits to the app's [`TextEdit`]; Enter then breaks the line (Rune's plain Return submits unless told otherwise).
+    pub fn on_edit<S: 'static>(
+        mut self,
+        f: impl for<'a> Fn(&'a mut S) -> &'a mut TextEdit + Clone + 'static,
+    ) -> Self {
+        let g = f.clone();
+        self.0 = self.0.on_edit(f);
+        self.0.binds.push(Rc::new(move |e: El| {
+            let g = g.clone();
+            e.on_submit(move |s: &mut S, _| g(s).insert("\n"))
+        }));
+        self
+    }
+    pub fn build(self, t: &Tokens) -> El {
+        self.0.build(t)
     }
 }
