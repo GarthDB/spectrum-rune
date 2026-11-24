@@ -6,6 +6,8 @@
 //! (`.on_edit(|s: &mut App| &mut s.name)`), so selection, caret, clipboard, IME and undo are Rune's. Enter calls
 //! [`TextField::on_submit`].
 //!
+//! ([`SearchField`] and [`TextArea`], below, are this field as a pill with a leading search icon and as a multi-line editor.)
+//!
 //! Built: the four sizes (`S` to `XL`), the label (with the required asterisk) and help text, `error` (the negative border and
 //! help text), the `valid` checkmark (shown when not in error), `disabled`, hover (the stronger border and the hover text
 //! colour) and keyboard focus (the focus ring around the field, the focus text colour; Rune also draws it on pointer focus,
@@ -16,10 +18,11 @@
 //! Verification: geometry, type and colours against the oracle (`tests/text_field.rs`), the border and the focus ring from
 //! pixels; text widths follow the installed font, so only heights, offsets and colours are compared.
 
+use crate::clear_button::ClearButton;
 use crate::field_label::FieldLabel;
 use crate::font;
 use crate::help_text::{HelpText, Variant};
-use crate::icons::CHECKMARK_100;
+use crate::icons::{CHECKMARK_100, WORKFLOW_SEARCH};
 use crate::interaction::{Interaction, State};
 use crate::tokens::Tokens;
 use crate::Size;
@@ -40,7 +43,16 @@ pub struct TextField {
     disabled: bool,
     /// The text area: a multi-line editor, a minimum height, vertical padding, the checkmark at the top.
     pub(crate) area: Option<AreaOptions>,
+    /// The search field: a pill with a leading search icon, a placeholder and a clear button.
+    pub(crate) search: Option<SearchOptions>,
     binds: Vec<Bind>,
+}
+
+#[derive(Default)]
+pub(crate) struct SearchOptions {
+    placeholder: Option<String>,
+    clear_button: bool,
+    clear: Option<Rc<dyn Fn(ClearButton) -> ClearButton>>,
 }
 
 #[derive(Clone, Copy, Default)]
@@ -63,6 +75,7 @@ impl TextField {
             valid: false,
             disabled: false,
             area: None,
+            search: None,
             binds: Vec::new(),
         }
     }
@@ -113,7 +126,7 @@ impl TextField {
     }
 
     pub fn build(self, t: &Tokens) -> El {
-        let (width, height, pad, radius, pad_y) = match self.size {
+        let (mut width, height, pad, mut radius, pad_y) = match self.size {
             Size::S => (
                 t.field_width_small,
                 t.base_height_small,
@@ -143,6 +156,21 @@ impl TextField {
                 t.base_padding_vertical_extra_large,
             ),
         };
+        let (glyph, icon_gap) = match self.size {
+            Size::S => (t.workflow_icon_small, t.base_gap_small),
+            Size::M => (t.workflow_icon_medium, t.base_gap_medium),
+            Size::L => (t.workflow_icon_large, t.base_gap_large),
+            Size::XL => (t.workflow_icon_extra_large, t.base_gap_extra_large),
+        };
+        if self.search.is_some() {
+            width = match self.size {
+                Size::S => t.width_field_75,
+                Size::M => t.width_field_100,
+                Size::L => t.width_field_200,
+                Size::XL => t.width_field_300,
+            };
+            radius = height / 2.0;
+        }
         let part = |name: &str| format!("{}/{name}", self.key);
         let field_key = part("field");
         let interaction = Interaction::of(&field_key);
@@ -185,6 +213,16 @@ impl TextField {
                 t.accent_background_color_default.alpha(0.3),
             )
             .disabled(self.disabled);
+        if let Some(p) = self.search.as_ref().and_then(|o| o.placeholder.clone()) {
+            value = value.placeholder(
+                p,
+                if self.disabled {
+                    t.disabled_content_color
+                } else {
+                    t.gray_600
+                },
+            );
+        }
         if let Some(l) = &self.label {
             value = value.label(l.clone());
         }
@@ -205,7 +243,28 @@ impl TextField {
                 t.focus_ring_gap,
                 t.focus_indicator_color,
             )
-            .child(value);
+            .gap(if self.search.is_some() { icon_gap } else { 0.0 });
+        if self.search.is_some() {
+            field = field.child(
+                icon(&WORKFLOW_SEARCH, glyph)
+                    .key(part("leading-icon"))
+                    .color(if self.disabled {
+                        t.disabled_content_color
+                    } else {
+                        t.gray_600
+                    })
+                    .a11y_hidden(),
+            );
+        }
+        field = field.child(value);
+        if let Some(o) = &self.search {
+            if o.clear_button && !self.disabled && !self.edit.text.is_empty() {
+                if let Some(c) = &o.clear {
+                    field = field
+                        .child(c(ClearButton::new(part("clear-button")).size(self.size)).build(t));
+                }
+            }
+        }
         field = match self.area {
             Some(a) => field
                 .min_h(a.min_height.unwrap_or(height))
@@ -308,6 +367,75 @@ impl TextArea {
             e.on_submit(move |s: &mut S, _| g(s).insert("\n"))
         }));
         self
+    }
+    pub fn build(self, t: &Tokens) -> El {
+        self.0.build(t)
+    }
+}
+
+/// Spectrum Search field: the [`TextField`] as a pill with a leading search icon and a placeholder, from `design-data`
+/// visuals/search-field.json (the label and help text are the text field's). The field is `corner-radius-full` (half its
+/// height), `width-field-*` wide, the icon and the placeholder in `gray-600`; hover and keyboard focus are the text field's.
+///
+/// With [`SearchField::on_edit`] a [`ClearButton`] appears at the field's end while there is text, and clears it. The recipe
+/// has no clear button, so its placement is unverified (the oracle test turns it off with `clear_button(false)`). No valid or
+/// error state, as in the recipe.
+pub struct SearchField(TextField);
+
+impl SearchField {
+    /// `key` must be unique per instance; the parts are the text field's plus `{key}/leading-icon`.
+    pub fn new(key: impl Into<String>, edit: &TextEdit) -> Self {
+        let mut f = TextField::new(key, edit);
+        f.search = Some(SearchOptions {
+            clear_button: true,
+            ..SearchOptions::default()
+        });
+        SearchField(f)
+    }
+    pub fn label(self, l: impl Into<String>) -> Self {
+        SearchField(self.0.label(l))
+    }
+    pub fn help_text(self, h: impl Into<String>) -> Self {
+        SearchField(self.0.help_text(h))
+    }
+    pub fn size(self, s: Size) -> Self {
+        SearchField(self.0.size(s))
+    }
+    pub fn disabled(self, v: bool) -> Self {
+        SearchField(self.0.disabled(v))
+    }
+    /// Shown while the field is empty.
+    pub fn placeholder(mut self, p: impl Into<String>) -> Self {
+        if let Some(o) = self.0.search.as_mut() {
+            o.placeholder = Some(p.into());
+        }
+        self
+    }
+    /// Whether the clear button shows while there is text (on by default; it needs [`Self::on_edit`]).
+    pub fn clear_button(mut self, v: bool) -> Self {
+        if let Some(o) = self.0.search.as_mut() {
+            o.clear_button = v;
+        }
+        self
+    }
+    /// Routes edits to the app's [`TextEdit`]; the clear button empties it.
+    pub fn on_edit<S: 'static>(
+        mut self,
+        f: impl for<'a> Fn(&'a mut S) -> &'a mut TextEdit + Clone + 'static,
+    ) -> Self {
+        let g = f.clone();
+        self.0 = self.0.on_edit(f);
+        if let Some(o) = self.0.search.as_mut() {
+            o.clear = Some(Rc::new(move |b: ClearButton| {
+                let g = g.clone();
+                b.on_press(move |s: &mut S| g(s).clear())
+            }));
+        }
+        self
+    }
+    /// Called on Enter.
+    pub fn on_submit<S: 'static>(self, f: impl Fn(&mut S, &mut Tx) + Clone + 'static) -> Self {
+        SearchField(self.0.on_submit(f))
     }
     pub fn build(self, t: &Tokens) -> El {
         self.0.build(t)
