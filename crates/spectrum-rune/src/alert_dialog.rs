@@ -39,7 +39,7 @@ pub struct AlertDialog {
 }
 
 /// Whether `t` is the touch scale's token set (its type is larger): the recipe picks different tokens there.
-fn touch(t: &Tokens) -> bool {
+pub(crate) fn touch(t: &Tokens) -> bool {
     t.font_size_100 > tokens(ColorScheme::Light, Scale::Desktop).font_size_100
 }
 

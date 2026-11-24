@@ -43,6 +43,7 @@ pub mod radio_group;
 pub mod segmented_control;
 pub mod side_navigation;
 pub mod size;
+pub mod standard_dialog;
 pub mod status_light;
 pub mod steplist;
 pub mod switch;
