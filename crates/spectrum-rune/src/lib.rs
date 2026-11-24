@@ -39,6 +39,7 @@ pub mod progress_bar;
 pub mod progress_circle;
 pub mod radio_button;
 pub mod radio_group;
+pub mod segmented_control;
 pub mod side_navigation;
 pub mod size;
 pub mod status_light;

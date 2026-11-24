@@ -25,6 +25,7 @@ use spectrum_rune::progress_bar::ProgressBar;
 use spectrum_rune::progress_circle::ProgressCircle;
 use spectrum_rune::radio_button::RadioButton;
 use spectrum_rune::radio_group::{Orientation, RadioGroup};
+use spectrum_rune::segmented_control::{SegmentedControl, SegmentedItem};
 use spectrum_rune::side_navigation::{SideNavigation, SideNavigationItem};
 use spectrum_rune::status_light::{self, StatusLight};
 use spectrum_rune::switch::Switch;
@@ -89,6 +90,7 @@ stories! {
     "tag" => "Tag", tag;
     "clear-button" => "Clear button", clear_button;
     "side-navigation" => "Side navigation", side_navigation;
+    "segmented-control" => "Segmented control", segmented_control;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
@@ -336,6 +338,46 @@ fn tag(s: &G, t: &'static Tokens) -> El {
         section(t, "Looks (static)", looks),
         section(t, "Interactive: hover, press, Tab to focus", live),
     ])
+}
+
+fn segmented_control(s: &G, t: &'static Tokens) -> El {
+    use spectrum_rune::icons::{WORKFLOW_ADD, WORKFLOW_EDIT, WORKFLOW_SEARCH, WORKFLOW_SETTINGS};
+    // The selected item is the one last pressed (kept in `picked`); the third is disabled.
+    let bar = |key: &str, size: Size| {
+        let current = s
+            .picked
+            .get(key)
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(0);
+        let k = key.to_owned();
+        let items = [
+            ("Search", &WORKFLOW_SEARCH, false),
+            ("Edit", &WORKFLOW_EDIT, false),
+            ("Add", &WORKFLOW_ADD, true),
+            ("Settings", &WORKFLOW_SETTINGS, false),
+        ];
+        let mut b = SegmentedControl::new(format!("segmented-control/{key}"))
+            .size(size)
+            .on_select(move |g: &mut G, i| {
+                g.picked.insert(k.clone(), i.to_string());
+            });
+        for (i, (label, ic, disabled)) in items.into_iter().enumerate() {
+            b = b.item(
+                SegmentedItem::new(label)
+                    .icon(ic)
+                    .selected(i == current)
+                    .disabled(disabled),
+            );
+        }
+        b.build(t)
+    };
+    page(vec![section(
+        t,
+        "Sizes (press an item; arrow keys move and select)",
+        col()
+            .gap(t.spacing_200)
+            .children(SIZES.map(|(z, n)| bar(&format!("size-{n}"), z))),
+    )])
 }
 
 fn tabs(s: &G, t: &'static Tokens) -> El {
