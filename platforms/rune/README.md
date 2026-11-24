@@ -28,5 +28,7 @@ No token overrides: every value comes from the foundation.
 
 - Where Rune cannot draw what a recipe says (focus-visible stroke colour, hover-vs-focus precedence, busy state, font
   family) the manifest has nowhere to say so; those are tracked in beads (a14.14, wav), not in the manifest.
-- `RadioGroup` is checked for gap and item geometry only: the fixture's radio buttons carry no label (data 4.4.0's
-  `with.label` could add them, not done), and the recipe's field label and help text are not built.
+- `RadioGroup` is checked for gap and item geometry and, with a label and a description, for where the field label, the
+  options and the help text sit (data 4.5.0 nests them); the fixture's radio buttons carry no label (`with.label` could add
+  them, not done). A group without a label or description draws neither, where the oracle draws an empty label and help
+  text's height.

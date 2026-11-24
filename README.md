@@ -39,7 +39,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Breadcrumbs (a trail of links; sizes m and l, chevron separators; no collapsed menu) | `breadcrumbs` | the pressed index (`on_navigate`) |
 | Tooltip (label on a surface with a tip; hover to show via `Tooltip::bind`, or `anchor` to a trigger) | `tooltip` | none (the app shows it) |
 | Popover (surface and tip; six placements, optional `anchor` to a trigger) | `popover` | none (the app shows it; `on_dismiss` on Escape) |
-| Radio group | `radio_group` | `value` |
+| Radio group (a field label with the required asterisk, the options, a description or error message) | `radio_group` | `value` |
 | Accordion item (one item) | `accordion` | `open` |
 | Accordion (a group of items; single or multiple) | `accordion_group` | the open set |
 

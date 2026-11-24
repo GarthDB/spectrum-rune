@@ -1131,7 +1131,36 @@ fn radio_group(s: &G, t: &'static Tokens) -> El {
         }
         g.build(t)
     };
+    let states = flow().gap(24.0).children([
+        RadioGroup::new("radio-group/required")
+            .label("Fruit")
+            .required(true)
+            .description("Pick one")
+            .item("apple", "Apple")
+            .item("pear", "Pear")
+            .build(t),
+        RadioGroup::new("radio-group/error")
+            .label("Fruit")
+            .required(true)
+            .error(true)
+            .description("Choose a fruit to continue")
+            .item("apple", "Apple")
+            .item("pear", "Pear")
+            .build(t),
+        RadioGroup::new("radio-group/disabled")
+            .label("Fruit")
+            .disabled(true)
+            .description("Not available")
+            .item("apple", "Apple")
+            .item("pear", "Pear")
+            .build(t),
+    ]);
     page(vec![
+        section(
+            t,
+            "Required with a description, error message, disabled",
+            states,
+        ),
         section(
             t,
             "Vertical (no gap: the radio buttons' height spaces them)",

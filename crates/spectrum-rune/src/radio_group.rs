@@ -4,10 +4,16 @@
 //! keys and a radio takes its press on arrival, so an arrow moves the selection; `focus_selected` makes
 //! Tab land on the selected item.
 //!
-//! Verification: the gap and item heights against the oracle (`tests/radio_group.rs`); keyboard
-//! behaviour in the same test. Not drawn: the group label (the recipe draws a field label, not built here; it is the accessible
-//! name only), description, required and error message.
+//! Above the options sits the group's [`FieldLabel`] (the label, with the required asterisk), below them its [`HelpText`]
+//! (the description, or in the error state the error message, negative with the alert icon), both as the recipe nests
+//! them. [`RadioGroup::hide_label`] keeps the label as the accessible name only. A group without a label or a
+//! description draws neither (the oracle draws an empty label and help text's height anyway).
+//!
+//! Verification: the gap and item heights, and the label, options and help text offsets, against the oracle
+//! (`tests/radio_group.rs`); keyboard behaviour in the same test.
 
+use crate::field_label::FieldLabel;
+use crate::help_text::{HelpText, Variant};
 use crate::radio_button::RadioButton;
 use crate::size::Size;
 use crate::tokens::Tokens;
@@ -32,6 +38,10 @@ pub struct RadioGroup {
     orientation: Orientation,
     emphasized: bool,
     disabled: bool,
+    hide_label: bool,
+    required: bool,
+    error: bool,
+    description: Option<String>,
     change: Option<Change>,
 }
 
@@ -47,12 +57,36 @@ impl RadioGroup {
             orientation: Orientation::Vertical,
             emphasized: false,
             disabled: false,
+            hide_label: false,
+            required: false,
+            error: false,
+            description: None,
             change: None,
         }
     }
-    /// The group's accessible name. Always set one.
+    /// The group's label, shown above the options (and its accessible name). Always set one; see [`Self::hide_label`].
     pub fn label(mut self, l: impl Into<String>) -> Self {
         self.label = Some(l.into());
+        self
+    }
+    /// Keeps the label as the accessible name only.
+    pub fn hide_label(mut self, v: bool) -> Self {
+        self.hide_label = v;
+        self
+    }
+    /// An asterisk after the label.
+    pub fn required(mut self, v: bool) -> Self {
+        self.required = v;
+        self
+    }
+    /// The text under the options.
+    pub fn description(mut self, d: impl Into<String>) -> Self {
+        self.description = Some(d.into());
+        self
+    }
+    /// The error state: the description is the error message, negative with the alert icon.
+    pub fn error(mut self, v: bool) -> Self {
+        self.error = v;
         self
     }
     /// An option: `value` identifies it (unique in the group), `label` is shown.
@@ -103,17 +137,20 @@ impl RadioGroup {
             Orientation::Vertical => 0.0,
             Orientation::Horizontal => t.spacing_300,
         };
-        let mut root = match self.orientation {
+        let mut options = match self.orientation {
             Orientation::Vertical => col(),
             Orientation::Horizontal => row(),
         }
-        .key(self.key.clone())
+        .key(format!("{}/options", self.key))
         .role("radiogroup")
         .focus_group()
         .gap(gap)
         .disabled(self.disabled);
         if let Some(l) = &self.label {
-            root = root.label(l.clone());
+            options = options.label(l.clone());
+        }
+        if let Some(d) = &self.description {
+            options = options.description(d.clone());
         }
         let n = self.items.len();
         for (i, (value, label)) in self.items.iter().enumerate() {
@@ -127,10 +164,34 @@ impl RadioGroup {
             if let Some(c) = &self.change {
                 rb = c(rb, value.clone());
             }
-            root = root.child(
+            options = options.child(
                 rb.build(t)
                     .focus_selected(selected)
                     .position_in_set(i + 1, n),
+            );
+        }
+        let mut root = col().key(self.key.clone());
+        if let (Some(l), false) = (&self.label, self.hide_label) {
+            root = root.child(
+                FieldLabel::new(format!("{}/field-label", self.key), l.clone())
+                    .size(self.size)
+                    .required(self.required)
+                    .disabled(self.disabled)
+                    .build(t),
+            );
+        }
+        root = root.child(options);
+        if let Some(d) = &self.description {
+            root = root.child(
+                HelpText::new(format!("{}/help-text", self.key), d.clone())
+                    .size(self.size)
+                    .variant(if self.error {
+                        Variant::Negative
+                    } else {
+                        Variant::Neutral
+                    })
+                    .disabled(self.disabled)
+                    .build(t),
             );
         }
         root
