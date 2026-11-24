@@ -21,6 +21,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Picker (the closed field; its menu is `PickerMenu`, a `Menu` in a modal `Popover` under it) | `picker`, `picker_menu` | `value`, `open` (calls `on_open`); the menu: the chosen id, close |
 | Menu (items with a checkmark selection; `PickerMenu` and `Popover` give it a surface) | `menu` | the chosen id (`on_choose`) |
 | Tag (a label on a pill; selected, emphasized, disabled, removable; no avatar or icon) | `tag` | none (`on_press`, `on_remove`; the app keeps `selected`) |
+| Steplist (steps side by side, each a label over a circle and a track; completed / current / incomplete, disabled; four sizes; no vertical) | `steplist` | the pressed index (`on_select`; the app keeps the current step) |
 | Segmented control (a rounded track of icon-and-label items, the selected on a raised fill; four sizes; no vertical) | `segmented_control` | the pressed index (`on_select`; the app keeps the selection) |
 | Tabs (a row of icon-and-label tabs with a selection indicator; four sizes, compact density; no vertical) | `tabs` | the pressed index (`on_select`; the app keeps the selection) |
 | Side navigation (a list of icon-and-label links with a selection indicator and an optional section title) | `side_navigation` | the pressed index (`on_select`; the app keeps the selection) |

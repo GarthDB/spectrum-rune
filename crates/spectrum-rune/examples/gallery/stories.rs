@@ -28,6 +28,7 @@ use spectrum_rune::radio_group::{Orientation, RadioGroup};
 use spectrum_rune::segmented_control::{SegmentedControl, SegmentedItem};
 use spectrum_rune::side_navigation::{SideNavigation, SideNavigationItem};
 use spectrum_rune::status_light::{self, StatusLight};
+use spectrum_rune::steplist::{Step, StepState, Steplist};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tabs::{self, TabItem, Tabs};
 use spectrum_rune::tag::Tag;
@@ -91,6 +92,7 @@ stories! {
     "clear-button" => "Clear button", clear_button;
     "side-navigation" => "Side navigation", side_navigation;
     "segmented-control" => "Segmented control", segmented_control;
+    "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
     "accordion" => "Accordion item", accordion;
@@ -338,6 +340,42 @@ fn tag(s: &G, t: &'static Tokens) -> El {
         section(t, "Looks (static)", looks),
         section(t, "Interactive: hover, press, Tab to focus", live),
     ])
+}
+
+fn steplist(s: &G, t: &'static Tokens) -> El {
+    // The current step is the one last pressed (kept in `picked`); the one after the last is disabled.
+    let list = |key: &str, size: Size| {
+        let current = s
+            .picked
+            .get(key)
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(1);
+        let k = key.to_owned();
+        let mut b = Steplist::new(format!("steplist/{key}"))
+            .size(size)
+            .on_select(move |g: &mut G, i| {
+                g.picked.insert(k.clone(), i.to_string());
+            });
+        for (i, label) in ["Account", "Details", "Review", "Payment", "Done"]
+            .into_iter()
+            .enumerate()
+        {
+            let state = match i.cmp(&current) {
+                std::cmp::Ordering::Less => StepState::Completed,
+                std::cmp::Ordering::Equal => StepState::Current,
+                std::cmp::Ordering::Greater => StepState::Incomplete,
+            };
+            b = b.step(Step::new(label, state).disabled(i == 3));
+        }
+        b.build(t)
+    };
+    page(vec![section(
+        t,
+        "Sizes (press a step; arrow keys move focus, Enter selects)",
+        col()
+            .gap(t.spacing_300)
+            .children(SIZES.map(|(z, n)| list(&format!("size-{n}"), z))),
+    )])
 }
 
 fn segmented_control(s: &G, t: &'static Tokens) -> El {

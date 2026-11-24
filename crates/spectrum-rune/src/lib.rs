@@ -43,6 +43,7 @@ pub mod segmented_control;
 pub mod side_navigation;
 pub mod size;
 pub mod status_light;
+pub mod steplist;
 pub mod switch;
 pub mod tabs;
 pub mod tag;
