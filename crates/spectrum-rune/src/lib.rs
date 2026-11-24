@@ -17,6 +17,7 @@ macro_rules! names {
 pub mod accordion;
 pub mod accordion_group;
 pub mod action_button;
+pub mod alert_dialog;
 pub mod badge;
 mod bar;
 pub mod breadcrumbs;

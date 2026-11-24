@@ -6,6 +6,7 @@ use rune::{col, el, row, text, El};
 use spectrum_rune::accordion::{AccordionItem, Density};
 use spectrum_rune::accordion_group::AccordionGroup;
 use spectrum_rune::action_button::ActionButton;
+use spectrum_rune::alert_dialog::{self, AlertDialog};
 use spectrum_rune::badge::{self, Badge};
 use spectrum_rune::breadcrumbs::{self, BreadcrumbItem, Breadcrumbs};
 use spectrum_rune::button::{self, Button, StaticColor};
@@ -92,6 +93,7 @@ stories! {
     "clear-button" => "Clear button", clear_button;
     "side-navigation" => "Side navigation", side_navigation;
     "segmented-control" => "Segmented control", segmented_control;
+    "alert-dialog" => "Alert dialog", alert_dialog;
     "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
@@ -339,6 +341,63 @@ fn tag(s: &G, t: &'static Tokens) -> El {
         ),
         section(t, "Looks (static)", looks),
         section(t, "Interactive: hover, press, Tab to focus", live),
+    ])
+}
+
+fn alert_dialog(_: &G, t: &'static Tokens) -> El {
+    let dialog = |name: &str, title: &str, v: alert_dialog::Variant, destructive: bool| {
+        let cancel = Button::new(format!("alert-dialog/{name}/cancel"))
+            .label("Cancel")
+            .variant(button::Variant::Secondary)
+            .style(button::Style::Outline)
+            .build(t);
+        let go = Button::new(format!("alert-dialog/{name}/go"))
+            .label(if destructive { "Delete" } else { "Continue" })
+            .variant(if destructive {
+                button::Variant::Negative
+            } else {
+                button::Variant::Accent
+            })
+            .build(t);
+        AlertDialog::new(format!("alert-dialog/{name}"), title)
+            .description("This will permanently change the file and its history.")
+            .variant(v)
+            .actions([cancel, go])
+            .build(t)
+    };
+    // The dialog is white like the page: sit it on a grey backdrop so its edge shows.
+    let dialog = |name: &str, title: &str, v: alert_dialog::Variant, destructive: bool| {
+        col()
+            .padding(16.0)
+            .fill(t.gray_200)
+            .child(dialog(name, title, v, destructive))
+    };
+    page(vec![
+        section(
+            t,
+            "Confirmation",
+            dialog(
+                "confirmation",
+                "Replace file?",
+                alert_dialog::Variant::Confirmation,
+                false,
+            ),
+        ),
+        section(
+            t,
+            "Warning",
+            dialog(
+                "warning",
+                "Unsaved changes",
+                alert_dialog::Variant::Warning,
+                false,
+            ),
+        ),
+        section(
+            t,
+            "Error",
+            dialog("error", "Delete file", alert_dialog::Variant::Error, true),
+        ),
     ])
 }
 
