@@ -14,7 +14,7 @@ mod playground_tests;
 mod stories;
 
 use rune::text::measure;
-use rune::{col, row, text, App, AppSpec, Cx, El, Family, FontSmoothing, ScrollSpec};
+use rune::{col, row, text, App, AppSpec, Cx, El, Family, FontSmoothing, ScrollSpec, TextEdit};
 use spectrum_rune::action_button::ActionButton;
 use spectrum_rune::font;
 use spectrum_rune::switch::Switch;
@@ -76,6 +76,8 @@ pub struct G {
     /// `None` follows the system (`--theme`) until the header switch is used.
     pub scheme: Option<ColorScheme>,
     pub scale: Scale,
+    /// The text fields' contents, by field.
+    pub fields: [TextEdit; 2],
 }
 
 impl G {
@@ -98,6 +100,7 @@ fn init() -> G {
         open: HashMap::new(),
         scheme: None,
         scale: Scale::Desktop,
+        fields: [TextEdit::new("Ada Lovelace"), TextEdit::new("")],
     }
 }
 

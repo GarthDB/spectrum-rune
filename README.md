@@ -23,6 +23,7 @@ Built so far (all verified against Spectrum's own renderer, see [Verification](#
 | Tag (a label on a pill; selected, emphasized, disabled, removable; no avatar or icon) | `tag` | none (`on_press`, `on_remove`; the app keeps `selected`) |
 | Alert dialog (title, description, status icon for warning and error, the app's buttons in the footer; both scales; no shadow, as in the oracle) | `alert_dialog` | Escape (`on_dismiss`); the buttons are the app's |
 | Standard dialog (title, description, optional footer content, the app's buttons; three sizes, both scales; buttons at the footer's start as the oracle draws them) | `standard_dialog` | Escape (`on_dismiss`); the buttons are the app's |
+| Text field (a field label, a bordered single-line editor, help text; four sizes, error, valid checkmark, disabled, hover and focus; Rune's own editor) | `text_field` | edits via `on_edit(\|s\| &mut s.edit)`, Enter via `on_submit` |
 | Field label (the label above a control, an asterisk when required; four sizes; no text indicator or side position, as the oracle draws them) | `field_label` | none |
 | Help text (a line of text under a control, alert icon for the negative variant; four sizes) | `help_text` | none |
 | Steplist (steps side by side, each a label over a circle and a track; completed / current / incomplete, disabled; four sizes; no vertical) | `steplist` | the pressed index (`on_select`; the app keeps the current step) |

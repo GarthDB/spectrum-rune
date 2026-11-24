@@ -2,7 +2,7 @@
 //! option combination goes through `constraints::check` and an `error` one is skipped.
 
 use crate::G;
-use rune::{col, el, row, text, El};
+use rune::{col, el, row, text, El, TextEdit};
 use spectrum_rune::accordion::{AccordionItem, Density};
 use spectrum_rune::accordion_group::AccordionGroup;
 use spectrum_rune::action_button::ActionButton;
@@ -36,6 +36,7 @@ use spectrum_rune::steplist::{Step, StepState, Steplist};
 use spectrum_rune::switch::Switch;
 use spectrum_rune::tabs::{self, TabItem, Tabs};
 use spectrum_rune::tag::Tag;
+use spectrum_rune::text_field::TextField;
 use spectrum_rune::tokens::Tokens;
 use spectrum_rune::tooltip::{self, Tooltip};
 use spectrum_rune::{ActionButtonSize, Size};
@@ -100,6 +101,7 @@ stories! {
     "standard-dialog" => "Standard dialog", standard_dialog;
     "field-label" => "Field label", field_label;
     "help-text" => "Help text", help_text;
+    "text-field" => "Text field", text_field;
     "steplist" => "Steplist", steplist;
     "tabs" => "Tabs", tabs;
     "status-light" => "Status light", status_light;
@@ -441,6 +443,50 @@ fn standard_dialog(_: &G, t: &'static Tokens) -> El {
             dialog("m", DialogSize::M, true),
         ),
         section(t, "Large", dialog("l", DialogSize::L, false)),
+    ])
+}
+
+fn text_field(s: &G, t: &'static Tokens) -> El {
+    // The first field is live (type in it); the others show the states.
+    let live = TextField::new("text-field/live", &s.fields[0])
+        .label("Name")
+        .help_text("Your full name")
+        .on_edit(|g: &mut G| &mut g.fields[0])
+        .build(t);
+    let states = flow().gap(24.0).children([
+        TextField::new("text-field/empty", &s.fields[1])
+            .label("Email")
+            .required(true)
+            .help_text("We never share it")
+            .on_edit(|g: &mut G| &mut g.fields[1])
+            .build(t),
+        TextField::new("text-field/valid", &TextEdit::new("ada@example.com"))
+            .label("Email")
+            .valid(true)
+            .help_text("Looks good")
+            .build(t),
+        TextField::new("text-field/error", &TextEdit::new("ada@"))
+            .label("Email")
+            .error(true)
+            .help_text("Enter a full address")
+            .build(t),
+        TextField::new("text-field/disabled", &TextEdit::new("ada@example.com"))
+            .label("Email")
+            .disabled(true)
+            .help_text("Locked")
+            .build(t),
+    ]);
+    let sizes = flow().gap(24.0).children(SIZES.map(|(z, n)| {
+        TextField::new(format!("text-field/size-{n}"), &TextEdit::new("Ada"))
+            .label("Name")
+            .size(z)
+            .help_text("Size")
+            .build(t)
+    }));
+    page(vec![
+        section(t, "Live (type, select, copy)", live),
+        section(t, "Empty and required, valid, error, disabled", states),
+        section(t, "Sizes", sizes),
     ])
 }
 
