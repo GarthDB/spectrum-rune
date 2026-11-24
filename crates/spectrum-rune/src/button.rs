@@ -16,7 +16,8 @@
 //! - The focus ring is white or black for primary and secondary with a static colour, and
 //!   `focus_indicator_color` otherwise (static colour is a no-op on accent and negative).
 //! - Keyboard focus takes the hover fill besides the ring (`El::focus_fill`: opaque, under the
-//!   content, clipped to the pill, never from pointer focus). Not drawn: the oracle's focus and
+//!   content, clipped to the pill, never from pointer focus; outline buttons too since 0.63.5). Pressed outline buttons
+//!   take the hover fill as well (0.63.5 draws `down` like hover there; 0.63.4 had `gray_200`). Not drawn: the oracle's focus and
 //!   hover + focus colours for the stroke and label of outline buttons and of secondary fills
 //!   (focus beats hover there), because the view cannot see focus (bead a14.31).
 //! - The oracle's pending progress is gray_800 on every variant, invisible on a primary fill. We
@@ -236,7 +237,7 @@ pub(crate) fn look(
             let strong = by_state(state, t.gray_800, t.gray_900, t.gray_900);
             Look {
                 fill: if outline {
-                    wash(t.gray_100, t.gray_200)
+                    wash(t.gray_100, t.gray_100)
                 } else {
                     Some(strong)
                 },
@@ -246,7 +247,7 @@ pub(crate) fn look(
         }
         (Variant::Secondary, None) => Look {
             fill: if outline {
-                wash(t.gray_100, t.gray_200)
+                wash(t.gray_100, t.gray_100)
             } else {
                 Some(by_state(state, t.gray_100, t.gray_200, t.gray_200))
             },
@@ -515,8 +516,8 @@ impl Button {
             root = root.border(t.border_width_200, c);
         }
         // Keyboard focus takes the hover fill (the oracle's keyboard-focus state), laid over the
-        // fill by Rune. Outline buttons keep theirs, and so do static colours (hover = rest).
-        if !self.disabled && self.style == Style::Fill {
+        // fill by Rune; outline buttons too, since design-data 0.63.5. Static colours keep theirs (hover = rest).
+        if !self.disabled {
             let at = |s| {
                 crate::button::look(t, self.variant, self.style, self.static_color, false, s).fill
             };

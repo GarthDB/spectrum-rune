@@ -248,9 +248,10 @@ fn no_ring_without_keyboard_focus() {
 
 /// What the oracle gives hover + keyboard-focus that a Button cannot: the view never sees focus, so
 /// the stroke and label of an outline button, and the label of a secondary fill, stay at their
-/// hover colours where the oracle lets focus win (a14.31). Only the fill is compared there.
+/// hover colours where the oracle lets focus win (a14.31); since design-data 0.63.5 plain keyboard focus too (the oracle
+/// draws the focus stroke and label there). Only the fill is compared there.
 fn focus_beats_hover(c: &Value) -> bool {
-    c["state"] == "hover+keyboard-focus"
+    (c["state"] == "keyboard-focus" || c["state"] == "hover+keyboard-focus")
         && !c["disabled"].as_bool().unwrap_or(false)
         && (c["style"] == "outline" || c["variant"] == "secondary")
 }
@@ -366,7 +367,7 @@ fn keyboard_focus_fill_matches_oracle() {
         }
     }
     assert!(
-        filled > 300 && stroked > 40 && contents > 150,
+        filled > 300 && stroked > 10 && contents > 100,
         "{filled} {stroked} {contents}"
     );
 }
